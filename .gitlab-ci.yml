@@ -9,6 +9,7 @@ build-image:
   variables:
     DOCKERFILE_PATH: $CI_PROJECT_DIR/deployment/Dockerfile
     CI_REGISTRY_IMAGE: $CI_REGISTRY/rationai/test_deploy
+    KANIKO_BUILD_CONTEXT: $CI_PROJECT_DIR/deployment
   rules:
     - if: "$CI_COMMIT_TAG"
     - when: manual
