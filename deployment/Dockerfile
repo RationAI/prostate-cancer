@@ -5,6 +5,7 @@ FROM rayproject/ray:2.10.0-py310-gpu
 # RUN pip --no-cache-dir install -r requirements.txt && rm requirements.txt
 
 COPY model.onnx $HOME/model.onnx
+COPY model.pt $HOME/model.pt
 
 # WORKDIR /app
 
