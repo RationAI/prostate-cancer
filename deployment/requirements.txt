@@ -1,0 +1,8 @@
+torch
+numpy
+pyvips
+scikit-image
+aiohttp
+Pillow
+albumentations
+imageio

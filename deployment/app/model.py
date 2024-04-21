@@ -6,7 +6,20 @@ from ray import serve
 from torch import Tensor
 
 
-@serve.deployment(num_replicas=8, ray_actor_options={"num_cpus": 0.5})
+@serve.deployment(
+    num_replicas="auto",
+    autoscaling_config={
+        "min_replicas": 0,
+        "max_replicas": 10,
+        "target_ongoing_requests": 10,
+        "downscale_delay_s": 10,
+        "upscale_delay_s": 10,
+    },
+    ray_actor_options={
+        "num_cpus": 0.5,
+        "memory": 1000 * 1024 * 1024,  # quota 1 GiB
+    },
+)
 class Model:
     """JIT model for prostate cancer detection."""
 
@@ -19,10 +32,10 @@ class Model:
             .eval()
         )
 
-    def __call__(self, image: NDArray[np.uint8]) -> list[float]:
+    def __call__(self, image: NDArray[np.uint8]) -> float:
         with torch.no_grad():
             outputs = self._model(self._preprocess(image))
-            return list(outputs.squeeze(1).cpu().numpy())
+            return outputs.squeeze(1).cpu().numpy().item()
 
     def _preprocess(self, image: NDArray[np.uint8]) -> Tensor:
         normalized = self._normalize(image=image)["image"]

@@ -1,27 +1,21 @@
-from typing import Any
-
-import aiohttp
 import numpy as np
 import pyvips
 from numpy.typing import NDArray
 
-from prostate_cancer.utils import create_pyramid
+from app.empaia import Client
+from app.empaia.typing import WSI
 
 
-async def background_mask(
-    session: aiohttp.ClientSession,
-    job_id: str,
-    wsi_metadata: dict[str, Any],
-    level: int,
-) -> dict[int, NDArray[np.float32]]:
-    extent = wsi_metadata["levels"][6]["extent"]
+async def get_background_mask(
+    client: Client, wsi: WSI, level: int
+) -> tuple[NDArray[np.float32], int]:
+    level = min(level, wsi["num_levels"] - 1)
+    extent = wsi["levels"][level]["extent"]
 
-    response = await session.get(
-        f'/v3/{job_id}/regions/{wsi_metadata["id"]}/level/{level}/start/0/0/size/{extent["x"]}/{extent["y"]}'
-    )
-    image = pyvips.Image.new_from_buffer(await response.read(), "")
-    mask = (_create_thresholded_bg_mask(image) / 255).astype(np.float32)
-    return dict(create_pyramid(mask, level, len(wsi_metadata["levels"])))
+    data = await client.get_region(wsi["id"], level, 0, 0, extent["x"], extent["y"])
+    slide = pyvips.Image.new_from_buffer(data, "")
+    background_mask = _create_thresholded_bg_mask(slide) / 255
+    return background_mask.astype(np.float32), level
 
 
 def _create_thresholded_bg_mask(
