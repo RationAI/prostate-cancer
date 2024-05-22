@@ -11,7 +11,7 @@ from ray import ObjectRef, serve
 from ray.serve.handle import DeploymentHandle
 from skimage.util import view_as_windows
 
-from app.background_mask import get_background_mask, put_background_mask
+from app.background_mask import get_background_mask
 from app.empaia import Client
 from app.empaia.typing import WSI
 from app.heatmap_assembler import HeatmapAssembler
@@ -45,15 +45,15 @@ class Ingress:
     max_concurrent_tiles = 100
     background_mask_level = 6
     tissue_percentage_threshold = 0.5
-    target_resolution = 0.45
+    target_resolution = 0.485
     tile_size = 512
     stride = 256
 
     def __init__(
-        self, model: DeploymentHandle, tiling_service: DeploymentHandle
+        self, model: DeploymentHandle, upload_service: DeploymentHandle
     ) -> None:
         self.model = model
-        self.tiling_service = tiling_service
+        self.upload_service = upload_service
 
     def reconfigure(self, config: dict[str, Any]) -> None:
         self.max_concurrent_tiles = config.get(
@@ -92,12 +92,13 @@ class Ingress:
                 client, wsi, self.background_mask_level
             )
 
-            background_mask_response = await put_background_mask(
+            background_mask_response = self.upload_service.remote(
                 client=client,
-                tiling_service=self.tiling_service,
                 wsi=wsi,
-                mask=background_mask,
-                min_level=wsi_level,
+                name="Background mask",
+                key="background_mask",
+                array=(background_mask * 255).astype(np.uint8),
+                level=wsi_level,
             )
 
             attention_mask = self._get_attention_mask(
@@ -108,7 +109,7 @@ class Ingress:
 
             heatmap_assembler = HeatmapAssembler.remote(
                 self.model,
-                self.tiling_service,
+                self.upload_service,
                 client,
                 wsi,
                 wsi_level,
@@ -117,7 +118,7 @@ class Ingress:
                 attention_mask,
                 checkpoint_dir,
             )
-            progress.add.remote(0.05)
+            progress.update.remote(0.05)
 
             self._process_tissue(progress, heatmap_assembler, attention_mask)
 
@@ -159,7 +160,7 @@ class Ingress:
         for y, x in zip(*indices):
             if len(pending) > self.max_concurrent_tiles:
                 done, pending = ray.wait(pending, num_returns=1)
-                progress.add.remote(len(done) / total_tiles * progress_weight)
+                progress.update.remote(len(done) / total_tiles * progress_weight)
             pending.append(heatmap_assembler.__call__.remote(x, y))
         ray.get(pending)
-        progress.add.remote(len(pending) / total_tiles * progress_weight)
+        progress.update.remote(len(pending) / total_tiles * progress_weight)

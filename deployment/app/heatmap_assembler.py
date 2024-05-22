@@ -1,16 +1,15 @@
-import json
 import math
 from pathlib import Path
 
 import imageio.v3 as iio
 import numpy as np
 import ray
-from aiohttp import ClientConnectionError
+from aiohttp import ClientConnectionError, ClientResponseError
 from numpy.typing import NDArray
 from ray.serve.handle import DeploymentHandle
 
 from app.empaia import Client
-from app.empaia.typing import WSI, ContinuousPixelmap
+from app.empaia.typing import WSI
 from app.lib.functools import cached_property
 
 
@@ -23,7 +22,7 @@ class HeatmapAssembler:
     def __init__(
         self,
         model: DeploymentHandle,
-        tiling_service: DeploymentHandle,
+        upload_service: DeploymentHandle,
         client: Client,
         wsi: WSI,
         wsi_level: int,
@@ -33,7 +32,7 @@ class HeatmapAssembler:
         checkpoint_dir: Path,
     ) -> None:
         self.model = model
-        self.tiling_service = tiling_service
+        self.upload_service = upload_service
         self.client = client
         self.wsi = wsi
         self.wsi_level = wsi_level
@@ -61,7 +60,10 @@ class HeatmapAssembler:
             return np.load(self._counter_checkpoint)
         return np.zeros_like(self._overlaps, dtype=np.uint8)
 
-    @ray.method(retry_exceptions=[ClientConnectionError], max_task_retries=-1)
+    @ray.method(
+        retry_exceptions=[ClientConnectionError, ClientResponseError],
+        max_task_retries=-1,
+    )
     async def __call__(self, x: int, y: int) -> None:
         data = await self.client.get_region(
             wsi_id=self.wsi["id"],
@@ -80,16 +82,14 @@ class HeatmapAssembler:
         np.save(self._heatmap_accumulator_checkpoint, self._heatmap_accumulator)
         np.save(self._counter_checkpoint, self._counter)
 
-    @ray.method(retry_exceptions=[ClientConnectionError], max_task_retries=-1)
     async def finalize(self) -> np.uint:
-        pixelmap = await self._post_pixelmap()
-        await self.tiling_service.remote(
-            self.client.api_url,
-            self.client.job_id,
-            self.client.token,
-            self.wsi,
-            pixelmap,
-            self._heatmap_accumulator,
+        await self.upload_service.remote(
+            client=self.client,
+            wsi=self.wsi,
+            name="Probability mask",
+            key="probability_mask",
+            array=(self._heatmap_accumulator * 255).astype(np.uint8),
+            level=self.wsi_level,
         )
         await self.client.close()
         return np.sum(self._overlaps - self._counter)
@@ -109,47 +109,3 @@ class HeatmapAssembler:
             slice(y * self._stride, y * self._stride + self._tile_size),
             slice(x * self._stride, x * self._stride + self._tile_size),
         )
-
-    async def _post_pixelmap(self) -> ContinuousPixelmap:
-        checkpoint = self.checkpoint_dir / "pixelmap.json"
-        if checkpoint.exists():
-            with open(checkpoint, "r", encoding="utf-8") as f:
-                return json.load(f)
-
-        pixelmap = {
-            "name": "Probability mask",
-            "reference_id": self.wsi["id"],
-            "reference_type": "wsi",
-            "creator_id": self.client.job_id,
-            "creator_type": "job",
-            "type": "continuous_pixelmap",
-            "element_type": "float32",
-            "min_value": 0.0,
-            "neutral_value": 0.0,
-            "max_value": 1.0,
-            "tilesize": 1024,
-            "channel_count": 1,
-            "channel_class_mapping": [
-                {
-                    "number_value": 0,
-                    "class_value": "org.empaia.rationai.prostate_cancer.v3.0.classes.cancer_probability",
-                }
-            ],
-        }
-        pixelmap["levels"] = [
-            {
-                "slide_level": i,
-                "position_min_x": 0,
-                "position_min_y": 0,
-                "position_max_x": (level["extent"]["x"] - 1) // pixelmap["tilesize"],
-                "position_max_y": (level["extent"]["y"] - 1) // pixelmap["tilesize"],
-            }
-            for i, level in enumerate(
-                self.wsi["levels"][self.wsi_level :], start=self.wsi_level
-            )
-        ]
-
-        pixelmap = await self.client.post_output("probability_mask", pixelmap)
-        with open(checkpoint, "w", encoding="utf-8") as f:
-            json.dump(pixelmap, f)
-        return pixelmap

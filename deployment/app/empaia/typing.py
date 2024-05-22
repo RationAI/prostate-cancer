@@ -1,4 +1,4 @@
-from typing import Literal, TypedDict
+from typing import Literal, Type, TypedDict
 
 
 class Color(TypedDict):
@@ -75,3 +75,8 @@ class ContinuousPixelmap(TypedDict):
     channel_count: int
     channel_class_mapping: list[ChannelClass]
     levels: list[PixelmapLevel]
+
+
+class WSIMask(TypedDict):
+    id: str
+    local_id: str

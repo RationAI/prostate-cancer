@@ -1,8 +1,11 @@
 import asyncio
+from functools import cached_property
 from types import TracebackType
 from typing import Any
 
 from aiohttp import ClientSession
+
+from app.empaia.typing import WSIMask
 
 
 class Client:
@@ -11,9 +14,11 @@ class Client:
         self.job_id = job_id
         self.token = token
 
-        self._session = ClientSession(
-            api_url,
-            headers={"Authorization": f"Bearer {token}"},
+    @cached_property
+    def _session(self) -> ClientSession:
+        return ClientSession(
+            self.api_url,
+            headers={"Authorization": f"Bearer {self.token}"},
             raise_for_status=True,
         )
 
@@ -33,11 +38,14 @@ class Client:
         return type(self), serialized_data
 
     def __del__(self):
-        loop = asyncio.get_event_loop()
-        if loop.is_running():
-            loop.create_task(self._session.close())
-        else:
-            loop.run_until_complete(self._session.close())
+        try:
+            loop = asyncio.get_event_loop()
+            if loop.is_running():
+                loop.create_task(self._session.close())
+            else:
+                loop.run_until_complete(self._session.close())
+        except RuntimeError:
+            pass
 
     async def get_input(self, input_key: str) -> Any:
         response = await self._session.get(f"/v3/{self.job_id}/inputs/{input_key}")
@@ -78,5 +86,12 @@ class Client:
             f"/v3/{self.job_id}/failure", json={"user_message": user_message}
         )
 
+    async def post_wsi_mask(self, wsi_id: str, path: str) -> WSIMask:
+        response = await self._session.post(
+            f"/v3/{self.job_id}/wsi_mask/{wsi_id}/create", json={"path": path}
+        )
+        return await response.json()
+
     async def close(self) -> None:
-        await self._session.close()
+        if "_session" in self.__dict__:
+            await self._session.close()

@@ -1,10 +1,13 @@
 import json
+import logging
 from pathlib import Path
 from typing import TypedDict
 
 import ray
 
 from app.empaia import Client
+
+log = logging.getLogger(__name__)
 
 
 class State(TypedDict):
@@ -33,7 +36,7 @@ class Progress:
         self._state_checkpoint = checkpoint_dir / "state.json"
         self._state = self._restore_state()
 
-    async def add(self, current: float) -> None:
+    async def update(self, current: float) -> None:
         """Update the progress of the job.
 
         Args:
@@ -47,6 +50,7 @@ class Progress:
         ):
             await self.client.put_progress(self._state["progress"])
             self._state["last_logged"] = self._state["progress"]
+            log.info("Progress: %d%", self._state["progress"] * 100)
 
         self._make_checkpoint()
 

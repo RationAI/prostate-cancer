@@ -1,4 +1,5 @@
 # Taken from: https://github.com/python/cpython/blob/3.12/Lib/functools.py
+# There is a bug in the original implementation of cached_property before Python 3.12
 
 from types import GenericAlias
 

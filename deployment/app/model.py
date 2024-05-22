@@ -10,7 +10,7 @@ from torch import Tensor
     num_replicas="auto",
     autoscaling_config={
         "min_replicas": 0,
-        "max_replicas": 10,
+        "max_replicas": 8,
         "target_ongoing_requests": 10,
         "downscale_delay_s": 10,
         "upscale_delay_s": 10,
