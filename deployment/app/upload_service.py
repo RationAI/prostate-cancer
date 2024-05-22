@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import Any
+from uuid import uuid4
 
 import pyvips
 from numpy.typing import NDArray
@@ -37,7 +38,8 @@ class UploadService:
     ) -> None:
         pyvips.cache_set_max_mem(1500 * 1024 * 1024)  # 1.5 GiB
 
-        path = Path(f"/mnt/data/wsi_mask/{wsi['id']}/{key}.tiff")
+        case = await client.get_case()
+        path = Path(f"/mnt/data/wsi_mask/{case['id']}/{wsi['id']}/{key}/{uuid4()}.tiff")
         path.parent.mkdir(parents=True, exist_ok=True)
 
         extent = wsi["levels"][level]["extent"]

@@ -5,7 +5,7 @@ from typing import Any
 
 from aiohttp import ClientSession
 
-from app.empaia.typing import WSIMask
+from app.empaia.typing import Case, WSIMask
 
 
 class Client:
@@ -90,6 +90,10 @@ class Client:
         response = await self._session.post(
             f"/v3/{self.job_id}/wsi_mask/{wsi_id}/create", json={"path": path}
         )
+        return await response.json()
+
+    async def get_case(self) -> Case:
+        response = await self._session.get(f"/v3/{self.job_id}/case")
         return await response.json()
 
     async def close(self) -> None:

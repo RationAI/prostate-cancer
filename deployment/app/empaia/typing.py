@@ -80,3 +80,7 @@ class ContinuousPixelmap(TypedDict):
 class WSIMask(TypedDict):
     id: str
     local_id: str
+
+
+class Case(TypedDict):
+    id: str
