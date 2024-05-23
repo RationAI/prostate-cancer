@@ -1,17 +1,13 @@
 {
     "$schema": "https://gitlab.com/empaia/integration/definitions/-/raw/main/ead/ead-schema.v3.json",
-    "name": "Prostate Cancer",
-    "name_short": "PC1",
-    "namespace": "org.empaia.rationai.prostate_cancer.v3.0",
-    "description": "Binary classifier for prostate cancer",
+    "name": "Cancer Detection",
+    "name_short": "PCD",
+    "namespace": "org.empaia.rationai.cancer_detection.v3.0",
+    "description": "Overlay displaying probability of cancerous tissue in image patches",
     "classes": {
         "background": {
             "name": "Background",
             "description": "Binary background mask"
-        },
-        "tissue": {
-            "name": "Tissue",
-            "description": "Valid tissue particles"
         },
         "cancer_probability": {
             "name": "Cancer probability",
@@ -26,14 +22,14 @@
             "type": "continuous_pixelmap",
             "reference": "io.my_wsi",
             "channel_classes": [
-                "org.empaia.rationai.prostate_cancer.v3.0.classes.background"
+                "org.empaia.rationai.cancer_detection.v3.0.classes.background"
             ]
         },
         "probability_mask": {
             "type": "continuous_pixelmap",
             "reference": "io.my_wsi",
             "channel_classes": [
-                "org.empaia.rationai.prostate_cancer.v3.0.classes.cancer_probability"
+                "org.empaia.rationai.cancer_detection.v3.0.classes.cancer_probability"
             ]
         }
     },
