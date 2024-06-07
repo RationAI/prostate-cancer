@@ -28,7 +28,7 @@ spec:
         spec:
           containers:
             - name: ray-head
-              image: cerit.io/rationai/pathology/prostate-cancer:0.2.0
+              image: cerit.io/rationai/pathology/prostate-cancer:1.0.0
               env:
                 - name: HTTPS_PROXY
                   value: http://proxy.ics.muni.cz:3128
