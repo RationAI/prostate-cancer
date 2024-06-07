@@ -2,4 +2,3 @@
 Dockerfile
 empaia.ead.json
 ray-service.yaml
-model.onnx

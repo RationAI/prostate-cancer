@@ -6,17 +6,17 @@ import numpy as np
 import ray
 from aiohttp import ClientConnectionError, ClientResponseError
 from numpy.typing import NDArray
+from rationai.empaia import Client
+from rationai.empaia.typing import SlideInfo
 from ray.serve.handle import DeploymentHandle
 
-from app.empaia import Client
-from app.empaia.typing import WSI
 from app.lib.functools import cached_property
 
 
 @ray.remote(
-    num_cpus=0.5,
+    num_cpus=0.25,
     max_restarts=-1,
-    memory=1000 * 1024 * 1024,  # quota 1 GiB
+    memory=700 * 1024 * 1024,  # quota 800 MiB
 )
 class HeatmapAssembler:
     def __init__(
@@ -24,7 +24,7 @@ class HeatmapAssembler:
         model: DeploymentHandle,
         upload_service: DeploymentHandle,
         client: Client,
-        wsi: WSI,
+        wsi: SlideInfo,
         wsi_level: int,
         wsi_tile_size: int,
         wsi_stride: int,
@@ -66,7 +66,7 @@ class HeatmapAssembler:
     )
     async def __call__(self, x: int, y: int) -> None:
         data = await self.client.get_region(
-            wsi_id=self.wsi["id"],
+            wsi_id=self.wsi.id,
             level=self.wsi_level,
             x=x * self.wsi_stride,
             y=y * self.wsi_stride,

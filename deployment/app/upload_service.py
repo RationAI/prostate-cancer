@@ -1,13 +1,15 @@
+import logging
 from pathlib import Path
 from typing import Any
 from uuid import uuid4
 
 import pyvips
 from numpy.typing import NDArray
+from rationai.empaia import Client
+from rationai.empaia.typing import DataCreatorType, SlideInfo, primitives
 from ray import serve
 
-from app.empaia import Client
-from app.empaia.typing import WSI
+log = logging.getLogger(__name__)
 
 
 @serve.deployment(
@@ -21,33 +23,36 @@ from app.empaia.typing import WSI
     },
     ray_actor_options={
         "num_cpus": 1.5,
-        "memory": 2000 * 1024 * 1024,  # quota 2 GiB
+        "memory": 1000 * 1024 * 1024,  # quota 1 GiB
     },
 )
 class UploadService:
-    """Upload service for uploading pixelmaps to EMPIA."""
+    """Upload service for uploading slides to EMPIA."""
+
+    output_dir = Path("/mnt/data/wsi_mask")
+
+    def reconfigure(self, config: dict[str, Any]) -> None:
+        self.output_dir = Path(config.get("output_dir", self.output_dir))
 
     async def __call__(
         self,
         client: Client,
-        wsi: WSI,
+        wsi: SlideInfo,
         name: str,
         key: str,
         array: NDArray[Any],
         level: int,
     ) -> None:
-        pyvips.cache_set_max_mem(1500 * 1024 * 1024)  # 1.5 GiB
+        pyvips.cache_set_max_mem(1000 * 1024 * 1024)  # 1 GiB
 
-        case = await client.get_case()
-        path = Path(f"/mnt/data/wsi_mask/{case['id']}/{wsi['id']}/{key}/{uuid4()}.tiff")
+        case_id = await client.get_case_id()
+        path = self.output_dir / str(case_id) / wsi.id / key / f"{uuid4()}.tiff"
         path.parent.mkdir(parents=True, exist_ok=True)
-
-        extent = wsi["levels"][level]["extent"]
 
         image = pyvips.Image.new_from_array(array)
         image = image.resize(
-            extent["x"] / image.width,
-            vscale=extent["y"] / image.height,
+            wsi.levels[level].extent.x / image.width,
+            vscale=wsi.levels[level].extent.y / image.height,
             kernel="nearest",
         )
 
@@ -63,15 +68,15 @@ class UploadService:
 
         async with client:
             response = await client.post_wsi_mask(
-                wsi["id"], str(path.relative_to("/mnt/data"))
+                wsi.id, path.relative_to("/mnt/data").as_posix()
             )
-            print(f"Writing mask: {response['id']}")
+            log.info("Writing mask: %s", response.id)
 
-            data = {
-                "name": name,
-                "type": "string",
-                "value": response["id"],
-                "creator_type": "job",
-                "creator_id": client.job_id,
-            }
+            data = primitives.PostStringPrimitive(
+                name=name,
+                type="string",
+                value=response.id,
+                creator_type=DataCreatorType.JOB,
+                creator_id=client.job_id,
+            )
             await client.post_output(key, data)

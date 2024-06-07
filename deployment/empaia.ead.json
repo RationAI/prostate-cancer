@@ -4,33 +4,17 @@
     "name_short": "PCD",
     "namespace": "org.empaia.rationai.cancer_detection.v3.0",
     "description": "Overlay displaying probability of cancerous tissue in image patches",
-    "classes": {
-        "background": {
-            "name": "Background",
-            "description": "Binary background mask"
-        },
-        "cancer_probability": {
-            "name": "Cancer probability",
-            "description": "Cancer probability score"
-        }
-    },
     "io": {
         "my_wsi": {
             "type": "wsi"
         },
         "background_mask": {
-            "type": "continuous_pixelmap",
             "reference": "io.my_wsi",
-            "channel_classes": [
-                "org.empaia.rationai.cancer_detection.v3.0.classes.background"
-            ]
+            "type": "string"
         },
         "probability_mask": {
-            "type": "continuous_pixelmap",
             "reference": "io.my_wsi",
-            "channel_classes": [
-                "org.empaia.rationai.cancer_detection.v3.0.classes.cancer_probability"
-            ]
+            "type": "string"
         }
     },
     "modes": {

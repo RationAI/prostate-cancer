@@ -1,3 +1,5 @@
+--index-url https://download.pytorch.org/whl/cpu
+--extra-index-url https://pypi.org/simple
 torch
 numpy
 pyvips
@@ -6,3 +8,4 @@ aiohttp
 Pillow
 albumentations
 imageio
+rationai-empaia @ git+ssh://git@gitlab.ics.muni.cz/rationai/digital-pathology/libraries/empaia

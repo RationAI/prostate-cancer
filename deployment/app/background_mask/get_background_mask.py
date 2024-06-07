@@ -1,18 +1,17 @@
 import numpy as np
 import pyvips
 from numpy.typing import NDArray
-
-from app.empaia import Client
-from app.empaia.typing import WSI
+from rationai.empaia import Client
+from rationai.empaia.typing import SlideInfo
 
 
 async def get_background_mask(
-    client: Client, wsi: WSI, level: int
+    client: Client, wsi: SlideInfo, level: int
 ) -> tuple[NDArray[np.float32], int]:
-    level = min(level, wsi["num_levels"] - 1)
-    extent = wsi["levels"][level]["extent"]
+    level = min(level, wsi.num_levels - 1)
+    extent = wsi.levels[level].extent
 
-    data = await client.get_region(wsi["id"], level, 0, 0, extent["x"], extent["y"])
+    data = await client.get_region(wsi.id, level, 0, 0, extent.x, extent.y)
     slide = pyvips.Image.new_from_buffer(data, "")
     background_mask = _create_thresholded_bg_mask(slide) / 255
     return background_mask.astype(np.float32), level

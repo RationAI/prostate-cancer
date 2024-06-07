@@ -1,0 +1,98 @@
+apiVersion: ray.io/v1
+kind: RayService
+metadata:
+  name: rayservice-prostate-cancer
+spec:
+  serveConfigV2: |
+    applications:
+      - name: ProstateCancer
+        import_path: app:app
+        route_prefix: /
+  rayClusterConfig:
+    rayVersion: 2.10.0
+    # enableInTreeAutoscaling: true
+    # autoscalerOptions:
+    #   idleTimeoutSeconds: 60 # number of seconds to wait before scaling down a worker pod which is not using Ray resources.
+    #   securityContext:
+    #     allowPrivilegeEscalation: false
+    #     capabilities:
+    #       drop: ["ALL"]
+    #     runAsNonRoot: true
+    #     seccompProfile:
+    #       type: RuntimeDefault
+
+    headGroupSpec:
+      rayStartParams:
+        dashboard-host: "0.0.0.0"
+      template:
+        spec:
+          containers:
+            - name: ray-head
+              image: cerit.io/rationai/pathology/prostate-cancer:0.2.0
+              env:
+                - name: HTTPS_PROXY
+                  value: http://proxy.ics.muni.cz:3128
+              securityContext:
+                allowPrivilegeEscalation: false
+                capabilities:
+                  drop: ["ALL"]
+                runAsNonRoot: true
+                seccompProfile:
+                  type: RuntimeDefault
+              resources:
+                limits:
+                  cpu: 8
+                  memory: 10G
+                requests:
+                  cpu: 8
+                  memory: 10G
+              ports:
+                - containerPort: 6379
+                  name: gcs-server
+                - containerPort: 8265 # Ray dashboard
+                  name: dashboard
+                - containerPort: 10001
+                  name: client
+                - containerPort: 8000
+                  name: serve
+              volumeMounts:
+                - name: wsi-storage-pvc
+                  mountPath: /mnt/data
+
+          volumes:
+            - name: wsi-storage-pvc
+              persistentVolumeClaim:
+                claimName: rat-data-wsi-storage-pvc
+
+    workerGroupSpecs: []
+    #   - groupName: cpu-group
+    #     replicas: 1
+    #     minReplicas: 1
+    #     maxReplicas: 1
+    #     rayStartParams: {}
+    #     template:
+    #       spec:
+    #         containers:
+    #           - name: ray-worker
+    #             image: cerit.io/rationai/test_deploy:branch-feature-deployment
+    #             env:
+    #               - name: HTTPS_PROXY
+    #                 value: http://proxy.ics.muni.cz:3128
+    #             securityContext:
+    #               allowPrivilegeEscalation: false
+    #               capabilities:
+    #                 drop: ["ALL"]
+    #               runAsNonRoot: true
+    #               seccompProfile:
+    #                 type: RuntimeDefault
+    #             lifecycle:
+    #               preStop:
+    #                 exec:
+    #                   command: ["/bin/sh", "-c", "ray stop"]
+    #             resources:
+    #               limits:
+    #                 cpu: 4
+    #                 memory: 10G
+    #               requests:
+    #                 cpu: 4
+    #                 memory: 10G

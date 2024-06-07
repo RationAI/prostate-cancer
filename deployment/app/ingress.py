@@ -7,15 +7,15 @@ import numpy as np
 import ray
 from fastapi import Body, FastAPI, Response, status
 from numpy.typing import NDArray
+from rationai.empaia import Client
+from rationai.empaia.utils import Progress
 from ray import ObjectRef, serve
 from ray.serve.handle import DeploymentHandle
 from skimage.util import view_as_windows
 
 from app.background_mask import get_background_mask
-from app.empaia import Client
-from app.empaia.typing import WSI
 from app.heatmap_assembler import HeatmapAssembler
-from app.utils import Progress, find_closes_resolution_level
+from app.utils import find_closes_resolution_level
 
 app = FastAPI()
 
@@ -23,8 +23,8 @@ app = FastAPI()
 @serve.deployment(
     num_replicas=1,
     ray_actor_options={
-        "num_cpus": 0.4,
-        "memory": 1000 * 1024 * 1024,  # quota 1 GiB
+        "num_cpus": 0.25,
+        "memory": 700 * 1024 * 1024,  # quota 600 MiB
     },
 )
 @serve.ingress(app)
@@ -81,10 +81,10 @@ class Ingress:
                 client, checkpoint_dir
             )
 
-            wsi: Final[WSI] = await client.get_input("my_wsi")
-            wsi_level: Final[int] = find_closes_resolution_level(
-                levels=wsi["levels"],
-                pixel_size_nm=wsi["pixel_size_nm"],
+            wsi = await client.get_input("my_wsi")
+            wsi_level = find_closes_resolution_level(
+                levels=wsi.levels,
+                pixel_size_nm=wsi.pixel_size_nm,
                 target_resolution=self.target_resolution,
             )
 
@@ -103,8 +103,8 @@ class Ingress:
 
             attention_mask = self._get_attention_mask(
                 background_mask,
-                wsi["levels"][background_mask_level]["downsample_factor"]
-                / wsi["levels"][wsi_level]["downsample_factor"],
+                wsi.levels[background_mask_level].downsample_factor
+                / wsi.levels[wsi_level].downsample_factor,
             )
 
             heatmap_assembler = HeatmapAssembler.remote(
@@ -158,7 +158,7 @@ class Ingress:
 
         pending: list[ObjectRef[None]] = []
         for y, x in zip(*indices):
-            if len(pending) > self.max_concurrent_tiles:
+            if len(pending) >= self.max_concurrent_tiles:
                 done, pending = ray.wait(pending, num_returns=1)
                 progress.update.remote(len(done) / total_tiles * progress_weight)
             pending.append(heatmap_assembler.__call__.remote(x, y))

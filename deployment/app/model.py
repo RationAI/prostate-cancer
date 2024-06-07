@@ -8,16 +8,19 @@ from torch import Tensor
 
 @serve.deployment(
     num_replicas="auto",
+    max_ongoing_requests=2,
     autoscaling_config={
         "min_replicas": 0,
-        "max_replicas": 8,
-        "target_ongoing_requests": 10,
+        "max_replicas": 12,
+        "target_ongoing_requests": 1,
         "downscale_delay_s": 10,
         "upscale_delay_s": 10,
+        "upscaling_factor": 2.0,
+        "downscaling_factor": 2.0,
     },
     ray_actor_options={
-        "num_cpus": 0.5,
-        "memory": 1000 * 1024 * 1024,  # quota 1 GiB
+        "num_cpus": 0.75,
+        "memory": 750 * 1024 * 1024,  # quota 750 MiB
     },
 )
 class Model:
