@@ -17,3 +17,4 @@ build-image:
 
 stages:
   - lint
+  - build
