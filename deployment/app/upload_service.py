@@ -9,6 +9,7 @@ from rationai.empaia import Client
 from rationai.empaia.typing import DataCreatorType, SlideInfo, primitives
 from ray import serve
 
+
 log = logging.getLogger(__name__)
 
 

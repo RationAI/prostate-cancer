@@ -1,6 +1,7 @@
 include:
   project: rationai/digital-pathology/templates/ci-templates
   file:
+    - Python-Lint.gitlab-ci.yml
     - Kaniko.gitlab-ci.yml
 
 build-image:
@@ -13,3 +14,6 @@ build-image:
   rules:
     - if: "$CI_COMMIT_TAG"
     - when: manual
+
+stages:
+  - lint

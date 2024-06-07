@@ -17,6 +17,7 @@ from app.background_mask import get_background_mask
 from app.heatmap_assembler import HeatmapAssembler
 from app.utils import find_closes_resolution_level
 
+
 app = FastAPI()
 
 
@@ -157,7 +158,7 @@ class Ingress:
         total_tiles = len(indices[0])
 
         pending: list[ObjectRef[None]] = []
-        for y, x in zip(*indices):
+        for y, x in zip(*indices, strict=False):
             if len(pending) >= self.max_concurrent_tiles:
                 done, pending = ray.wait(pending, num_returns=1)
                 progress.update.remote(len(done) / total_tiles * progress_weight)

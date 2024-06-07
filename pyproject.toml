@@ -1,0 +1,26 @@
+[project]
+name = "prostate-cancer"
+version = "0.1.0"
+description = ""
+authors = []
+requires-python = ">=3.11,<3.12"
+readme = "README.md"
+license = { file = "LICENSE" }
+dependencies = []
+
+[tool.pdm.dev-dependencies]
+dev = ["mypy", "pre-commit", "ruff"]
+
+[tool.pdm.scripts]
+l = { composite = ["lint", "format", "mypy"] }
+test = "pytest tests"
+lint = "ruff check"
+format = "ruff format"
+mypy = "mypy ."
+post_install = { composite = [
+    "pre-commit install",
+    "pre-commit install --hook-type commit-msg",
+] }
+
+[tool.pdm]
+distribution = false
