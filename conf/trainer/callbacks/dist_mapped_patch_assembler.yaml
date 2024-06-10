@@ -1,0 +1,5 @@
+_target_: prostate_cancer.trainer.callbacks.DiskMappedPatchAssembler
+_partial_: true
+vis_mode:
+  _target_: prostate_cancer.trainer.callbacks.vis_mode.BipolarMode
+interpolation: nearest

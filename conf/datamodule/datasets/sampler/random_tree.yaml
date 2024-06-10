@@ -1,0 +1,4 @@
+_target_: prostate_cancer.datamodule.samplers.RandomTreeSampler
+seed: ${seed}
+epoch_size: ???
+index_levels: ???

@@ -1,0 +1,6 @@
+job:
+  name: task
+  chdir: true
+
+help:
+  app_name: ProstateCancer

@@ -1,0 +1,2 @@
+binary_specificity:
+  _target_: torchmetrics.classification.BinarySpecificity

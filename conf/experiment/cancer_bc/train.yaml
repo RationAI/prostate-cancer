@@ -1,0 +1,104 @@
+# @package _global_
+defaults:
+  - /datamodule: wsi
+  # Train dataset
+  - /datamodule/datasets@datamodule.datasets.train: base_classification
+  - /datamodule/datasets/sampler@datamodule.datasets.train.sampler: random_tree
+  - /datamodule/datasets/augmentations@datamodule.datasets.train.augmentations: her_transforms
+  # Valid dataset
+  - /datamodule/datasets@datamodule.datasets.valid: base_classification
+  - /datamodule/datasets/sampler@datamodule.datasets.valid.sampler: random_tree
+  - /datamodule/datasets/augmentations@datamodule.datasets.valid.augmentations: normalize
+  - /ml: prostate_cancer
+  - /ml/optimizer: adam
+  - /ml/net: vgg16
+  - /ml/output_activation: sigmoid
+  - /ml/loss: bce
+  - /ml/metrics:
+      - binary_accuracy
+      - binary_auroc
+      - binary_recall
+      - binary_specificity
+  - /ml/lr_scheduler: reduce_lr_on_plateau
+  - /trainer/callbacks:
+      - log_best_model
+      - early_stopping
+      - lr_monitor
+  - _self_
+
+datamodule:
+  data_sources:
+    prostate:
+      splits:
+        train: 0.8
+        valid: 0.2
+
+  datasets:
+    train:
+      sampler:
+        epoch_size: 20_000
+        index_levels:
+          - is_cancer
+          - slide_name
+
+    valid:
+      sampler:
+        epoch_size: 5_000
+        index_levels:
+          - is_cancer
+          - slide_name
+
+  dataloaders_kwargs:
+    train:
+      num_workers: 8
+      batch_size: 32
+    valid:
+      num_workers: 8
+      batch_size: 32
+
+ml:
+  net:
+    features:
+      weights: IMAGENET1K_V1
+  optimizer:
+    lr: 5e-5
+    weight_decay: 5e-05
+  lr_scheduler:
+    monitor: valid/loss
+    scheduler:
+      mode: min
+      factor: 0.5
+      patience: 3
+
+trainer:
+  max_epochs: 20
+  log_every_n_steps: 20
+  logger:
+    log_model: all
+  callbacks:
+    early_stopping:
+      monitor: valid/binary_auroc
+      mode: max
+      patience: 5
+    log_best_model:
+      monitor: valid/binary_auroc
+      mode: max
+      filename: vgg16_prostate_best
+
+metadata:
+  experiment_name: Prostate
+  run_name: VGG16 retraining
+  description: |
+    Prostate cancer binary classification.
+    The goal is to retrain VGG16 model on the same data in the new pipeline with analogous performance.
+  hyperparameters:
+    # Scaled for V40 GPU
+    # tested with 24 GiB Memory, 8 cpus (set request=limits in k8s)
+    # Expect around 50tiles/s
+    # most time is spent in reading WSI regions (tiles) from disk
+    max_epochs: ${trainer.max_epochs}
+    train_epoch_size: ${datamodule.datasets.train.sampler.epoch_size}
+    valid_epoch_size: ${datamodule.datasets.valid.sampler.epoch_size}
+    lr: ${ml.optimizer.lr}
+    weight_decay: ${ml.optimizer.weight_decay}
+    batch_size: ${datamodule.dataloaders_kwargs.train.batch_size}

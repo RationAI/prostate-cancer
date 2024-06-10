@@ -1,0 +1,4 @@
+scheduler:
+  _target_: prostate_cancer.ml.lr.ListLR
+  _partial_: true
+  lr_list: ???

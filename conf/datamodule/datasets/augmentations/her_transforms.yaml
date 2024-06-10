@@ -1,0 +1,47 @@
+# Reference:
+# Tellez, D., Balkenhol, M., Karssemeijer, N., Litjens, G.,
+# van der Laak, J., & Ciompi, F. (2018, March). H and E stain
+# augmentation improves generalization of convolutional
+# networks for histopathological mitosis detection.
+# In Medical Imaging 2018: Digital Pathology (Vol. 10581, pp. 264-270). SPIE.
+# https://geertlitjens.nl/publication/tell-18-a/tell-18-a.pdf
+
+_target_: albumentations.Compose
+p: 1.0 # default
+transforms:
+  - _target_: albumentations.Compose
+    p: 0.75
+    transforms:
+      - _target_: prostate_cancer.datamodule.augmentations.RGB2HER
+        h_vector: [0.479, 0.851, 0.216]
+        e_vector: [0.181, 0.974, 0.133]
+        r_vector: [-0.295, -0.076, 0.953]
+      - _target_: albumentations.MultiplicativeNoise
+        multiplier:
+          - 0.5
+          - 1.5
+        per_channel: true
+        elementwise: false
+      - _target_: prostate_cancer.datamodule.augmentations.AdditiveNoise
+        low: -0.005
+        high: 0.005
+        axis: -1
+      - _target_: prostate_cancer.datamodule.augmentations.HER2RGB
+        h_vector: ${..[0].h_vector}
+        e_vector: ${..[0].e_vector}
+        r_vector: ${..[0].r_vector}
+  - _target_: albumentations.RandomRotate90
+    p: 0.75
+  - _target_: albumentations.Flip
+    p: 0.5  # default
+  - _target_: albumentations.RandomGamma
+    p: 0.5  # default
+  - _target_: albumentations.RandomBrightnessContrast
+    p: 0.5
+  - _target_: albumentations.HueSaturationValue
+    p: 0.5
+  - _target_: albumentations.Normalize
+    mean: 0.5
+    std: 0.5
+    max_pixel_value: 255
+    p: 1.0  # default

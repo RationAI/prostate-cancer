@@ -1,0 +1,7 @@
+features:
+  _target_: prostate_cancer.ml.nets.AlexNet
+global_max_pooling:
+  _target_: prostate_cancer.ml.nets.GMaxPool
+classifier:
+  _target_: prostate_cancer.ml.nets.BinaryClassifier
+  input_dim: 256

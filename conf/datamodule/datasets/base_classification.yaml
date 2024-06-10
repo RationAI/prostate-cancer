@@ -1,0 +1,4 @@
+_target_: prostate_cancer.datamodule.datasets.ClassificationDataset
+sampler: ???
+augmentations: ???
+seed: ${seed}

@@ -1,0 +1,21 @@
+# @package _global_
+defaults:
+  - /experiment/cancer_bc: train
+  - override /ml/net: resnet50
+  - _self_
+
+ml:
+  net:
+    features:
+      weights: IMAGENET1K_V2
+
+trainer:
+  callbacks:
+    log_best_model:
+      filename: resnet50_prostate_best
+
+metadata:
+  run_name: ResNet50 training
+  description: |
+    Prostate cancer binary classification.
+    The goal is to train the ResNet50 model.

@@ -1,0 +1,2 @@
+_target_: prostate_cancer.ml.nets.SavedModel
+model_uri: ???

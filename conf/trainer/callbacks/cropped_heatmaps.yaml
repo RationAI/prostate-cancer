@@ -1,0 +1,5 @@
+cropped_heatmaps:
+  _target_: prostate_cancer.trainer.callbacks.CroppedHeatmaps
+  save_dir: ???
+  masks: ???
+  pred_dir: ${trainer.callbacks.heatmap_visualizer.save_dir}

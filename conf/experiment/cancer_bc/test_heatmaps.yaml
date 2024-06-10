@@ -1,0 +1,49 @@
+# @package _global_
+defaults:
+  - prostate/cancer_bc: test
+  - /trainer/callbacks:
+    - slide_predictor
+    - heatmap_visualizer
+    - cropped_heatmaps
+  - _self_
+
+
+datamodule:
+  datasets:
+    test:
+      sampler:
+        index_levels:
+          - slide_name
+  dataloaders_kwargs:
+    test:
+      num_workers: 8
+      batch_size: 40
+
+ml:
+  net:
+    model_uri: ???
+
+trainer:
+  callbacks:
+    slide_predictor:
+      save_dir: slide_predictions
+      mask_size: 2
+      threshold: 0.992
+      ground_truth_col: is_cancer
+    heatmap_visualizer:
+      save_dir: test_heatmaps
+    cropped_heatmaps:
+      save_dir: cropped_heatmaps
+      masks:
+        ??? : 0.5
+
+
+metadata:
+  experiment_name: Prostate
+  run_name: Test for Prostate Heatmaps
+  description: |
+    Prostate cancer binary classification test with prediction heatmap generation.
+    The goal is to evaluate the retrained VGG16 model on the same data in the new pipeline to verify analogous performance.
+  hyperparameters:
+    # tested with ~ 8 GiB Memory, 8 cpus
+    batch_size: ${datamodule.dataloaders_kwargs.test.batch_size}

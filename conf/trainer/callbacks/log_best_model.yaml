@@ -1,0 +1,9 @@
+log_best_model:
+  _target_: prostate_cancer.trainer.callbacks.MLFlowModelCheckpoint
+  monitor: ???
+  save_weights_only: True
+  mode: ???
+  save_top_k: 1
+  auto_insert_metric_name: True
+  save_last: True
+  filename: ???

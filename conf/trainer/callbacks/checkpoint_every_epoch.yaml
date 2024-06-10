@@ -1,0 +1,3 @@
+# default logger for training.
+training:
+  _target_: lightning.pytorch.callbacks.ModelCheckpoint

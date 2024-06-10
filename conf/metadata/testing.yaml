@@ -1,0 +1,7 @@
+defaults:
+  - base
+
+experiment_name: Testing
+run_name: Test run
+description: test description
+hyperparameters: {}

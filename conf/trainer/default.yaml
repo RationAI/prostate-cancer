@@ -1,0 +1,6 @@
+defaults:
+  - _self_
+  - logger: mlflow
+
+_target_: prostate_cancer.trainer.Trainer
+reload_dataloaders_every_n_epochs: 1

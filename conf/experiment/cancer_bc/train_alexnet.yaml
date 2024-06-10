@@ -1,0 +1,17 @@
+# @package _global_
+defaults:
+  - /experiment/cancer_bc: train
+  - override /ml/net: alexnet
+  - _self_
+
+trainer:
+  callbacks:
+    log_best_model:
+      filename: alexnet_prostate_best
+
+metadata:
+  experiment_name: Prostate
+  run_name: AlexNet training
+  description: |
+    Prostate cancer binary classification.
+    The goal is to train AlexNet model.

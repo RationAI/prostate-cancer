@@ -1,0 +1,11 @@
+heatmap_visualizer:
+  _target_: prostate_cancer.trainer.callbacks.HeatmapVisualizer
+  save_dir: ???
+  image_builder:
+    _target_: prostate_cancer.trainer.callbacks.image_builders.InMemoryHeatmapAssembler
+    _partial_: true
+    vis_mode:
+      _target_: prostate_cancer.trainer.callbacks.vis_mode.IdentityMode
+    interpolation: nearest
+    compress_accumulator_array: true
+    

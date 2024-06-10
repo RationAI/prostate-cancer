@@ -1,0 +1,4 @@
+slide_prediction_optimizer:
+  _target_: prostate_cancer.trainer.callbacks.SlidePredictionOptimizer
+  save_dir: ???
+    

@@ -1,0 +1,2 @@
+binary_accuracy:
+  _target_: torchmetrics.classification.BinaryAccuracy

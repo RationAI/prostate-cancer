@@ -1,0 +1,3 @@
+_target_: prostate_cancer.datamodule.samplers.SequentialTreeSampler
+index_levels: ???
+advance_to_next: true

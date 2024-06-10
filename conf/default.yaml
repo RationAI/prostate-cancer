@@ -1,0 +1,10 @@
+defaults:
+  - _self_
+  - hydra: default
+  - metadata: base
+  - trainer: default
+
+ml: ???
+datamodule: ???
+stage: ???
+seed: ${random_seed:}

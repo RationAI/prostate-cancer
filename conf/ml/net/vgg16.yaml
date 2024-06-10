@@ -1,0 +1,6 @@
+features:
+  _target_: prostate_cancer.ml.nets.VGG16Features
+global_max_pooling:
+  _target_: prostate_cancer.ml.nets.GMaxPool
+classifier:
+  _target_: prostate_cancer.ml.nets.BinaryClassifier

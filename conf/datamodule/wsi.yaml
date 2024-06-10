@@ -1,0 +1,4 @@
+_target_: prostate_cancer.datamodule.WSIDataModule
+data_sources: ???
+datasets: ???
+dataloaders_kwargs: ???
