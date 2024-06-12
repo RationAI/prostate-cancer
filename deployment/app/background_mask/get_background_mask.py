@@ -11,8 +11,8 @@ async def get_background_mask(
     level = min(level, wsi.num_levels - 1)
     extent = wsi.levels[level].extent
 
-    data = await client.get_region(wsi.id, level, 0, 0, extent.x, extent.y)
-    slide = pyvips.Image.new_from_buffer(data, "")
+    array = await client.get_region(wsi.id, level, 0, 0, extent.x, extent.y)
+    slide = pyvips.Image.new_from_array(array)
     background_mask = _create_thresholded_bg_mask(slide) / 255
     return background_mask.astype(np.float32), level
 

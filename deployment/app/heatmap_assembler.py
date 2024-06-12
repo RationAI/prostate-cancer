@@ -1,7 +1,6 @@
 import math
 from pathlib import Path
 
-import imageio.v3 as iio
 import numpy as np
 import ray
 from aiohttp import ClientConnectionError, ClientResponseError
@@ -65,7 +64,7 @@ class HeatmapAssembler:
         max_task_retries=-1,
     )
     async def __call__(self, x: int, y: int) -> None:
-        data = await self.client.get_region(
+        tile = await self.client.get_region(
             wsi_id=self.wsi.id,
             level=self.wsi_level,
             x=x * self.wsi_stride,
@@ -73,7 +72,7 @@ class HeatmapAssembler:
             height=self.wsi_tile_size,
             width=self.wsi_tile_size,
         )
-        prediction = await self.model.remote(np.asarray(iio.imread(data)))
+        prediction = await self.model.remote(tile)
 
         roi = self._get_roi(x, y)
         self._counter[roi] += 1
