@@ -8,8 +8,9 @@ spec:
       - name: ProstateCancer
         import_path: app:app
         route_prefix: /
+
   rayClusterConfig:
-    rayVersion: 2.10.0
+    rayVersion: 2.24.0
     # enableInTreeAutoscaling: true
     # autoscalerOptions:
     #   idleTimeoutSeconds: 60 # number of seconds to wait before scaling down a worker pod which is not using Ray resources.
@@ -29,9 +30,7 @@ spec:
           containers:
             - name: ray-head
               image: cerit.io/rationai/pathology/prostate-cancer:1.0.0
-              env:
-                - name: HTTPS_PROXY
-                  value: http://proxy.ics.muni.cz:3128
+              imagePullPolicy: Always
               securityContext:
                 allowPrivilegeEscalation: false
                 capabilities:
@@ -41,11 +40,11 @@ spec:
                   type: RuntimeDefault
               resources:
                 limits:
-                  cpu: 8
-                  memory: 10G
+                  cpu: 4
+                  memory: 6Gi
                 requests:
-                  cpu: 8
-                  memory: 10G
+                  cpu: 4
+                  memory: 6Gi
               ports:
                 - containerPort: 6379
                   name: gcs-server
@@ -57,42 +56,50 @@ spec:
                   name: serve
               volumeMounts:
                 - name: wsi-storage-pvc
-                  mountPath: /mnt/data
+                  mountPath: /data/Projects/empaia/job_slides
+                  subPath: empaia/job_slides
 
           volumes:
             - name: wsi-storage-pvc
               persistentVolumeClaim:
-                claimName: rat-data-wsi-storage-pvc
+                claimName: pvc-xopat3
 
-    workerGroupSpecs: []
-    #   - groupName: cpu-group
-    #     replicas: 1
-    #     minReplicas: 1
-    #     maxReplicas: 1
-    #     rayStartParams: {}
-    #     template:
-    #       spec:
-    #         containers:
-    #           - name: ray-worker
-    #             image: cerit.io/rationai/test_deploy:branch-feature-deployment
-    #             env:
-    #               - name: HTTPS_PROXY
-    #                 value: http://proxy.ics.muni.cz:3128
-    #             securityContext:
-    #               allowPrivilegeEscalation: false
-    #               capabilities:
-    #                 drop: ["ALL"]
-    #               runAsNonRoot: true
-    #               seccompProfile:
-    #                 type: RuntimeDefault
-    #             lifecycle:
-    #               preStop:
-    #                 exec:
-    #                   command: ["/bin/sh", "-c", "ray stop"]
-    #             resources:
-    #               limits:
-    #                 cpu: 4
-    #                 memory: 10G
-    #               requests:
-    #                 cpu: 4
-    #                 memory: 10G
+    workerGroupSpecs:
+      - groupName: cpu-group
+        replicas: 1
+        # minReplicas: 2
+        # maxReplicas: 5
+        rayStartParams: {}
+        template:
+          spec:
+            containers:
+              - name: ray-worker
+                image: cerit.io/rationai/pathology/prostate-cancer:1.0.0
+                imagePullPolicy: Always
+                securityContext:
+                  allowPrivilegeEscalation: false
+                  capabilities:
+                    drop: ["ALL"]
+                  runAsNonRoot: true
+                  seccompProfile:
+                    type: RuntimeDefault
+                lifecycle:
+                  preStop:
+                    exec:
+                      command: ["/bin/sh", "-c", "ray stop"]
+                resources:
+                  limits:
+                    cpu: 6
+                    memory: 6Gi
+                  requests:
+                    cpu: 6
+                    memory: 6Gi
+                volumeMounts:
+                  - name: wsi-storage-pvc
+                    mountPath: /data/Projects/empaia/job_slides
+                    subPath: empaia/job_slides
+
+            volumes:
+              - name: wsi-storage-pvc
+                persistentVolumeClaim:
+                  claimName: pvc-xopat3

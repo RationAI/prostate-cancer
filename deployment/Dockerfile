@@ -1,4 +1,4 @@
-FROM rayproject/ray:2.10.0-py311
+FROM rayproject/ray:latest-py311
 
 RUN sudo apt-get update -y \
     && sudo apt-get install -y --no-install-recommends openssh-client libvips-dev gcc \
@@ -10,4 +10,6 @@ RUN mkdir -p -m 0700 ~/.ssh && ssh-keyscan gitlab.ics.muni.cz >> ~/.ssh/known_ho
 
 COPY . .
 
-RUN --mount=type=ssh,uid=1000 pip --no-cache-dir install -r requirements.txt && rm requirements.txt
+RUN --mount=type=ssh,uid=1000 pip --no-cache-dir install -r requirements.txt \
+    && rm requirements.txt \
+    && rm -rf ~/.ssh 

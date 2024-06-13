@@ -10,14 +10,14 @@ from rationai.empaia.typing import DataCreatorType, SlideInfo, primitives
 from ray import serve
 
 
-log = logging.getLogger(__name__)
+log = logging.getLogger("ray.serve")
 
 
 @serve.deployment(
     num_replicas="auto",
     autoscaling_config={
         "min_replicas": 0,
-        "max_replicas": 1,
+        "max_replicas": 2,
         "target_ongoing_requests": 1,
         "downscale_delay_s": 10,
         "upscale_delay_s": 10,
@@ -30,7 +30,7 @@ log = logging.getLogger(__name__)
 class UploadService:
     """Upload service for uploading slides to EMPIA."""
 
-    output_dir = Path("/mnt/data/wsi_mask")
+    output_dir = Path("/data/Projects/empaia/job_slides")
 
     def reconfigure(self, config: dict[str, Any]) -> None:
         self.output_dir = Path(config.get("output_dir", self.output_dir))
@@ -42,7 +42,7 @@ class UploadService:
         name: str,
         key: str,
         array: NDArray[Any],
-        level: int,
+        min_level: int,
     ) -> None:
         pyvips.cache_set_max_mem(1000 * 1024 * 1024)  # 1 GiB
 
@@ -52,8 +52,8 @@ class UploadService:
 
         image = pyvips.Image.new_from_array(array)
         image = image.resize(
-            wsi.levels[level].extent.x / image.width,
-            vscale=wsi.levels[level].extent.y / image.height,
+            wsi.levels[min_level].extent.x / image.width,
+            vscale=wsi.levels[min_level].extent.y / image.height,
             kernel="nearest",
         )
 
@@ -69,7 +69,7 @@ class UploadService:
 
         async with client:
             response = await client.post_wsi_mask(
-                wsi.id, path.relative_to("/mnt/data").as_posix()
+                wsi.id, path.relative_to("/data").as_posix()
             )
             log.info("Writing mask: %s", response.id)
 

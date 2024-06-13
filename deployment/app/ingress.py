@@ -1,13 +1,16 @@
+import asyncio
+import logging
 import shutil
 import tempfile
 from pathlib import Path
-from typing import Annotated, Any, Final
+from statistics import mean
+from typing import Annotated, Any
 
 import numpy as np
-import ray
 from fastapi import Body, FastAPI, Response, status
 from numpy.typing import NDArray
 from rationai.empaia import Client
+from rationai.empaia.typing import slide
 from rationai.empaia.utils import Progress
 from ray import ObjectRef, serve
 from ray.serve.handle import DeploymentHandle
@@ -15,9 +18,9 @@ from skimage.util import view_as_windows
 
 from app.background_mask import get_background_mask
 from app.heatmap_assembler import HeatmapAssembler
-from app.utils import find_closes_resolution_level
 
 
+log = logging.getLogger("ray.serve")
 app = FastAPI()
 
 
@@ -25,7 +28,7 @@ app = FastAPI()
     num_replicas=1,
     ray_actor_options={
         "num_cpus": 0.25,
-        "memory": 700 * 1024 * 1024,  # quota 600 MiB
+        "memory": 2500 * 1024 * 1024,  # quota 2.5 GiB
     },
 )
 @serve.ingress(app)
@@ -38,9 +41,11 @@ class Ingress:
             not presented, the highest level is used.
         tissue_percentage_threshold: The minimum percentage of tissue required for a
             tile to be considered.
-        target_resolution: The target resolution for the model input tiles (μm per pixel).
+        target_resolution: The target resolution for the model input tiles
+            (μm per pixel).
         tile_size: The size of the model input tiles (pixels).
-        stride: The stride of the model input tiles (pixels). Overlapping tiles are averaged.
+        stride: The stride of the model input tiles (pixels). Overlapping tiles are
+            averaged.
     """
 
     max_concurrent_tiles = 100
@@ -83,10 +88,8 @@ class Ingress:
             )
 
             wsi = await client.get_input("my_wsi")
-            wsi_level = find_closes_resolution_level(
-                levels=wsi.levels,
-                pixel_size_nm=wsi.pixel_size_nm,
-                target_resolution=self.target_resolution,
+            wsi_level = self._find_closes_resolution_level(
+                levels=wsi.levels, pixel_size_nm=wsi.pixel_size_nm
             )
 
             background_mask, background_mask_level = await get_background_mask(
@@ -99,7 +102,7 @@ class Ingress:
                 name="Background mask",
                 key="background_mask",
                 array=(background_mask * 255).astype(np.uint8),
-                level=wsi_level,
+                min_level=wsi_level,
             )
 
             attention_mask = self._get_attention_mask(
@@ -108,7 +111,7 @@ class Ingress:
                 / wsi.levels[wsi_level].downsample_factor,
             )
 
-            heatmap_assembler = HeatmapAssembler.remote(
+            heatmap_assembler = HeatmapAssembler(
                 self.model,
                 self.upload_service,
                 client,
@@ -117,19 +120,18 @@ class Ingress:
                 self.tile_size,
                 self.stride,
                 attention_mask,
-                checkpoint_dir,
             )
-            progress.update.remote(0.05)
 
-            self._process_tissue(progress, heatmap_assembler, attention_mask)
+            await self._process_tissue(progress, heatmap_assembler, attention_mask)
 
-            num_lost = await heatmap_assembler.finalize.remote()
+            num_lost = await heatmap_assembler.finalize()
             await background_mask_response
             await progress.finalize.remote()
 
             if num_lost == 0:
                 await client.put_finalize()
             else:
+                log.error("%d tiles lost", num_lost)
                 await client.put_failure(f"{num_lost} tiles lost")
 
         shutil.rmtree(checkpoint_dir)
@@ -146,22 +148,44 @@ class Ingress:
         attention = np.tensordot(arr4d, kernel, axes=((2, 3), (0, 1)))
         return attention >= self.tissue_percentage_threshold
 
-    def _process_tissue(
+    async def _process_tissue(
         self,
         progress: ObjectRef,
-        heatmap_assembler: ObjectRef,
+        heatmap_assembler: HeatmapAssembler,
         attention_mask: NDArray[np.bool_],
     ) -> None:
-        progress_weight: Final[float] = 0.95
-
         indices = np.nonzero(attention_mask)
         total_tiles = len(indices[0])
+        if total_tiles == 0:
+            log.warning("No tissue found")
+            return
 
-        pending: list[ObjectRef[None]] = []
+        pending: set[asyncio.Task[None]] = set()
         for y, x in zip(*indices, strict=False):
             if len(pending) >= self.max_concurrent_tiles:
-                done, pending = ray.wait(pending, num_returns=1)
-                progress.update.remote(len(done) / total_tiles * progress_weight)
-            pending.append(heatmap_assembler.__call__.remote(x, y))
-        ray.get(pending)
-        progress.update.remote(len(pending) / total_tiles * progress_weight)
+                done, pending = await asyncio.wait(
+                    pending, return_when=asyncio.FIRST_COMPLETED
+                )
+                progress.update.remote(len(done) / total_tiles)
+            pending.add(asyncio.create_task(heatmap_assembler(x, y)))
+        await asyncio.gather(*pending)
+        progress.update.remote(len(pending) / total_tiles)
+
+    def _find_closes_resolution_level(
+        self, levels: list[slide.SlideLevel], pixel_size_nm: slide.SlidePixelSizeNm
+    ) -> int:
+        """Find the closest level that matches the target resolution.
+
+        Args:
+            levels: The levels of the whole slide image.
+            pixel_size_nm: The pixel size of the whole slide image.
+            target_resolution: The target resolution in μm/px.
+
+        Returns:
+            The index of the level that matches the target resolution.
+        """
+        base_resolution = mean((pixel_size_nm.x, pixel_size_nm.y)) / 1000  # μm/px
+        resolutions = [base_resolution * level.downsample_factor for level in levels]
+        return min(
+            enumerate(resolutions), key=lambda x: abs(x[1] - self.target_resolution)
+        )[0]
