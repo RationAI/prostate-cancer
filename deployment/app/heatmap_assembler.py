@@ -1,18 +1,10 @@
-import asyncio
-import logging
 import math
 
 import numpy as np
-from aiohttp import ClientConnectionError, ClientResponseError
 from numpy.typing import NDArray
 from rationai.empaia import Client
 from rationai.empaia.typing import SlideInfo
 from ray.serve.handle import DeploymentHandle
-
-
-MAX_RETRIES = 5
-
-log = logging.getLogger("ray.serve")
 
 
 class HeatmapAssembler:
@@ -42,28 +34,18 @@ class HeatmapAssembler:
         self._counter = np.zeros_like(self._overlaps, dtype=np.uint8)
 
     async def __call__(self, x: int, y: int) -> None:
-        for retry in range(MAX_RETRIES):
-            try:
-                tile = await self.client.get_region(
-                    wsi_id=self.wsi.id,
-                    level=self.wsi_level,
-                    x=x * self.wsi_stride,
-                    y=y * self.wsi_stride,
-                    height=self.wsi_tile_size,
-                    width=self.wsi_tile_size,
-                )
-                prediction = await self.model.remote(tile)
-                roi = self._get_roi(x, y)
-                self._counter[roi] += 1
-                self._heatmap_accumulator[roi] += prediction / self._overlaps[roi]
-                break
-            except (ClientConnectionError, ClientResponseError) as e:
-                if retry + 1 == MAX_RETRIES:
-                    raise e
-                log.warning(
-                    "Retrying tile %d, %d, attempt %d", x, y, retry + 1, exc_info=e
-                )
-                await asyncio.sleep(2**retry)
+        tile = await self.client.get_region(
+            wsi_id=self.wsi.id,
+            level=self.wsi_level,
+            x=x * self.wsi_stride,
+            y=y * self.wsi_stride,
+            height=self.wsi_tile_size,
+            width=self.wsi_tile_size,
+        )
+        prediction = await self.model.remote(tile)
+        roi = self._get_roi(x, y)
+        self._counter[roi] += 1
+        self._heatmap_accumulator[roi] += prediction / self._overlaps[roi]
 
     async def finalize(self) -> np.uint:
         await self.upload_service.remote(
