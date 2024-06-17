@@ -1,0 +1,16 @@
+# @package _global_
+defaults:
+  - train_base_without_valid
+  - /ml/net: vgg16
+  - _self_
+
+trainer:
+  callbacks:
+    log_best_model:
+      filename: vgg16_prostate_best
+
+metadata:
+  run_name: VGG16 training
+  description: |
+    Prostate cancer binary classification.
+    The goal is to train VGG16 model without a validation set.

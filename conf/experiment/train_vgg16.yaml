@@ -1,0 +1,16 @@
+# @package _global_
+defaults:
+  - train_base
+  - /ml/net: vgg16
+  - _self_
+
+trainer:
+  callbacks:
+    log_best_model:
+      filename: vgg16_prostate_best
+
+metadata:
+  run_name: VGG16 training
+  description: |
+    Prostate cancer binary classification.
+    The goal is to retrain VGG16 model on the same data in the new pipeline with analogous performance.

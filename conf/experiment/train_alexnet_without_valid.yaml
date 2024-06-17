@@ -1,0 +1,16 @@
+# @package _global_
+defaults:
+  - train_base_without_valid
+  - /ml/net: alexnet
+  - _self_
+
+trainer:
+  callbacks:
+    log_best_model:
+      filename: alexnet_prostate_best
+
+metadata:
+  run_name: AlexNet training
+  description: |
+    Prostate cancer binary classification.
+    The goal is to train the AlexNet model without a validation set.

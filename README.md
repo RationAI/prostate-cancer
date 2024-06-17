@@ -4,11 +4,10 @@
 
 Michal Jakubík, Matěj Gallo, Vít Musil, Matěj Pekár
 
-This repository provides an implementation of a pipeline for training a binary
+An implementation of a pipeline for training a binary
 classifier to detect prostate cancer using Whole Slide Images (WSIs). Built with
 [PyTorch Lightning](https://lightning.ai/docs/pytorch/stable/), [Hydra](https://hydra.cc)
-and [MlFlow](https://mlflow.org). The pipeline leverages VGG16 as the model's
-backbone.
+and [MlFlow](https://mlflow.org).
 
 Due to the unavailability of the dataset used in this project, users will
 need to create their own data source to utilize the pipeline.

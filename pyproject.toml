@@ -30,7 +30,7 @@ dev = ["mypy", "pre-commit", "ruff"]
 
 [tool.pdm.scripts]
 train = "python -m prostate_cancer.main stage=fit"
-eval = "python -m prostate_cancer.mani stage=test"
+eval = "python -m prostate_cancer.main stage=test"
 
 l = { composite = ["lint", "format", "mypy"] }
 lint = "ruff check"
