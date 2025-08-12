@@ -1,0 +1,55 @@
+[project]
+name = "prostate-cancer"
+version = "0.1.0"
+authors = [
+    { name = "Jozef Kraus", email = "jozefkraus@mail.muni.cz" },
+    { name = "Adam Džadoň", email = "524839@mail.muni.cz" },
+    { name = "Vít Musil", email = "vit.musil@mail.muni.cz" },
+    { name = "Michal Jakubík", email = "jakubik@mail.muni.cz" },
+    { name = "Matej Gallo", email = "gallo.matej@mail.muni.cz" },
+]
+requires-python = ">=3.11,<3.13"
+readme = "README.md"
+license = { file = "LICENSE" }
+dependencies = [
+    "lightning>=2.0.0",
+    "albumentations>=1.4.21",
+    "pandas>=2.2.2",
+    "torch>=2.2.2",
+    "torchvision>=0.17.2",
+    "triton>=3.2.0", 
+    "tqdm>=4.66.5",
+    "rationai-mlkit @ git+https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/mlkit.git@fix/openslide-dataset",
+    "rationai-masks @ git+https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/masks.git",
+    "rationai-tiling @ git+https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/tiling.git",
+    "numpy>=1.24.4",
+    "scikit-image>=0.25.2", # For stain augmentation
+    "timm", # For pretrained models, tile embedding
+    "matplotlib>=3.10.1",
+]
+
+[tool.pdm.scripts]
+fit = "python -m prostate_cancer mode=fit"
+validate = "python -m prostate_cancer mode=validate"
+test = "python -m prostate_cancer mode=test"
+predict = "python -m prostate_cancer mode=predict"
+l = { composite = ["lint", "format", "mypy"] }
+lint = "ruff check --fix"
+format = "ruff format"
+mypy = "mypy ."
+post_install = { composite = [
+    "pre-commit autoupdate",
+    "pre-commit install",
+    "pre-commit install --hook-type commit-msg",
+] }
+
+[tool.pdm]
+distribution = false
+
+[dependency-groups]
+dev = [
+    "mypy",
+    "pre-commit",
+    "ruff",
+    "ipykernel>=6.29.5",
+]
