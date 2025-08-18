@@ -1,0 +1,37 @@
+defaults:
+  - hydra: default
+  - logger: mlflow
+  - _self_
+
+
+# Working directory for MMCI data (Masaryk Memorial Cancer Institute)
+prostate_cancer_path: /mnt/data/Projects/prostate_cancer/cancer
+
+# Paths to the slides (MRXS format) and annotations
+data_path: /mnt/data/Projects/Data/MOU/prostate/tile_level_annotations
+test_data_path: /mnt/data/Projects/Data/MOU/prostate/tile_level_annotations_test
+
+
+annotation_masks:
+  level: 5
+  max_concurrent: 100
+  output_path: ${prostate_cancer_path}/annot_masks
+
+tissue_masks:
+  level: 3
+  max_concurrent: 100
+  output_path: ${prostate_cancer_path}/tissue_masks
+
+qc_masks:
+  request_limit: 4
+  request_timeout: 1260
+  report_request_timeout: 240
+  url: "http://rayservice-qc-serve-svc.rationai-jobs-ns.svc.cluster.local:8000/"
+  mask_level: 3
+  sample_level: 1
+  output_path: ${prostate_cancer_path}/qc_masks
+
+metadata:
+  experiment_name: Prostate
+  run_name: ???
+  description: ???
