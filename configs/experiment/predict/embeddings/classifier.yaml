@@ -1,0 +1,15 @@
+# @package _global_
+
+defaults:
+  - /experiment/predict/predict_base
+  - /data/embeddings_datamodule@data
+  - /model/pgp_model@model
+  - _self_
+
+data:
+  batch_size: 128
+  num_workers: 12
+
+metadata:
+  run_name: PGP Predict
+  description: PGP Predict

@@ -26,6 +26,8 @@ dependencies = [
     "scikit-image>=0.25.2", # For stain augmentation
     "timm", # For pretrained models, tile embedding
     "matplotlib>=3.10.1",
+    "scikit-learn",
+    "openpyxl",
 ]
 
 [tool.pdm.scripts]

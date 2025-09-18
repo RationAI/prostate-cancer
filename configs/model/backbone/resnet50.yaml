@@ -1,0 +1,2 @@
+_target_: prostate_cancer.modeling.backbone.resnet50
+weights: IMAGENET1K_V1

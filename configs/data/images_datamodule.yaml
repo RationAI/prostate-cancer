@@ -1,0 +1,10 @@
+defaults:
+  - datasets@train: images/train
+  - datasets@val: images/val
+  - datasets@test: images/test
+  - datasets@predict: images/predict
+
+  - samplers@sampler: stratified_weighted_random
+
+batch_size: ???
+num_workers: ???

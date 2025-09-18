@@ -17,7 +17,7 @@ async def put_request(
     semaphore: asyncio.Semaphore,
     request_timeout: int,
     data: dict[str, Any],
-) -> str:
+) -> tuple[int, str]:
     timeout = ClientTimeout(total=request_timeout)
 
     try:
@@ -28,13 +28,45 @@ async def put_request(
                 f"Processed {data['wsi_path']}:\n\tStatus: {response.status} \n\tResponse: {result}\n"
             )
 
-            return result
+            return response.status, result
     except TimeoutError:
         slide_name = Path(data["wsi_path"]).name
         print(
             f"Request to {url} timed out after {request_timeout} seconds. Slide: {slide_name}"
         )
-        return "Timeout"
+        return -1, "Timeout"
+
+
+async def repeatable_put_request(
+    session: ClientSession,
+    url: str,
+    data: dict[str, Any],
+    num_repeats: int,
+    semaphore: asyncio.Semaphore,
+    request_timeout: int,
+) -> None:
+    for attempt in range(1, num_repeats + 1):
+        status, text = await put_request(session, url, semaphore, request_timeout, data)
+
+        if status == -1 and text == "Timeout":
+            return
+
+        if status == 500 and text == "Internal Server Error":
+            att_count = f"attempt {attempt}/{num_repeats}"
+            print(
+                f"Unexpected status 500 received for {data['wsi_path']} ({att_count}):\n\tResponse: {text}\n"
+            )
+            await asyncio.sleep(2**attempt)
+
+            continue
+
+        print(
+            f"Processed {data['wsi_path']}:\n\tStatus: {status} \n\tResponse: {text}\n"
+        )
+
+        return
+
+    print(f"Failed to process {data['wsi_path']}:\n\tAll retry attempts failed\n")
 
 
 async def generate_report(
@@ -83,13 +115,15 @@ async def qc_main(
     semaphore: asyncio.Semaphore,
     request_timeout: int,
     report_request_timeout: int,
+    num_repeats: int,
 ) -> None:
     async with ClientSession() as session:
         tasks = [
-            put_request(
+            repeatable_put_request(
                 session=session,
                 request_timeout=request_timeout,
                 url=url,
+                num_repeats=num_repeats,
                 semaphore=semaphore,
                 data={
                     "wsi_path": str(slide),
@@ -155,6 +189,7 @@ def main(config: DictConfig, logger: Logger | None = None) -> None:
                 semaphore=semaphore,
                 request_timeout=config.qc_masks.request_timeout,
                 report_request_timeout=config.qc_masks.report_request_timeout,
+                num_repeats=config.qc_masks.num_repeats,
             )
         )
 

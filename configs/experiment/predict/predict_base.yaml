@@ -1,0 +1,23 @@
+# @package _global_
+
+checkpoint: ???
+
+trainer:
+  callbacks:
+    - _target_: prostate_cancer.callbacks.HeatmapCallback
+
+data:
+  batch_size: 74
+  num_workers: 8
+
+model:
+  lr: 0
+
+metadata:
+  experiment_name: Prostate
+  run_name: ???
+  description: ???
+  hyperparams:
+    batch_size: ${data.batch_size}
+    num_workers: ${data.num_workers}
+    checkpoint: ${checkpoint}

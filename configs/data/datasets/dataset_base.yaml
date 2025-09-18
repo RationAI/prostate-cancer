@@ -1,0 +1,6 @@
+tissue_roi_t: ${tissue_roi_t}
+exclude_t: ${exclude_t}
+another_pathology_t: ${another_pathology_t}
+residual_t: ${residual_t}
+blur_t: ${blur_t}
+folding_t: ${folding_t}

@@ -22,7 +22,7 @@ from ray._private.worker import RemoteFunction0
 from preprocessing.tiling.stratified_group_split import stratified_group_split
 
 
-def cancer_bool(slide_path: Path | str) -> bool:
+def carcinoma_bool(slide_path: Path | str) -> bool:
     """Get the slide cancer status from the slide name."""
     slide_path = Path(slide_path)
 
@@ -206,17 +206,17 @@ def process_slide(
             carcinoma_mask_path, slide.extent, another_path_tiles
         )
     # If it is positive slide and no carcinoma mask exists (there are no XML annotations) -> skip
-    elif cancer_bool(slide_path):
+    elif carcinoma_bool(slide_path):
         return None
     else:
-        # Convert to CancerTileMetadata with 0 cancer percentage if no carcinoma mask
+        # Convert to CarcinomaTileMetadata with 0 cancer percentage if no carcinoma mask
         carcinoma_tiles = [
             CarcinomaTileMetadata(**asdict(tile), carcinoma_roi_percentage=0.0)
             for tile in another_path_tiles
         ]
 
     # --- postprocessing
-    slide_carcinoma = cancer_bool(slide_path)
+    slide_carcinoma = carcinoma_bool(slide_path)
     slide = CarcinomaOpenSlideMetadata(**asdict(slide), carcinoma=slide_carcinoma)
     # ---
 
@@ -226,7 +226,7 @@ def process_slide(
 def create_dataframe(slides: Iterable[Path]) -> pd.DataFrame:
     slides_df = pd.DataFrame(slides, columns=["path"])
 
-    slides_df["cancer"] = slides_df["path"].apply(cancer_bool).astype(int)
+    slides_df["carcinoma"] = slides_df["path"].apply(carcinoma_bool).astype(int)
 
     def get_case_id(slide_path: Path) -> str:
         # File names are expected to be in the format: "PREFIX-YEAR_CASEID-SLIDENUMBER-[0,1].mrxs"
@@ -358,16 +358,16 @@ def main(config: DictConfig, logger: Logger | None = None) -> None:
     # Split the dataset into train and validation sets
     train_slides, val_slides = stratified_group_split(
         data=slides_df,
-        labels=slides_df["cancer"],
+        labels=slides_df["carcinoma"],
         groups=slides_df["case_id"],
         test_size=0.1,
         random_state=42,
     )
 
     # Log distribution of cancer slides
-    print("Train slides:", train_slides["cancer"].value_counts())
-    print("Validation slides:", val_slides["cancer"].value_counts())
-    print("Test slides:", test_slides["cancer"].value_counts())
+    print("Train slides:", train_slides["carcinoma"].value_counts())
+    print("Validation slides:", val_slides["carcinoma"].value_counts())
+    print("Test slides:", test_slides["carcinoma"].value_counts())
 
     # Tiling
     train_slides_df, train_tiles_df = tiling(

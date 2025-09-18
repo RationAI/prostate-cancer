@@ -10,10 +10,19 @@ prostate_cancer_path: /mnt/data/Projects/prostate_cancer/cancer
 # Paths to the slides (MRXS format) and annotations
 data_path: /mnt/data/Projects/Data/MOU/prostate/tile_level_annotations
 test_data_path: /mnt/data/Projects/Data/MOU/prostate/tile_level_annotations_test
-
+val_2k_data_path: /mnt/data/Projects/Data/MOU/prostate/slide_level_annotations
+val_2k_data_table_path: /mnt/data/Projects/Data/MOU/prostate/slide_level_annotations/Prostaty2023-tabulka-final-corrections.xlsx
 
 # Microns per pixel of MMCI data on highest resolution
 mmci_mpp: 0.23
+
+thresholds:
+  tissue_roi_t: 0.5
+  exclude_t: 0.0
+  another_pathology_t: 0.0
+  residual_t: 0.25
+  blur_t: 0.25
+  folding_t: 0.25
 
 tile_masks:
   output_path: ${prostate_cancer_path}/tile_masks
@@ -25,16 +34,16 @@ tile_masks:
   percentage_cols: 
     - "carcinoma_roi_percentage"
     - "tissue_roi_percentage"
-  tissue_threshold: 0.5
+  tissue_threshold: ${thresholds.tissue_roi_t}
 
 tiling:
   level: 1
   tile_extent: 512
   stride: 256
   # We prefer taking masks from MLFlow
-  qc_masks_uri: "mlflow-artifacts:/65/df5ccd31178549afb5e843b1ea0741a0/artifacts/qc_masks"
-  tissue_masks_uri: "mlflow-artifacts:/65/4ea7cee809a2443389855facba548959/artifacts/tissue_masks"
-  annotation_masks_uri: "mlflow-artifacts:/65/199141b76f90457fbf6183bd70a1e488/artifacts/annotation_masks"
+  qc_masks_uri: null
+  tissue_masks_uri: "mlflow-artifacts:/65/7e0f909430cd48459511d0dd683e7629/artifacts/tissue_masks"
+  annotation_masks_uri: null
 
 annotation_masks:
   level: 5
@@ -44,16 +53,29 @@ annotation_masks:
 tissue_masks:
   level: 3
   max_concurrent: 100
-  output_path: ${prostate_cancer_path}/tissue_masks
+  output_path: ${prostate_cancer_path}/tissue_masks_2k
 
 qc_masks:
   request_limit: 4
   request_timeout: 1260
   report_request_timeout: 240
+  num_repeats: 5
   url: "http://rayservice-qc-serve-svc.rationai-jobs-ns.svc.cluster.local:8000/"
   mask_level: 3
   sample_level: 1
-  output_path: ${prostate_cancer_path}/qc_masks
+  output_path: ${prostate_cancer_path}/qc_masks_2k
+
+stats:
+  uris:
+    - "mlflow-artifacts:/65/0157ba4a0db349b8b86e4a24592d9230/artifacts/Prostate - train"
+
+tile_embeddings:
+  batch_size: 16
+  output_path: ${prostate_cancer_path}/tile_embeddings_2k
+
+  # Assuming the uri is is structured as: "mlflow-artifacts:/experiment_id/run_id/artifacts/Prostate - <partition>"
+  uris:
+    - "mlflow-artifacts:/65/ecc39a6204b9482a9eab3466eb6c8f86/artifacts/Prostate - 2k"
 
 metadata:
   experiment_name: Prostate

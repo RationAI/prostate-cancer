@@ -1,0 +1,10 @@
+defaults:
+  - decode_head: binary_classifier
+  - backbone: resnet50
+  - _self_
+
+decode_head:
+  in_features: 2048
+
+_target_: prostate_cancer.prostate_cancer_model.ProstateCancerModel
+lr: ???
