@@ -6,7 +6,7 @@ defaults:
   - /model/vgg16_model@model
   - _self_
 
-checkpoint: "mlflow-artifacts:/65/9c13c66621f744358dd5aca831813b2d/artifacts/checkpoints/epoch=2-step=20916/checkpoint.ckpt"
+checkpoint: "mlflow-artifacts:/65/7b52930515c14710855962f8882fb4d3/artifacts/checkpoints/epoch=1-step=11620/checkpoint.ckpt"
 metadata:
   run_name: VGG-16 Predict
   description: VGG-16 Predict

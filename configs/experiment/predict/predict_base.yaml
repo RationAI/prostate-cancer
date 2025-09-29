@@ -1,6 +1,6 @@
 # @package _global_
 
-checkpoint: ???
+checkpoint: mlflow-artifacts:/65/7b52930515c14710855962f8882fb4d3/artifacts/checkpoints/epoch=1-step=11620/checkpoint.ckpt
 
 trainer:
   callbacks:
