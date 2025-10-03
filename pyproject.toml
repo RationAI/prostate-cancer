@@ -12,22 +12,24 @@ requires-python = ">=3.11,<3.13"
 readme = "README.md"
 license = { file = "LICENSE" }
 dependencies = [
-    "lightning>=2.0.0",
-    "albumentations>=1.4.21",
-    "pandas>=2.2.2",
-    "torch>=2.2.2",
-    "torchvision>=0.17.2",
-    "triton>=3.2.0", 
-    "tqdm>=4.66.5",
-    "rationai-mlkit @ git+https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/mlkit.git@fix/openslide-dataset",
-    "rationai-masks @ git+https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/masks.git",
-    "rationai-tiling @ git+https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/tiling.git",
-    "numpy>=1.24.4",
-    "scikit-image>=0.25.2", # For stain augmentation
-    "timm", # For pretrained models, tile embedding
-    "matplotlib>=3.10.1",
-    "scikit-learn",
-    "openpyxl",
+    "lightning==2.5.1.post0",
+    "albumentations==2.0.8",
+    "pandas==2.2.3",
+    "torch==2.7.0",
+    "torchvision==0.22.0",
+    "triton==3.3.0", 
+    "tqdm==4.67.1",
+    "rationai-masks @ git+https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/masks.git@1bcaf1054011a6280870edc53fb6a8d1f995cdec",
+    "rationai-mlkit @ git+https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/mlkit.git@233ead782353b3f23eee75702576f5c004cf300e",
+    "rationai-tiling @ git+https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/tiling.git@9096ada81542c172908dff5b2766cf729786471b",
+    "rationai-staining @ git+https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/staining.git@feature/transforms",
+    "numpy==2.2.5",
+    "timm==1.0.15",
+    "matplotlib==3.10.1",
+    "scikit-learn==1.6.1",
+    "openpyxl==3.1.5",
+    "mlflow==2.21.3",
+    "deprecated",
 ]
 
 [tool.pdm.scripts]

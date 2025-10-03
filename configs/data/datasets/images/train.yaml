@@ -1,6 +1,6 @@
 defaults:
   - /data/datasets/dataset_base@thresholds
-  - /data/transforms@transforms: normalize_w_augments
+  - /data/transforms@transforms: normalize_w_stain_augments
 
 _target_: prostate_cancer.data.datasets.LabeledTilesDataset
 uris:
