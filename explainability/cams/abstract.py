@@ -1,10 +1,12 @@
 import torch
 
+from explainability.typing import Cams, Embeddings, EmbeddingsLocs
+
 
 class AbstractCAMHook:
-    """Batch-wise Grad-CAM++ hook (approximation using first-order grads).
+    """Abstract class for CAM hooks.
 
-    Computes alpha weights per location per channel using grad powers as in the Grad-CAM++ paper.
+    A CAM hook is a class that can be used to compute CAMs for a given model and layer.
     """
 
     def __init__(
@@ -20,9 +22,9 @@ class AbstractCAMHook:
         self.save_positive_activations = save_positive_activations
         self._forward_handle = None
         self._activations = None  # [B,C,H,W]
-        self._cams_history = []  # list of tensors [B,H,W]
-        self._embeddings = []  # list of tensors [B,C,H,W]
-        self._embeddings_locations = []  # list of tensors [B,H,W]
+        self._cams_history: list[Cams] = []
+        self._embeddings: list[Embeddings] = []
+        self._embeddings_locations: list[EmbeddingsLocs] = []
 
     def detach(self):
         if self._forward_handle is not None:
@@ -38,14 +40,12 @@ class AbstractCAMHook:
             return None
         return self._cams_history[-1]
 
-    def last_embeddings(self):
-        if not self._embeddings:
-            return None
+    def last_embeddings(self) -> Embeddings:
+        assert self._embeddings, "No embeddings saved"
         return self._embeddings[-1]
 
-    def last_embeddings_locations(self):
-        if not self._embeddings_locations:
-            return None
+    def last_embeddings_locations(self) -> EmbeddingsLocs:
+        assert self._embeddings_locations, "No embeddings locations saved"
         return self._embeddings_locations[-1]
 
     @torch.no_grad()

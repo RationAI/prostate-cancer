@@ -11,10 +11,10 @@ def overlay_clustered_locations(
     x_batch: torch.Tensor,
     embeddings_locations: torch.Tensor,
     max_indices: np.ndarray,
+    colors,
     activation_grid_size: tuple[int, int] | None = None,
     point_size: int = 20,
     alpha: float = 0.6,
-    title: str | None = None,
     draw_squares: bool = True,
 ):
     """Draw one figure per image with three panels: (1) original image, (2) clusters-only, and (3) overlay (image + clusters). Activation cells are rendered as upscaled squares.
@@ -23,10 +23,10 @@ def overlay_clustered_locations(
         x_batch: [B, C, H, W]
         embeddings_locations: [N, 3] with (b, i, j)
         max_indices: [N] cluster id for each location
+        colors: [K] RGB color for each cluster
         activation_grid_size: (h_l, w_l) of low-res activation map; inferred if None
         point_size: used only when draw_squares=False (scatter fallback)
         alpha: overlay alpha for squares on the overlay panel
-        title: optional title prefix for each figure
         draw_squares: draw upscaled squares if True, else scatter points
     """
     assert isinstance(x_batch, torch.Tensor) and x_batch.dim() == 4, (
@@ -49,8 +49,6 @@ def overlay_clustered_locations(
     )
 
     unique_clusters = np.unique(clusters)
-    num_clusters = int(unique_clusters.max() + 1) if unique_clusters.size > 0 else 0
-    colors = plt.cm.get_cmap("tab10", max(10, num_clusters))
 
     for b in range(num_of_images):
         img = images[b]
