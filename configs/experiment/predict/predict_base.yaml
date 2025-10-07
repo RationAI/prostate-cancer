@@ -1,10 +1,14 @@
 # @package _global_
+defaults:
+  - /aggregator/mean_pool_max@aggregator
+  - _self_
 
 checkpoint: ???
 
 trainer:
   callbacks:
-    - _target_: prostate_cancer.callbacks.HeatmapCallback
+    - _target_: prostate_cancer.callbacks.AggregatorCallback
+      aggregator: ${aggregator}
 
 data:
   batch_size: 74

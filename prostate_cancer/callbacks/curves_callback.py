@@ -1,7 +1,5 @@
-from pathlib import Path
 from typing import Any
 
-import matplotlib.pyplot as plt
 import mlflow
 import numpy as np
 import torch
@@ -9,6 +7,7 @@ from lightning import Callback, LightningModule, Trainer
 from numpy.typing import NDArray
 from sklearn.metrics import auc, precision_recall_curve, roc_curve
 
+from postprocessing.slide_roc import _plot_curve
 from prostate_cancer.typing import LabeledSampleBatch
 
 
@@ -37,47 +36,6 @@ class CurvesCallback(Callback):
         self.preds.append(outputs.cpu())
         self.targets.append(targets.cpu())
 
-    def _plot_curve(
-        self,
-        xs: NDArray[np.float32],
-        ys: NDArray[np.float32],
-        plot_label: str | None,
-        to_pinpoint: list[tuple[np.float32, np.float32]],
-        point_labels: list[str],
-        point_colors: list[str],
-        xlabel: str,
-        ylabel: str,
-        title: str,
-        plot_path_str: str,
-        loc: str,
-    ) -> None:
-        plt.figure()
-        plt.plot(xs, ys, label=plot_label)
-
-        for i in range(len(to_pinpoint)):
-            x, y = to_pinpoint[i]
-            plt.scatter(
-                x,
-                y,
-                color=point_colors[i],
-                label=point_labels[i],
-                zorder=5,
-            )
-
-        plt.xlabel(xlabel)
-        plt.ylabel(ylabel)
-        plt.title(title)
-        plt.legend(loc=loc)
-        plt.grid(True)
-        plt.tight_layout()
-
-        plot_path = Path(plot_path_str)
-        plt.savefig(plot_path)
-        mlflow.log_artifact(str(plot_path), artifact_path="plots")
-        plot_path.unlink(missing_ok=True)
-
-        plt.close()
-
     def _plot_roc(
         self, y_pred: NDArray[np.float32], y_true: NDArray[np.float32]
     ) -> None:
@@ -97,7 +55,8 @@ class CurvesCallback(Callback):
         j_fpr = fpr[optimal_idx]
         j_tpr = tpr[optimal_idx]
 
-        self._plot_curve(
+        plot_path = "tile_roc.png"
+        _plot_curve(
             fpr,
             tpr,
             f"AUC = {roc_auc:.3f}",
@@ -110,9 +69,10 @@ class CurvesCallback(Callback):
             "False Positive Rate",
             "True Positive Rate",
             "Receiver Operating Characteristic",
-            "tile_roc.png",
+            plot_path,
             "lower right",
         )
+        mlflow.log_artifact(plot_path, artifact_path="plots")
 
     def _plot_precision_recall(
         self, y_pred: NDArray[np.float32], y_true: NDArray[np.float32]
@@ -128,7 +88,8 @@ class CurvesCallback(Callback):
         closest_idx = (np.abs(thresholds - self.threshold)).argmin()
         pato_threshold = thresholds[closest_idx]
 
-        self._plot_curve(
+        plot_path = "tile_precision_recall.png"
+        _plot_curve(
             recall,
             precision,
             None,
@@ -147,6 +108,7 @@ class CurvesCallback(Callback):
             "tile_precision_recall.png",
             "lower left",
         )
+        mlflow.log_artifact(plot_path, artifact_path="plots")
 
     def on_test_epoch_end(self, trainer: Trainer, pl_module: LightningModule) -> None:
         y_pred = torch.cat(self.preds).numpy()
