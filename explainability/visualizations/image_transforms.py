@@ -1,14 +1,18 @@
-from torchvision import transforms
 import torch
 from jaxtyping import Float
+from torchvision import transforms
 
 
-def get_inverse_norm_transform(mean: Float[torch.Tensor, "C"] | None = None, std: Float[torch.Tensor, "C"] | None = None) -> torch.nn.Module:    
+def get_inverse_norm_transform(
+    mean: Float[torch.Tensor, "C"] | None = None,
+    std: Float[torch.Tensor, "C"] | None = None,
+) -> torch.nn.Module:
     """Get a torchvision transform that denormalizes images.
 
     Args:
         mean: Normalization mean values [C] (if None, uses default values)
         std: Normalization std values [C] (if None, uses default values)
+
     Returns:
         A torchvision.transforms.Normalize object that denormalizes images
     """

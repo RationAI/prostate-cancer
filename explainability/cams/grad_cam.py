@@ -1,5 +1,6 @@
 import torch
 from jaxtyping import Float
+
 from explainability.cams.abstract import AbstractCAMHook
 
 
@@ -18,12 +19,12 @@ class GradCAMBatchHook(AbstractCAMHook):
         cams = torch.relu(cams)
         return cams
 
+
 def grad_cam(
     activations: Float[torch.Tensor, "B C H W"],
     gradients: Float[torch.Tensor, "B C H W"],
 ) -> Float[torch.Tensor, "B H W"]:
-    """
-    Compute Grad-CAM maps given activations and gradients.
+    """Compute Grad-CAM maps given activations and gradients.
 
     Args:
         activations: Activation maps from the target layer, shape [B, C, H, W].

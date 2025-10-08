@@ -19,11 +19,14 @@ def visualize_cams(x_batch, cams, alpha=0.4, show_colorbar=False, title_prefix="
     assert isinstance(x_batch, torch.Tensor), "x_batch must be a torch.Tensor [B,C,H,W]"
 
     # Denormalize all images using existing helper
-    
-     # list of PIL images
+
+    # list of PIL images
     # denorm_imgs = batch_to_images(x_batch.detach())  # list of PIL
     inv_norm = get_inverse_norm_transform()
-    denorm_imgs = [inv_norm(img).permute(1, 2, 0).cpu().numpy().clip(0, 255).astype(np.uint8) for img in x_batch]   
+    denorm_imgs = [
+        inv_norm(img).permute(1, 2, 0).cpu().numpy().clip(0, 255).astype(np.uint8)
+        for img in x_batch
+    ]
     images = [np.asarray(img) / 255.0 for img in denorm_imgs]  # list of HxWx3 in [0,1]
     num_of_images = len(images)
 
@@ -97,10 +100,12 @@ def visualize_cams(x_batch, cams, alpha=0.4, show_colorbar=False, title_prefix="
 def plot_overlays_side_by_image(
     x_batch: Float[torch.Tensor, "B 3 H W"],  # [B,3,H,W]
     overlays: UInt8[torch.Tensor, "B 3 H W"],  # [B,3,H,W]
-    alpha: float = 0.6
+    alpha: float = 0.6,
 ):
     """This function blends plots B lines of side-by-side triples of images: original, blended, and overlay."""
-    overlaid = superimpose(opacity=alpha, images=x_batch.to(torch.uint8), overlays=overlays)
+    overlaid = superimpose(
+        opacity=alpha, images=x_batch.to(torch.uint8), overlays=overlays
+    )
     B = x_batch.shape[0]
     fig, axes = plt.subplots(B, 3, figsize=(12, 4 * B))
     if B == 1:
@@ -127,15 +132,17 @@ def superimpose(
     strategy: str = "additive_overflow_press",
     opacity: float = 0.5,
 ) -> UInt8[torch.Tensor, "B 3 H W"]:
-    """
-    This function blends the overlay images on top of the original images using the specified strategy, producing a batch of blended images.
+    """This function blends the overlay images on top of the original images using the specified strategy, producing a batch of blended images.
+
     Args:
         images: [B, 3, H, W] tensor of original images (uint8)
         overlays: [B, 3, H, W] tensor of overlay images (uint8)
         strategy: blending strategy
         opacity: blending opacity
     """
-    assert images.shape == overlays.shape, "Images and overlays must have the same shape"
+    assert images.shape == overlays.shape, (
+        "Images and overlays must have the same shape"
+    )
 
     if strategy == "additive_overflow_press":
         # tries to add the overlay without any modifications. Just slaps it on top of the image.
@@ -164,7 +171,9 @@ def superimpose(
     elif strategy == "outline":
         raise NotImplementedError("Outline strategy not implemented in torch version")
     elif strategy == "segment_contour":
-        raise NotImplementedError("Segment contour strategy not implemented in torch version")
+        raise NotImplementedError(
+            "Segment contour strategy not implemented in torch version"
+        )
     elif strategy == "black_alpha_blend":
         alpha = overlays.amax(dim=1, keepdim=True) / 255.0  # [B, 1, H, W]
         res = images * (1 - alpha) + overlays  # *alpha

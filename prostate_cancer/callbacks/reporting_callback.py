@@ -4,7 +4,7 @@ import mlflow
 from lightning import Callback
 
 # Local Imports
-from report.masks import AbstractMasksRetriever, RunIDMlflowMaskRetriever
+from report.masks import AbstractMasksRetriever
 from report.reporter import ReportAssembler
 from report.save import RunIDMLFlowReportAttacher
 

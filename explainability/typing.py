@@ -1,5 +1,5 @@
-from torch import Tensor
 from jaxtyping import Float
+from torch import Tensor
 
 
 EmbeddingsLocs = Float[Tensor, "K 3"]  # [K,3] -> (b, i, j)

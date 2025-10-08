@@ -30,7 +30,10 @@ def visualize_prototypes_row(
 
     # images = batch_to_images(patches)
     inv_norm = get_inverse_norm_transform()
-    images = [inv_norm(img).permute(1, 2, 0).cpu().clamp(0, 255).to(torch.uint8) for img in patches]
+    images = [
+        inv_norm(img).permute(1, 2, 0).cpu().clamp(0, 255).to(torch.uint8)
+        for img in patches
+    ]
 
     p = len(images)
     if p == 0:
