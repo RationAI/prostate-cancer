@@ -1,0 +1,9 @@
+defaults:
+  - /data/datasets/dataset_base@thresholds
+
+_target_: prostate_cancer.data.datasets.LabeledEmbeddingsDataset
+uris:
+  - ${test_224_tiles_uri}
+embeddings_uri: ${test_224_features_uri}
+stratified_filter: false
+carcinoma_roi_t: ${carcinoma_roi_t}

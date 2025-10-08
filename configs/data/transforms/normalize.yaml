@@ -1,4 +1,0 @@
-_target_: albumentations.Normalize
-mean: ${mean}
-std: ${std}
-max_pixel_value: 1

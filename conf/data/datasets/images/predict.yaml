@@ -1,0 +1,7 @@
+defaults:
+  - /data/datasets/dataset_base@thresholds
+  - /data/transforms@transforms: normalize
+
+_target_: prostate_cancer.data.datasets.UnlabeledTilesDataset
+uris:
+  - ${predict_512_tiles_uri}

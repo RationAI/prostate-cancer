@@ -1,7 +1,7 @@
 import matplotlib.pyplot as plt
 import torch
 
-from explainability.visualizations.to_image import batch_to_images
+from explainability.visualizations.image_transforms import get_inverse_norm_transform
 
 
 def visualize_prototypes_row(
@@ -28,7 +28,9 @@ def visualize_prototypes_row(
     elif channels not in (3, 4):
         raise ValueError("patches must have 1, 3, or 4 channels")
 
-    images = batch_to_images(patches)
+    # images = batch_to_images(patches)
+    inv_norm = get_inverse_norm_transform()
+    images = [inv_norm(img).permute(1, 2, 0).cpu().clamp(0, 255).to(torch.uint8) for img in patches]
 
     p = len(images)
     if p == 0:

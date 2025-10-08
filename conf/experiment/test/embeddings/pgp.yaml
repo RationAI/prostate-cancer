@@ -1,0 +1,14 @@
+# @package _global_
+
+defaults:
+  - /experiment/test/test_base
+  - /data/embeddings_datamodule@data
+  - /model/pgp_model@model
+  - _self_
+
+tile_threshold: 0.9
+checkpoint: mlflow-artifacts:/65/7a0552f43dca4f14ac5f200d5ac1073c/artifacts/checkpoints/epoch=1-step=16268/checkpoint.ckpt
+
+metadata:
+  run_name: ROC PGP
+  description: ROC PGP on MMCI Tile-Level Annotated Data

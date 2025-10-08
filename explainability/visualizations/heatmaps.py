@@ -1,8 +1,9 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
+from jaxtyping import Float, UInt8
 
-from explainability.visualizations.to_image import batch_to_images
+from explainability.visualizations.image_transforms import get_inverse_norm_transform
 
 
 def visualize_cams(x_batch, cams, alpha=0.4, show_colorbar=False, title_prefix=""):
@@ -18,7 +19,11 @@ def visualize_cams(x_batch, cams, alpha=0.4, show_colorbar=False, title_prefix="
     assert isinstance(x_batch, torch.Tensor), "x_batch must be a torch.Tensor [B,C,H,W]"
 
     # Denormalize all images using existing helper
-    denorm_imgs = batch_to_images(x_batch.detach())  # list of PIL
+    
+     # list of PIL images
+    # denorm_imgs = batch_to_images(x_batch.detach())  # list of PIL
+    inv_norm = get_inverse_norm_transform()
+    denorm_imgs = [inv_norm(img).permute(1, 2, 0).cpu().numpy().clip(0, 255).astype(np.uint8) for img in x_batch]   
     images = [np.asarray(img) / 255.0 for img in denorm_imgs]  # list of HxWx3 in [0,1]
     num_of_images = len(images)
 
@@ -87,3 +92,83 @@ def visualize_cams(x_batch, cams, alpha=0.4, show_colorbar=False, title_prefix="
 
     plt.tight_layout()
     plt.show()
+
+
+def plot_overlays_side_by_image(
+    x_batch: Float[torch.Tensor, "B 3 H W"],  # [B,3,H,W]
+    overlays: UInt8[torch.Tensor, "B 3 H W"],  # [B,3,H,W]
+    alpha: float = 0.6
+):
+    """This function blends plots B lines of side-by-side triples of images: original, blended, and overlay."""
+    overlaid = superimpose(opacity=alpha, images=x_batch.to(torch.uint8), overlays=overlays)
+    B = x_batch.shape[0]
+    fig, axes = plt.subplots(B, 3, figsize=(12, 4 * B))
+    if B == 1:
+        axes = axes[None, :]  # Make it 2D for consistency
+    for i in range(B):
+        axes[i, 0].imshow(x_batch[i].permute(1, 2, 0).cpu().numpy().astype("uint8"))
+        axes[i, 0].set_title("Original Image")
+        axes[i, 0].axis("off")
+
+        axes[i, 1].imshow(overlays[i].permute(1, 2, 0).cpu().numpy())
+        axes[i, 1].set_title("Overlay")
+        axes[i, 1].axis("off")
+
+        axes[i, 2].imshow(overlaid[i].permute(1, 2, 0).cpu().numpy())
+        axes[i, 2].set_title("Blended Image")
+        axes[i, 2].axis("off")
+    plt.tight_layout()
+    plt.show()
+
+
+def superimpose(
+    images: UInt8[torch.Tensor, "B 3 H1 W1"],
+    overlays: UInt8[torch.Tensor, "B 3 H2 W2"],
+    strategy: str = "additive_overflow_press",
+    opacity: float = 0.5,
+) -> UInt8[torch.Tensor, "B 3 H W"]:
+    """
+    This function blends the overlay images on top of the original images using the specified strategy, producing a batch of blended images.
+    Args:
+        images: [B, 3, H, W] tensor of original images (uint8)
+        overlays: [B, 3, H, W] tensor of overlay images (uint8)
+        strategy: blending strategy
+        opacity: blending opacity
+    """
+    assert images.shape == overlays.shape, "Images and overlays must have the same shape"
+
+    if strategy == "additive_overflow_press":
+        # tries to add the overlay without any modifications. Just slaps it on top of the image.
+        # But then, when pixels overflows, it compresses them back to range [0..255]
+        # First add the overlay to the image with a scaling factor
+        res = images + overlays * opacity  # [B, 3, H, W]
+
+        # get the maximum values across channels and stack them to get 3 channels again
+        channel_maximums = res.amax(dim=1, keepdim=True)  # [B, 1, H, W]
+
+        # get the locations of overflowing pixels using the maximum channel value
+        overflow_locations = channel_maximums > 255  # [B, 1, H, W]
+        overflow_locations = overflow_locations.expand(-1, 3, -1, -1)  # [B, 3, H, W]
+
+        # downscale the overflowing pixels so that the maximum value is 255. Channels are broadcasted automatically and colors are downscaled together
+        # the maximums are not broadcasted to the 3 channels automatically, we need to repeat the dimension
+        print("SHAPES:", res.shape, channel_maximums.shape, overflow_locations.shape)
+        res[overflow_locations] = res[overflow_locations] * (
+            255 / channel_maximums.expand(-1, 3, -1, -1)[overflow_locations]
+        )
+
+    elif strategy == "sub":
+        res = torch.clamp(images - overlays * opacity, min=0)
+    elif strategy == "linear_combination":
+        res = images * (1.0 - opacity) + overlays * opacity
+    elif strategy == "outline":
+        raise NotImplementedError("Outline strategy not implemented in torch version")
+    elif strategy == "segment_contour":
+        raise NotImplementedError("Segment contour strategy not implemented in torch version")
+    elif strategy == "black_alpha_blend":
+        alpha = overlays.amax(dim=1, keepdim=True) / 255.0  # [B, 1, H, W]
+        res = images * (1 - alpha) + overlays  # *alpha
+    else:
+        raise NotImplementedError(f"There is no strategy with name {strategy}!")
+
+    return res.clamp(0, 255).to(torch.uint8)
