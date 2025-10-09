@@ -105,7 +105,7 @@ class SlideTiles(Dataset[LabeledSample | UnlabeledSample]):
 
         if self.include_label:
             label = torch.tensor(
-                [self.slide_tiles.tiles.iloc[idx]["carcinoma"]]
+                [float(self.slide_tiles.tiles.iloc[idx]["carcinoma"])]
             ).float()
             return tensor_image, label, metadata
 

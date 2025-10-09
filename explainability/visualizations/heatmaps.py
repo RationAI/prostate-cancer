@@ -115,12 +115,12 @@ def plot_overlays_side_by_image(
         axes[i, 0].set_title("Original Image")
         axes[i, 0].axis("off")
 
-        axes[i, 1].imshow(overlays[i].permute(1, 2, 0).cpu().numpy())
-        axes[i, 1].set_title("Overlay")
+        axes[i, 1].imshow(overlaid[i].permute(1, 2, 0).cpu().numpy())
+        axes[i, 1].set_title("Blended Image")
         axes[i, 1].axis("off")
 
-        axes[i, 2].imshow(overlaid[i].permute(1, 2, 0).cpu().numpy())
-        axes[i, 2].set_title("Blended Image")
+        axes[i, 2].imshow(overlays[i].permute(1, 2, 0).cpu().numpy())
+        axes[i, 2].set_title("Overlay")
         axes[i, 2].axis("off")
     plt.tight_layout()
     plt.show()
