@@ -1,32 +1,33 @@
 import torch
 from jaxtyping import Float
 
-from explainability.cams.abstract import AbstractCAMHook
+
+# from explainability.cams.abstract import AbstractCAMHook
 
 
-class GradCAMPlusPlusBatchHook(AbstractCAMHook):
-    """Batch-wise Grad-CAM++ hook (approximation using first-order grads).
+# class GradCAMPlusPlusBatchHook(AbstractCAMHook):
+#     """Batch-wise Grad-CAM++ hook (approximation using first-order grads).
 
-    Computes alpha weights per location per channel using grad powers as in the Grad-CAM++ paper.
-    """
+#     Computes alpha weights per location per channel using grad powers as in the Grad-CAM++ paper.
+#     """
 
-    def __init__(self, *args, eps: float = 1e-6, **kwargs):
-        super().__init__(*args, **kwargs, method_name="grad_cam_pp")
-        self.eps = eps
+#     def __init__(self, *args, eps: float = 1e-6, **kwargs):
+#         super().__init__(*args, **kwargs, method_name="grad_cam_pp")
+#         self.eps = eps
 
-    def _compute_cams(self, grad):
-        activations = torch.relu(self._activations)  # ensure non-negative activations
-        g = grad
-        g2 = g * g
-        g3 = g2 * g
-        sum_a = activations.sum(dim=(2, 3), keepdim=True)  # [B,C,1,1]
-        alpha_num = g2
-        alpha_den = 2.0 * g2 + sum_a * g3 + self.eps
-        alpha = alpha_num / alpha_den  # [B,C,H,W]
-        weights = (alpha * torch.relu(g)).sum(dim=(2, 3), keepdim=True)  # [B,C,1,1]
-        cams = (weights * activations).sum(dim=1)  # [B,H,W]
-        cams = torch.clamp(cams, min=0)
-        return cams
+#     def _compute_cams(self, grad):
+#         activations = torch.relu(self._activations)  # ensure non-negative activations
+#         g = grad
+#         g2 = g * g
+#         g3 = g2 * g
+#         sum_a = activations.sum(dim=(2, 3), keepdim=True)  # [B,C,1,1]
+#         alpha_num = g2
+#         alpha_den = 2.0 * g2 + sum_a * g3 + self.eps
+#         alpha = alpha_num / alpha_den  # [B,C,H,W]
+#         weights = (alpha * torch.relu(g)).sum(dim=(2, 3), keepdim=True)  # [B,C,1,1]
+#         cams = (weights * activations).sum(dim=1)  # [B,H,W]
+#         cams = torch.clamp(cams, min=0)
+#         return cams
 
 
 def grad_cam_pp(
