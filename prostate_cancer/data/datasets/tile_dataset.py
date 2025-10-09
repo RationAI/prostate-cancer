@@ -70,7 +70,7 @@ class SlideTiles(Dataset[LabeledSample | UnlabeledSample]):
         transforms: TransformType | None = None,
     ) -> None:
         super().__init__()
-
+        self.slide_metadata = slide_metadata
         self.slide_tiles = OpenSlideTilesDataset(
             slide_path=slide_metadata.path,
             level=slide_metadata.level,

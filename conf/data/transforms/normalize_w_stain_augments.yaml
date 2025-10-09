@@ -1,0 +1,34 @@
+_target_: albumentations.Compose
+transforms:
+  - _target_: albumentations.RandomRotate90
+    p: 1.0
+  - _target_: albumentations.HorizontalFlip
+    p: 0.5
+  - _target_: albumentations.VerticalFlip
+    p: 0.5
+  - _target_: albumentations.RandomGamma
+    p: 0.5
+  - _target_: albumentations.RandomBrightnessContrast
+    p: 0.5
+  - _target_: albumentations.HueSaturationValue
+    p: 0.5
+  - _target_: rationai.staining.transforms.ColorTransform
+    conversion:
+      _target_: hydra.utils.get_object
+      path: rationai.staining.ColorConversion.RGB2HER_MMCI_PROSTATE
+  - _target_: albumentations.MultiplicativeNoise
+    multiplier: [0.5, 1.5]
+    per_channel: true
+    elementwise: false
+  - _target_: albumentations.AdditiveNoise
+    noise_type: "uniform"
+    noise_params:
+      ranges: [[-0.005, 0.005]]
+  - _target_: rationai.staining.transforms.ColorTransform
+    conversion:
+      _target_: hydra.utils.get_object
+      path: rationai.staining.ColorConversion.HER_MMCI_PROSTATE2RGB
+  - _target_: albumentations.Normalize
+    mean: ${mean}
+    std: ${std}
+    max_pixel_value: 1

@@ -1,10 +1,14 @@
 # @package _global_
+defaults:
+  - /aggregator/mean_pool_max@aggregator
+  - _self_
 
 checkpoint: mlflow-artifacts:/65/7b52930515c14710855962f8882fb4d3/artifacts/checkpoints/epoch=1-step=11620/checkpoint.ckpt
 
 trainer:
   callbacks:
-    - _target_: prostate_cancer.callbacks.HeatmapCallback
+    - _target_: prostate_cancer.callbacks.AggregatorCallback
+      aggregator: ${aggregator}
 
 data:
   batch_size: 74
