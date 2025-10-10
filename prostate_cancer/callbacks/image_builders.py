@@ -12,7 +12,7 @@ import scipy
 import torch
 
 # Local Imports
-from histopipe.trainer.callbacks.vis_mode import VisualisationMode
+from prostate_cancer.callbacks.vis_mode import VisualisationMode
 from nptyping import NDArray
 
 
@@ -21,7 +21,7 @@ logger = logging.getLogger("callbacks/image_builder")
 
 class ImageBuilder(ABC):
     visualization_mode: VisualisationMode
-    save_dir: Path | str
+    save_dir: Path
     filename: str
 
     def __init__(
@@ -103,7 +103,7 @@ class ImageAssembler(ImageBuilder, ABC):
         filename: str,
         interpolation: str,
     ) -> None:
-        super().__init__(vis_mode=vis_mode, save_dir=save_dir, filename=filename)
+        super().__init__(vis_mode=vis_mode, save_dir=Path(save_dir), filename=filename)
         self.image_size = image_size
         self.tile_size = tile_size
         self.interpolation = interpolation
@@ -252,20 +252,26 @@ class InMemoryHeatmapAssembler(ImageAssembler):
 
     def __init__(
         self,
-        metadata: dict,
+        heatmap_width: int,
+        heatmap_height: int,
+        heatmap_channels: int,
+        tile_size: int,
+        step_size: int,
+        sample_level: int,
+        filename: str,
         vis_mode: VisualisationMode,
         save_dir: Path | str,
         interpolation: str,
         compress_accumulator_array: bool,
     ) -> None:
-        filename = metadata["slide_name"]
+        # filename = metadata["slide_name"]
         image_size = (
-            int(metadata["slide_width"]),
-            int(metadata["slide_height"]),
-            int(metadata["slide_channels"]),
+            heatmap_width,
+            heatmap_height,
+            heatmap_channels,
         )
-        tile_size = int(metadata["tile_size"])
-        step_size = int(metadata["step_size"])
+        # tile_size = int(metadata["tile_size"])
+        # step_size = int(metadata["step_size"])
         super().__init__(
             image_size=image_size,
             tile_size=tile_size,
@@ -283,7 +289,7 @@ class InMemoryHeatmapAssembler(ImageAssembler):
         # set accumulator tile size to compressed size if enabled
         if self.compress_accumulator_array:
             self.accumulator_tile_size = self.overlap_counter_tile_size
-        self.level_coord_multiplier = 2 ** int(metadata["sample_level"])
+        self.level_coord_multiplier = 2 ** sample_level
 
         # Calculate sizes for accumulator and overlap counter
         w, h, c = self.image_size
@@ -306,12 +312,12 @@ class InMemoryHeatmapAssembler(ImageAssembler):
             dtype=np.uint8,
         )
 
-    def update(self, data: torch.Tensor, metadata: dict) -> None:
+    def update(self, data: torch.Tensor, x: int, y: int) -> None:
         logger.debug("Pasting tiles.")
 
         # Get base tile coordinates for uncompressed accumulator
-        xs_accum = metadata["coord_x"] // self.level_coord_multiplier
-        ys_accum = metadata["coord_y"] // self.level_coord_multiplier
+        xs_accum = x // self.level_coord_multiplier
+        ys_accum = y // self.level_coord_multiplier
         data = self._preprocess_data(data)
 
         # compress overlap counter coordinates
