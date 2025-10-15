@@ -141,7 +141,7 @@ class NMFClustering(Clustering):
         # Clamp to non-negative as NMF expects
         x = embedding.detach().cpu().float().clamp_min(0.0).numpy()
         weights = self.model.transform(x)  # [B, k]
-        clusters = np.argmax(weights, axis=1).astype(np.int64)
+        clusters = np.argmax(weights, axis=1).astype(np.int8)
         return torch.from_numpy(clusters)
 
     def find_top_closest(
