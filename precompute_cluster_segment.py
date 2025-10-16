@@ -393,9 +393,9 @@ for i, dataloader in _slide_pbar:
             del activations_assembled_wsi_narrowed
             del activations_assembled_wsi_rounded
             del heatmap_assembler
-
-        activations_assembled_wsi = np.load(OUT_FILE_PATH_ACTS, mmap_mode='r+')
-        _slide_pbar.write(f"Final activations shape: {activations_assembled_wsi.shape}")
+    continue
+        # activations_assembled_wsi = np.load(OUT_FILE_PATH_ACTS, mmap_mode='r+')
+        # _slide_pbar.write(f"Final activations shape: {activations_assembled_wsi.shape}")
     
 
         # print("Heatmap shape:", heatmap.shape)
