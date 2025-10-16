@@ -36,6 +36,7 @@ dependencies = [
     "hydra-core",
     "jaxtyping>=0.3.3",
     "nptyping>=2.5.0",
+    "pyvips>=3.0.0",
 ]
 
 [tool.pdm.scripts]
