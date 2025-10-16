@@ -37,6 +37,8 @@ dependencies = [
     "jaxtyping>=0.3.3",
     "nptyping>=2.5.0",
     "pyvips>=3.0.0",
+    "opencv-contrib-python>=4.11.0.86",
+    "opencv-python>=4.11.0.86",
 ]
 
 [tool.pdm.scripts]
