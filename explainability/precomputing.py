@@ -7,9 +7,12 @@ import torch
 import matplotlib.pyplot as plt
 import contextlib
 
+import logging
+logger = logging.getLogger(__name__)
+
 
 @contextlib.contextmanager
-def safe_file_op_ctxm(target_file: Path, unlink_on_exception: bool = False):
+def safe_file_op_ctxm(target_file: Path, unlink_on_exception: bool = True):
     """A context manager which provides you with a temporary filepath to write to, and then renames it to the target file on successful completion of the block. If an exception occurs, the temp file is deleted and the target file is left unchanged."""
     temp_file = target_file.with_suffix(".tmp")
     try:
@@ -18,6 +21,7 @@ def safe_file_op_ctxm(target_file: Path, unlink_on_exception: bool = False):
     except Exception as e:
         if unlink_on_exception:
             temp_file.unlink(missing_ok=True)
+            logger.debug(f"Deleted temporary file {temp_file} due to exception inside the managed block.")
         raise e
 
 
@@ -63,7 +67,7 @@ class MultichannelHeatmapAssembler:
             heatmap_npy_fp,
             mode="w+",
             dtype="float32",
-            shape=(heatmap_channels, heatmap_height, heatmap_width),
+            shape=(heatmap_channels, heatmap_width, heatmap_height),
         )
 
         # # overlap counter should fit in memory
@@ -73,7 +77,7 @@ class MultichannelHeatmapAssembler:
         # ) 
         # overlap counter should fit in memory
         self.patch_overlap_counter = np.zeros(
-            (1, heatmap_height, heatmap_width),  # row-first format (C, H, W)
+            (1, heatmap_width, heatmap_height),  # row-first format (C, H, W)
             dtype=np.uint8,
         )
 
@@ -96,20 +100,20 @@ class MultichannelHeatmapAssembler:
             tile_w, tile_h = tile.shape[1], tile.shape[2]
             mm_c, mm_h, mm_w = self.heatmap_accumulator[
                 :,
-                ya : ya + tile_h,
                 xa : xa + tile_w,
+                ya : ya + tile_h,
             ].shape
 
             self.heatmap_accumulator[
                 :,
-                ya : ya + tile_h,
                 xa : xa + tile_w,
+                ya : ya + tile_h,
             ] += tile[:mm_c, :mm_h, :mm_w]
 
             self.patch_overlap_counter[
                 :,
-                ya : ya + tile_h,
                 xa : xa + tile_w,
+                ya : ya + tile_h,
             ] += 1
 
     def finalize(self) -> tuple[np.ndarray, np.ndarray]:

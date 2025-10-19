@@ -54,7 +54,7 @@ def get_overlay_from_clustering_numpy(
         colormap_lut: [N, 3] array of RGB colors (optional, uint8)
 
     Returns:
-        overlays: [B, 3, H, W] array of RGB overlays (uint8)
+        overlays: [B, H, W, 3] array of RGB overlays (uint8)
     """
     if n_indices is None:
         n_indices = int(indices.max()) + 1

@@ -9,7 +9,9 @@ def reshape_for_clustering_universal(
     if isinstance(embeddings, np.ndarray):
         n_dims = embeddings.ndim
     elif isinstance(embeddings, torch.Tensor):
-        embeddings.dim()
+        n_dims = embeddings.dim()
+    else:
+        raise TypeError("embeddings must be a torch.Tensor or np.ndarray")
         
     permute_tuple = tuple(
         [i for i in range(n_dims) if i != channel_dim_index] + [channel_dim_index]
