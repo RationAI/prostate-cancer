@@ -5,6 +5,20 @@ import numpy as np
 import torch
 
 import matplotlib.pyplot as plt
+import contextlib
+
+
+@contextlib.contextmanager
+def safe_file_op_ctxm(target_file: Path, unlink_on_exception: bool = False):
+    """A context manager which provides you with a temporary filepath to write to, and then renames it to the target file on successful completion of the block. If an exception occurs, the temp file is deleted and the target file is left unchanged."""
+    temp_file = target_file.with_suffix(".tmp")
+    try:
+        yield temp_file
+        temp_file.rename(target_file)
+    except Exception as e:
+        if unlink_on_exception:
+            temp_file.unlink(missing_ok=True)
+        raise e
 
 
 class MultichannelHeatmapAssembler:
@@ -15,8 +29,9 @@ class MultichannelHeatmapAssembler:
         heatmap_channels: int,
         # tile_extent: int,
         # step_size: int,
-        npy_file_path: Path,
+        heatmap_npy_fp: Path,
     ):
+        self.npy_file_path = heatmap_npy_fp
         # self.original_heatmap_width = heatmap_width
         # self.original_heatmap_height = heatmap_height
         # # self.heatmap_channels = heatmap_channels
@@ -45,7 +60,7 @@ class MultichannelHeatmapAssembler:
 
         # init using lib.format.open_memmap
         self.heatmap_accumulator = open_memmap(
-            npy_file_path,
+            heatmap_npy_fp,
             mode="w+",
             dtype="float32",
             shape=(heatmap_channels, heatmap_height, heatmap_width),
@@ -61,7 +76,6 @@ class MultichannelHeatmapAssembler:
             (1, heatmap_height, heatmap_width),  # row-first format (C, H, W)
             dtype=np.uint8,
         )
-        print("SHAPES:", self.patch_overlap_counter.shape, self.heatmap_accumulator.shape)
 
     def update_batch_torch(self, data: np.ndarray, xs: np.ndarray, ys: np.ndarray) -> None:
         """Expects the data in the form (B, C, H, W)"""
@@ -92,11 +106,6 @@ class MultichannelHeatmapAssembler:
                 xa : xa + tile_w,
             ] += tile[:mm_c, :mm_h, :mm_w]
 
-            # self.heatmap_accumulator[
-            #     :,
-            #     ya : ya + tile_h,
-            #     xa : xa + tile_w,
-            # ] += tile
             self.patch_overlap_counter[
                 :,
                 ya : ya + tile_h,
@@ -106,6 +115,8 @@ class MultichannelHeatmapAssembler:
     def finalize(self) -> tuple[np.ndarray, np.ndarray]:
         """Finalize the heatmap assembly by normalizing the accumulated heatmap by the overlap counts."""
         # Normalize heatmap by patch overlap counts but do not expand the counter
+        npy_file_suffix = self.npy_file_path.suffix
+        np.save(self.npy_file_path.with_suffix(f".nzi{npy_file_suffix}"), self.heatmap_accumulator > 0)
         self.heatmap_accumulator /= self.patch_overlap_counter.clip(min=1)
         self.heatmap_accumulator.flush()
         # Return the final heatmap, cropped to the original heatmap extent
@@ -123,7 +134,7 @@ def test_heatmap_assembler():
         heatmap_width,
         heatmap_height,
         heatmap_channels,
-        npy_file_path=npy_file_path
+        heatmap_npy_fp=npy_file_path
     )
     # create dummy data
     B = 4

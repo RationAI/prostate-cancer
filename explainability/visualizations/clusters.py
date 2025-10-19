@@ -1,5 +1,6 @@
 import matplotlib.pyplot as plt
 import torch
+import numpy as np
 from jaxtyping import Int, UInt8
 
 
@@ -37,4 +38,35 @@ def get_overlay_from_clustering(
     overlays = (
         colormap_lut[indices.reshape(-1)].reshape(B, H, W, 3).permute(0, 3, 1, 2)
     )  # [B, 3, H, W]
+    return overlays
+
+
+def get_overlay_from_clustering_numpy(
+    indices: np.ndarray,
+    n_indices: int | None = None,
+    colormap_lut: np.ndarray | None = None,
+) -> np.ndarray:
+    """Numpy version of get_overlay_from_clustering.
+
+    Args:
+        indices: [B, H, W] array of cluster indices (int)
+        n_indices: number of clusters (optional)
+        colormap_lut: [N, 3] array of RGB colors (optional, uint8)
+
+    Returns:
+        overlays: [B, 3, H, W] array of RGB overlays (uint8)
+    """
+    if n_indices is None:
+        n_indices = int(indices.max()) + 1
+
+    if colormap_lut is None:
+        # Use matplotlib to get colors, then convert to numpy array
+        colors = plt.cm.get_cmap("tab10", max(10, n_indices))
+        colormap_lut = (colors(range(n_indices))[:, :3] * 255).astype("uint8")  # [N, 3]
+
+    # Compute overlays in a vectorized fashion
+    B, H, W = indices.shape
+    overlays = (
+        colormap_lut[indices.reshape(-1)].reshape(B, H, W, 3)
+    )  # [B, H, W, 3]
     return overlays
