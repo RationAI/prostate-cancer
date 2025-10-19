@@ -28,8 +28,8 @@ from explainability.visualizations.image_transforms import save_image_xopat_comp
 logging.basicConfig(level=logging.INFO)
 
 @click.command()
-@click.option('--num_clusters', type=int, default=6, help='Number of clusters for NMF clustering.')
-@click.option('--experiment_name', type=str, help='Name of the experiment.')
+@click.option('--num-clusters', type=int, default=6, help='Number of clusters for NMF clustering.')
+@click.option('--experiment-name', type=str, help='Name of the experiment.')
 def main(num_clusters: int, experiment_name: str):
 
     OUT_DIR = Path("/mnt/data/rationai/data/XAICNNEmbeddings/")
