@@ -65,8 +65,8 @@ def get_overlay_from_clustering_numpy(
         colormap_lut = (colors(range(n_indices))[:, :3] * 255).astype("uint8")  # [N, 3]
 
     # Compute overlays in a vectorized fashion
-    B, H, W = indices.shape
+    # B, H, W = indices.shape
     overlays = (
-        colormap_lut[indices.reshape(-1)].reshape(B, H, W, 3)
+        colormap_lut[indices.astype(np.int8).reshape(-1)].reshape(*indices.shape, 3)
     )  # [B, H, W, 3]
     return overlays

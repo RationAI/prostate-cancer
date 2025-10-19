@@ -31,43 +31,16 @@ class MultichannelHeatmapAssembler:
         heatmap_width: int,
         heatmap_height: int,
         heatmap_channels: int,
-        # tile_extent: int,
-        # step_size: int,
         heatmap_npy_fp: Path,
     ):
         self.npy_file_path = heatmap_npy_fp
-        # self.original_heatmap_width = heatmap_width
-        # self.original_heatmap_height = heatmap_height
-        # # self.heatmap_channels = heatmap_channels
-
-        # # check that the tile_extent with the step size can tile the heatmap fully,
-        # # and if not adjust the heatmap size to be fully tiled
-        # remainder_x = (heatmap_width - tile_extent) % step_size
-        # remainder_y = (heatmap_height - tile_extent) % step_size
-        # if remainder_x != 0:
-        #     heatmap_width += step_size - remainder_x
-        #     print(f"Adjusted heatmap width to {heatmap_width} to fit tiles")
-        # if remainder_y != 0:
-        #     heatmap_height += step_size - remainder_y
-        #     print(f"Adjusted heatmap height to {heatmap_height} to fit tiles")
-
-        
-
-        # self.gcd_size_factor = math.gcd(tile_extent, step_size)
-        # self.overlap_counter_tile_size = tile_extent // self.gcd_size_factor
-        # self.accumulator_tile_size = tile_extent
-        # self.level_coord_multiplier = 2 ** sample_level
-
-        # Calculate sizes for accumulator and overlap counter
-        # counter_w = heatmap_width // self.gcd_size_factor
-        # counter_h = heatmap_height // self.gcd_size_factor
-
+       
         # init using lib.format.open_memmap
         self.heatmap_accumulator = open_memmap(
             heatmap_npy_fp,
             mode="w+",
             dtype="float32",
-            shape=(heatmap_channels, heatmap_width, heatmap_height),
+            shape=(heatmap_channels, heatmap_height, heatmap_width),
         )
 
         # # overlap counter should fit in memory
@@ -77,7 +50,7 @@ class MultichannelHeatmapAssembler:
         # ) 
         # overlap counter should fit in memory
         self.patch_overlap_counter = np.zeros(
-            (1, heatmap_width, heatmap_height),  # row-first format (C, H, W)
+            (1, heatmap_height, heatmap_width),  # row-first format (C, H, W)
             dtype=np.uint8,
         )
 
@@ -100,20 +73,20 @@ class MultichannelHeatmapAssembler:
             tile_w, tile_h = tile.shape[1], tile.shape[2]
             mm_c, mm_h, mm_w = self.heatmap_accumulator[
                 :,
-                xa : xa + tile_w,
                 ya : ya + tile_h,
+                xa : xa + tile_w,
             ].shape
 
             self.heatmap_accumulator[
                 :,
-                xa : xa + tile_w,
                 ya : ya + tile_h,
+                xa : xa + tile_w,
             ] += tile[:mm_c, :mm_h, :mm_w]
 
             self.patch_overlap_counter[
                 :,
-                xa : xa + tile_w,
                 ya : ya + tile_h,
+                xa : xa + tile_w,
             ] += 1
 
     def finalize(self) -> tuple[np.ndarray, np.ndarray]:

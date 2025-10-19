@@ -32,8 +32,8 @@ def save_image_xopat_compatible(image: torch.Tensor | np.ndarray, save_path: Pat
     if isinstance(image, torch.Tensor):
         image = image.numpy()
     print("IMG SHP:", image.shape)
-    level_size_multiplier_x = target_extent_x / image.shape[0] 
-    level_size_multiplier_y = target_extent_y / image.shape[1]
+    level_size_multiplier_x = target_extent_x / image.shape[1] 
+    level_size_multiplier_y = target_extent_y / image.shape[0]
     print("Multipliers:", level_size_multiplier_x, level_size_multiplier_y)
     vips_im = pyvips.Image.new_from_array(image).affine(
         (level_size_multiplier_x, 0, 0, level_size_multiplier_y), interpolate=pyvips.Interpolate.new("nearest")
