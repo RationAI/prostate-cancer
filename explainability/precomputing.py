@@ -120,7 +120,7 @@ class MultichannelHeatmapAssembler:
         self.heatmap_accumulator /= self.patch_overlap_counter.clip(min=1)
         self.heatmap_accumulator.flush()
         # Return the final heatmap, cropped to the original heatmap extent
-        return self.heatmap_accumulator, self.patch_overlap_counter
+        return self.heatmap_accumulator, self.patch_overlap_counter.squeeze(0)
     
 # # perform sanity checks to make sure the assembler works as expected
 # def test_heatmap_assembler():
