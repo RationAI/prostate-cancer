@@ -44,12 +44,6 @@ class MultichannelHeatmapAssembler:
             shape=(heatmap_channels, heatmap_height, heatmap_width),
         )
 
-        # # overlap counter should fit in memory
-        # self.patch_overlap_counter = np.zeros(
-        #     (1, counter_h, counter_w),  # row-first format (C, H, W)
-        #     dtype=np.uint8,
-        # ) 
-        # overlap counter should fit in memory
         self.patch_overlap_counter = np.zeros(
             (1, heatmap_height, heatmap_width),  # row-first format (C, H, W)
             dtype=np.uint8,
@@ -57,17 +51,6 @@ class MultichannelHeatmapAssembler:
 
     def update_batch_torch(self, data: np.ndarray, xs: np.ndarray, ys: np.ndarray) -> None:
         """Expects the data in the form (B, C, H, W)"""
-
-        # compress overlap counter coordinates
-        # xs_count = xs // self.gcd_size_factor
-        # ys_count = ys // self.gcd_size_factor
-
-        # Paste tiles onto mask
-        # do not try to optimize this, not worth it. You would have to resolve issues with overlaps preventing direct broadcasting,
-        # which would require a lot of extra logic and probably end up not being significantly faster anyway.
-        # for xa, ya, xc, yc, tile in zip(
-        #     xs, ys, xs_count, ys_count, data, strict=True
-        # ):
         for xa, ya, tile in zip(
             xs, ys, data, strict=True
         ):
@@ -93,8 +76,6 @@ class MultichannelHeatmapAssembler:
     def finalize(self) -> tuple[np.ndarray, np.ndarray]:
         """Finalize the heatmap assembly by normalizing the accumulated heatmap by the overlap counts."""
         # Normalize heatmap by patch overlap counts but do not expand the counter
-        npy_file_suffix = self.npy_file_path.suffix
-        np.save(self.npy_file_path.with_suffix(f".nzi{npy_file_suffix}"), self.heatmap_accumulator > 0)
         self.heatmap_accumulator /= self.patch_overlap_counter.clip(min=1)
         self.heatmap_accumulator.flush()
         # Return the final heatmap, cropped to the original heatmap extent
