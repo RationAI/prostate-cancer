@@ -130,6 +130,9 @@ def main(num_clusters: int, experiment_name: str):
         slide_path = slide_metadata.path
         slide_name = Path(slide_path).stem
         _slide_pbar.set_description(f"Started processing slide {slide_name} ({i})")
+
+        # =====================================================================
+        # Assemble activations for the whole slide
         OUT_FILE_PATH_ACTS = EXP_DIR / f"activations_slide-aggregated_{i}_{slide_name}.npy"
         OUT_FILE_PATH_ACT_OVERLAPS = OUT_FILE_PATH_ACTS.with_suffix(f".nzi{OUT_FILE_PATH_ACTS.suffix}")
         if OUT_FILE_PATH_ACTS.exists() and OUT_FILE_PATH_ACT_OVERLAPS.exists():
@@ -189,14 +192,17 @@ def main(num_clusters: int, experiment_name: str):
             np.save(OUT_FILE_PATH_ACT_OVERLAPS, activations_assembled_wsi_overlaps)
 
 
+        # =====================================================================
+        # Perform clustering on the assembled activations
         OUT_FILE_PATH_INDS = EXP_DIR / f"cluster-indices_slide-aggregated_{i}_{slide_name}.npy"
-        OUT_FILE_PATH_EMBEDDINGS = EXP_DIR / f"embeddings_slide-aggregated_{i}_{slide_name}.npy"
-        if OUT_FILE_PATH_INDS.exists():
+        OUT_FILE_PATH_EMBEDDINGS = EXP_DIR / f"embeddings_slide-collected_{i}_{slide_name}.npy"
+        if OUT_FILE_PATH_INDS.exists() and OUT_FILE_PATH_EMBEDDINGS.exists():
             _slide_pbar.write(f"Clustering indices for slide {slide_name} exist, skipping.")
             clustering_indices_memmap = np.load(OUT_FILE_PATH_INDS, mmap_mode='r+')
             _slide_pbar.write(f"Clustering indices have shape: {clustering_indices_memmap.shape}")
+            embeddings = np.load(OUT_FILE_PATH_EMBEDDINGS, mmap_mode='r+')
+            _slide_pbar.write(f"Embeddings have shape: {embeddings.shape}")
         else:
-
             with safe_file_op_ctxm(OUT_FILE_PATH_INDS, unlink_on_exception=True) as cluster_inds_numpy_file:
                 original_shape = activations_assembled_wsi.shape  # shall be (C, H, W)
                 overlaps_nzi = activations_assembled_wsi_overlaps > 0
@@ -204,7 +210,8 @@ def main(num_clusters: int, experiment_name: str):
                 
                 embeddings = reshape_for_clustering_universal(activations_assembled_wsi[:, overlaps_nzi], channel_dim_index=0)
                 _slide_pbar.write(f"Clustering-reshaped embeddings shape: {embeddings.shape}")
-
+                with safe_file_op_ctxm(OUT_FILE_PATH_EMBEDDINGS, unlink_on_exception=True) as emb_numpy_file:
+                    np.save(emb_numpy_file, embeddings)
 
                 clustering_model = NMF(n_components=NUM_CLUSTERS, init='nndsvd', random_state=42, max_iter=500)
                 clustering_model.fit(embeddings)

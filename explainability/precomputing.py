@@ -14,14 +14,15 @@ logger = logging.getLogger(__name__)
 @contextlib.contextmanager
 def safe_file_op_ctxm(target_file: Path, unlink_on_exception: bool = True):
     """A context manager which provides you with a temporary filepath to write to, and then renames it to the target file on successful completion of the block. If an exception occurs, the temp file is deleted and the target file is left unchanged."""
-    temp_file = target_file.with_suffix(".tmp")
+    suffix = target_file.suffix
+    temp_file_path = target_file.with_suffix(f".tmp{suffix}")
     try:
-        yield temp_file
-        temp_file.rename(target_file)
+        yield temp_file_path
+        temp_file_path.rename(target_file)
     except Exception as e:
         if unlink_on_exception:
-            temp_file.unlink(missing_ok=True)
-            logger.debug(f"Deleted temporary file {temp_file} due to exception inside the managed block.")
+            temp_file_path.unlink(missing_ok=True)
+            logger.debug(f"Deleted temporary file {temp_file_path} due to exception inside the managed block.")
         raise e
 
 
