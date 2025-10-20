@@ -39,6 +39,7 @@ dependencies = [
     "pyvips>=3.0.0",
     "opencv-contrib-python>=4.11.0.86",
     "opencv-python>=4.11.0.86",
+    "git+ssh://git@gitlab.ics.muni.cz/rationai/digital-pathology/pipeline/report.git@feature/infer-slide-name-from-path",
 ]
 
 [tool.pdm.scripts]
