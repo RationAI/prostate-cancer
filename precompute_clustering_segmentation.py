@@ -96,7 +96,7 @@ def main(num_clusters: int, experiment_name: str):
 
     # %%
     # Get one batch from validation dataset
-    data.batch_size = 10
+    data.batch_size = 16
     data.setup("test")
 
     # %%
@@ -226,11 +226,9 @@ def main(num_clusters: int, experiment_name: str):
                 )
         
                 clustering_indices_memmap[overlaps_nzi] = (
-                    np.argmax(
-                        clustering_model
-                        .transform(embeddings), axis=1
-                    )
+                    np.argmax(clustering_model.transform(embeddings), axis=1)
                     .astype(np.int8)
+                    + 1
                 )
                 clustering_indices_memmap.flush()
 
@@ -238,8 +236,8 @@ def main(num_clusters: int, experiment_name: str):
 
         # =====================================================================
         # Visualize the clustering results as overlay on the WSI
-        OUT_FILE_PATH_SEGS = CLUSTERING_DIR / f"segmentation_slide-aggregated_{i}_{slide_name}.tiff"
-        OUT_FILE_PATH_INDS_GRAYSCALE = CLUSTERING_DIR / f"cluster-indices_slide-aggregated_grayscale_{i}_{slide_name}.tiff"
+        OUT_FILE_PATH_SEGS = CLUSTERING_DIR           / "clustering_color" / f"{slide_name}.tiff"
+        OUT_FILE_PATH_INDS_GRAYSCALE = CLUSTERING_DIR / "clustering_gray"  / f"{slide_name}.tiff"
         if OUT_FILE_PATH_SEGS.exists() and OUT_FILE_PATH_INDS_GRAYSCALE.exists():
             _slide_pbar.write(f"Segmentation for slide {slide_name} exists, skipping.")
             
