@@ -34,8 +34,9 @@ def main(num_clusters: int, experiment_name: str):
 
     OUT_DIR = Path("/mnt/data/rationai/data/XAICNNEmbeddings/")
     PRECOMPUTE_DIR = OUT_DIR / "PRECOMPUTED"
-    EXP_DIR = PRECOMPUTE_DIR / experiment_name
-    EXP_DIR.mkdir(exist_ok=True)
+    ACTIVATIONS_DIR = PRECOMPUTE_DIR / "VGG16_Prostate"
+    CLUSTERING_DIR = OUT_DIR / experiment_name
+    CLUSTERING_DIR.mkdir(exist_ok=True)
     WSI_LEVEL_TO_MATCH_OUTPUTS_TO = 3
     NUM_CLUSTERS = num_clusters
 
@@ -133,7 +134,7 @@ def main(num_clusters: int, experiment_name: str):
 
         # =====================================================================
         # Assemble activations for the whole slide
-        OUT_FILE_PATH_ACTS = EXP_DIR / f"activations_slide-aggregated_{i}_{slide_name}.npy"
+        OUT_FILE_PATH_ACTS = ACTIVATIONS_DIR / f"activations_slide-aggregated_{i}_{slide_name}.npy"
         OUT_FILE_PATH_ACT_OVERLAPS = OUT_FILE_PATH_ACTS.with_suffix(f".nzi{OUT_FILE_PATH_ACTS.suffix}")
         if OUT_FILE_PATH_ACTS.exists() and OUT_FILE_PATH_ACT_OVERLAPS.exists():
             _slide_pbar.write(f"Slide {slide_name} exists, skipping.")
@@ -194,8 +195,8 @@ def main(num_clusters: int, experiment_name: str):
 
         # =====================================================================
         # Perform clustering on the assembled activations
-        OUT_FILE_PATH_INDS = EXP_DIR / f"cluster-indices_slide-aggregated_{i}_{slide_name}.npy"
-        OUT_FILE_PATH_EMBEDDINGS = EXP_DIR / f"embeddings_slide-collected_{i}_{slide_name}.npy"
+        OUT_FILE_PATH_INDS = CLUSTERING_DIR / f"cluster-indices_slide-aggregated_{i}_{slide_name}.npy"
+        OUT_FILE_PATH_EMBEDDINGS = CLUSTERING_DIR / f"embeddings_slide-collected_{i}_{slide_name}.npy"
         if OUT_FILE_PATH_INDS.exists() and OUT_FILE_PATH_EMBEDDINGS.exists():
             _slide_pbar.write(f"Clustering indices for slide {slide_name} exist, skipping.")
             clustering_indices_memmap = np.load(OUT_FILE_PATH_INDS, mmap_mode='r+')
@@ -237,8 +238,8 @@ def main(num_clusters: int, experiment_name: str):
 
         # =====================================================================
         # Visualize the clustering results as overlay on the WSI
-        OUT_FILE_PATH_SEGS = EXP_DIR / f"segmentation_slide-aggregated_{i}_{slide_name}.tiff"
-        OUT_FILE_PATH_INDS_GRAYSCALE = EXP_DIR / f"cluster-indices_slide-aggregated_grayscale_{i}_{slide_name}.tiff"
+        OUT_FILE_PATH_SEGS = CLUSTERING_DIR / f"segmentation_slide-aggregated_{i}_{slide_name}.tiff"
+        OUT_FILE_PATH_INDS_GRAYSCALE = CLUSTERING_DIR / f"cluster-indices_slide-aggregated_grayscale_{i}_{slide_name}.tiff"
         if OUT_FILE_PATH_SEGS.exists() and OUT_FILE_PATH_INDS_GRAYSCALE.exists():
             _slide_pbar.write(f"Segmentation for slide {slide_name} exists, skipping.")
             
