@@ -37,6 +37,7 @@ def main(num_clusters: int, experiment_name: str):
     ACTIVATIONS_DIR = PRECOMPUTE_DIR / "VGG16_Prostate"
     CLUSTERING_DIR = OUT_DIR / experiment_name
     CLUSTERING_DIR.mkdir(exist_ok=True)
+    ACTIVATIONS_DIR.mkdir(exist_ok=True)
     WSI_LEVEL_TO_MATCH_OUTPUTS_TO = 3
     NUM_CLUSTERS = num_clusters
 
@@ -105,8 +106,6 @@ def main(num_clusters: int, experiment_name: str):
 
 
     # %%
-
-
 
 
     # single dataloader is single slide

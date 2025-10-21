@@ -16,6 +16,8 @@ def safe_file_op_ctxm(target_file: Path, unlink_on_exception: bool = True):
     """A context manager which provides you with a temporary filepath to write to, and then renames it to the target file on successful completion of the block. If an exception occurs, the temp file is deleted and the target file is left unchanged."""
     suffix = target_file.suffix
     temp_file_path = target_file.with_suffix(f".tmp{suffix}")
+    temp_file_path.parent.mkdir(parents=True, exist_ok=True)
+    temp_file_path.unlink(missing_ok=True)  # Ensure temp file does not exist
     try:
         yield temp_file_path
         temp_file_path.rename(target_file)
