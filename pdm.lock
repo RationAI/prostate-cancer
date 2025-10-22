@@ -5,7 +5,7 @@
 groups = ["default", "dev"]
 strategy = ["inherit_metadata"]
 lock_version = "4.5.0"
-content_hash = "sha256:dd7f9715893c3ba20cdd36e61a36a7a9e7c332b316f233c4ecaf0258218d1354"
+content_hash = "sha256:e12ee6387cc5a76e466ee141a73f597771585f1a44dba3e31b258dae3cdab2f6"
 
 [[metadata.targets]]
 requires_python = ">=3.11,<3.13"
@@ -3699,7 +3699,7 @@ version = "1.1.4"
 requires_python = ">=3.11"
 git = "ssh://git@gitlab.ics.muni.cz/rationai/digital-pathology/pipeline/report.git"
 ref = "feature/infer-slide-name-from-path"
-revision = "688bfddf6ba30898ceffd7efe7682cb288abe9f2"
+revision = "b49961b26bbabb63e518e90c6fee4312ec4220e7"
 summary = "Tool to create HTML presentation from MLFlow records."
 groups = ["default"]
 dependencies = [
