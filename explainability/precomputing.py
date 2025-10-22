@@ -122,4 +122,71 @@ class MultichannelHeatmapAssembler:
 #     assert assembled_heatmap.max() == 1.0, f"Assembled heatmap values should be normalized to 1.0 after finalization: {assembled_heatmap.max()}"
 
 # test_heatmap_assembler()
+
+
+
+def npy_data_offset(filename: Path):
+    """Return (offset, dtype, shape, fortran_order) for a .npy file."""
+    with open(filename, "rb") as f:
+        # read magic number and version
+        version = np.lib.format.read_magic(f)
+        # read the header (this leaves the file pointer after it)
+        shape, fortran_order, dtype = np.lib.format._read_array_header(f, version)
+        offset = f.tell()
+    return offset, dtype, shape, fortran_order, version
+
+
+def append_data_to_a_memmap_npy_file(
+    npy_file_path: Path,
+    data_to_append: np.ndarray,
+) -> None:
+    """Append data to a memmap .npy file.
+
+    The first dimension of the array is assumed to be the one which will increase, if the array is C-contiguous,
+    otherwise the last dimension is assumed to be the one which will increase.
+    Remaining dimensions must match.
+
+    Args:
+        npy_file_path (str): Path to the .npy file.
+        data_to_append (np.ndarray): Data to append.
+    """
+    offset, dtype, shape, fortran_order, version = npy_data_offset(npy_file_path)
+    if fortran_order:
+        *rest_shape_existing, N_existing = shape
+        *rest_shape_appended, N_appended = data_to_append.shape
+        new_shape = (*rest_shape_existing, N_existing + N_appended)
+    else:
+        N_existing, *rest_shape_existing = shape
+        N_appended, *rest_shape_appended = data_to_append.shape
+        new_shape = (N_existing + N_appended, *rest_shape_existing)
+
+    assert rest_shape_existing == rest_shape_appended, (
+        f"Shape of the data to append {data_to_append.shape} does not match the shape of existing data {shape}."
+    )
     
+    # Open the memmap in read-write mode
+    memmap_array = np.memmap(
+        filename=npy_file_path,
+        mode="r+",
+        dtype=dtype,
+        shape=new_shape,
+        offset=offset,
+        order='F' if fortran_order else 'C'
+    )
+
+    # Append the new data
+    if fortran_order:
+        memmap_array[..., N_existing:] = data_to_append
+    else:   
+        memmap_array[N_existing:, ...] = data_to_append
+
+    # Flush changes to disk
+    memmap_array.flush()
+    del memmap_array
+
+    # Update the header to reflect the new shape
+    np.lib.format._write_array_header(
+        open(npy_file_path, "r+b"),
+        dict(descr=dtype.str, fortran_order=fortran_order, shape=new_shape),
+        version=version
+    )
