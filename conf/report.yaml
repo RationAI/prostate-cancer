@@ -1,0 +1,83 @@
+defaults:
+  - _self_
+  - hydra: default
+
+mlflow:
+  tracking_uri: http://mlflow.rationai-mlflow:5000/
+
+reporter:
+  _target_: report.reporter.ReportAssembler
+  template_asset_path: report_template.html
+  save:
+    # _target_: report.save.RunIDMLFlowReportAttacher
+    # artifact_path: report.html
+    # run_id: fa35edb93b104070ac2bfec5328eb86c
+    _target_: report.save.MLFlowReportStorer
+    artifact_path: report.html
+    metadata:
+        experiment_name: Explainability
+        run_name: "📊 NMF clustering - Each WSI separately"
+        description: |
+            This is a report containing image segmentation using clustering of embedding from a VGG16 Prostate binary classifier mapped back to input image.
+            Activation values were first assembled, overlaps resolved using averaging, then reshaped into clusterable embedding along the channel dimension.
+            Overlays are present for multiple number of clusters. The clustering algorithm used is NMF (implementation from sklearn.decompose) and argmaxing the clustering result for each embedding.
+        user: adambajger
+  background:
+    _target_: report.masks.ParquetSlideDatasetMLFlowMaskRetriever
+    artifact_uris: 
+      - "mlflow-artifacts:/65/0157ba4a0db349b8b86e4a24592d9230/artifacts/Prostate - test/"
+    item_path_col: path
+    ground_truth_col: carcinoma
+    # _target_: report.masks.DriveMasksRetriever
+    # dir_name: "/mnt/data/Projects/prostate_cancer/cancer/test_tiff"
+    layer_name: HE
+  title: NMF Segmentation - Prostate
+  mask_retrievers:
+    # - _target_: report.masks.RunIDMlflowMaskRetriever
+    #   run_id: fa35edb93b104070ac2bfec5328eb86c
+    #   dir_name: LKCell/MOU
+    #   shader_conf:
+    #     type: classify
+    #     classes: 5
+    #     modifiable: true
+    #     color: Turbo
+    #   layer_name: LKCell
+    - _target_: report.masks.DriveMasksRetriever
+      layer_name: Clusters NMF 4
+      dir_name: "/mnt/data/Projects/Explainability/XAICNNEmbeddings/VGG16_Prostate_NMF_4clusters/clustering_gray"
+      shader_conf:
+        type: classify
+        classes: 5  # 1 for background (probably?)
+        modifiable: true
+        color: Turbo
+    - _target_: report.masks.DriveMasksRetriever
+      layer_name: Clusters NMF 6
+      dir_name: "/mnt/data/Projects/Explainability/XAICNNEmbeddings/VGG16_Prostate_NMF_6clusters/clustering_gray"
+      shader_conf:
+        type: classify
+        classes: 7  # 1 for background (probably?)
+        modifiable: true
+        color: Turbo
+    - _target_: report.masks.DriveMasksRetriever
+      layer_name: Clusters NMF 8
+      dir_name: "/mnt/data/Projects/Explainability/XAICNNEmbeddings/VGG16_Prostate_NMF_8clusters/clustering_gray"
+      shader_conf:
+        type: classify
+        classes: 9  # 1 for background
+        modifiable: true
+        color: Turbo
+    - _target_: report.masks.DriveMasksRetriever
+      layer_name: Clusters NMF 10
+      dir_name: "/mnt/data/Projects/Explainability/XAICNNEmbeddings/VGG16_Prostate_NMF_10clusters/clustering_gray"
+      shader_conf:
+        type: classify
+        classes: 11  # 1 for background (probably?)
+        modifiable: true
+        color: Turbo
+
+    # - _target_: report.masks.DriveMasksRetriever
+    #   layer_name: Clusters NMF 4
+    #   dir_name: "/mnt/data/Projects/Explainability/XAICNNEmbeddings/VGG16_Prostate_NMF_4clusters/clustering_color"
+    #   shader_conf:
+    #     type: identity
+      
