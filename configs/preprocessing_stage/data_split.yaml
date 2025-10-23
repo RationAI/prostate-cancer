@@ -1,0 +1,7 @@
+# @package _global_
+
+test_size: 0.1
+
+metadata:
+  run_name: Data Split ${data_name}
+  description: Data Split ${data_name}

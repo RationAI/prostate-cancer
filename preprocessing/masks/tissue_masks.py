@@ -4,6 +4,8 @@ from pathlib import Path
 from typing import cast
 
 import hydra
+import mlflow
+import pandas as pd
 import pyvips
 import ray
 from lightning.pytorch.loggers import Logger
@@ -40,36 +42,30 @@ def make_remote_process_slide(
     return remote_process_slide
 
 
-@hydra.main(config_path="../../configs", config_name="preprocessing", version_base=None)
+@hydra.main(
+    config_path="../../configs", config_name="preprocessing_base", version_base=None
+)
 @autolog
 def main(config: DictConfig, logger: Logger | None = None) -> None:
     assert logger is not None, "Need logger"
     logger = cast("MLFlowLogger", logger)
 
-    level = config.tissue_masks.level
-    output_path = Path(config.tissue_masks.output_path)
+    level = config.level
+    output_path = Path(config.output_path)
     output_path.mkdir(exist_ok=True, parents=True)
 
     remote_process_slide = make_remote_process_slide(level, output_path)
 
-    slides_path = Path(config.data_path).rglob("*.mrxs")
-    test_slides_path = Path(config.test_data_path).rglob("*.mrxs")
+    df = pd.read_csv(mlflow.artifacts.download_artifacts(config.slides_df_uri))
+    slides_path = [Path(path) for path in df["slide_path"]]
 
     process_items(
         slides_path,
         process_item=remote_process_slide,
-        max_concurrent=config.tissue_masks.max_concurrent,
+        max_concurrent=config.max_concurrent,
     )
 
-    process_items(
-        test_slides_path,
-        process_item=remote_process_slide,
-        max_concurrent=config.tissue_masks.max_concurrent,
-    )
-
-    logger.experiment.log_artifacts(
-        run_id=logger.run_id, local_dir=str(output_path), artifact_path="tissue_masks"
-    )
+    logger.log_artifacts(local_dir=str(output_path), artifact_path="tissue_masks")
 
 
 if __name__ == "__main__":

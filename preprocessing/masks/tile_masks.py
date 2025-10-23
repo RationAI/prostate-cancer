@@ -104,44 +104,42 @@ def make_remote_process_slide(
     return remote_process_slide
 
 
-@hydra.main(config_path="../../configs", config_name="preprocessing", version_base=None)
+@hydra.main(
+    config_path="../../configs", config_name="preprocessing_base", version_base=None
+)
 @autolog
 def main(config: DictConfig, logger: Logger | None = None) -> None:
     assert logger is not None, "Need logger"
     logger = cast("MLFlowLogger", logger)
 
-    paths = [
-        mlflow.artifacts.download_artifacts(uri) for uri in config.tile_masks.tile_uris
-    ]
+    paths = [mlflow.artifacts.download_artifacts(uri) for uri in config.tile_uris]
     slides = pd.read_parquet([Path(path) / "slides.parquet" for path in paths])
     tiles = pd.read_parquet([Path(path) / "tiles.parquet" for path in paths])
     tiles_ref = ray.put(tiles)
 
-    output_path = Path(config.tile_masks.output_path)
+    output_path = Path(config.output_path)
 
     # Create subdirs for each tile mask type
     for percentage_col in [
-        *config.tile_masks.percentage_cols,
+        *config.percentage_cols,
         "outlines",
         "carcinoma_filtered",
     ]:
         (output_path / percentage_col).mkdir(parents=True, exist_ok=True)
 
     remote_process_slide = make_remote_process_slide(
-        config.tile_masks.percentage_cols,
+        config.percentage_cols,
         output_path,
-        config.tile_masks.tissue_threshold,
+        config.tissue_threshold,
         tiles_ref,
     )
     process_items(
         slides.itertuples(),
         remote_process_slide,
-        max_concurrent=config.tile_masks.max_concurrent,
+        max_concurrent=config.max_concurrent,
     )
 
-    logger.experiment.log_artifacts(
-        run_id=logger.run_id, local_dir=str(output_path), artifact_path="tile_masks"
-    )
+    logger.log_artifacts(local_dir=str(output_path), artifact_path="tile_masks")
 
 
 if __name__ == "__main__":

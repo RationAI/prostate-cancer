@@ -20,7 +20,7 @@ dependencies = [
     "triton==3.3.0", 
     "tqdm==4.67.1",
     "rationai-masks @ git+https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/masks.git@1bcaf1054011a6280870edc53fb6a8d1f995cdec",
-    "rationai-mlkit @ git+https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/mlkit.git@233ead782353b3f23eee75702576f5c004cf300e",
+    "rationai-mlkit @ git+https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/mlkit.git",
     "rationai-tiling @ git+https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/tiling.git@9096ada81542c172908dff5b2766cf729786471b",
     "rationai-staining @ git+https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/staining.git@feature/transforms",
     "numpy==2.2.5",
@@ -30,6 +30,7 @@ dependencies = [
     "openpyxl==3.1.5",
     "mlflow==2.21.3",
     "deprecated",
+    "pillow==11.3.0",
 ]
 
 [tool.pdm.scripts]

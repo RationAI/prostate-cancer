@@ -4,6 +4,8 @@ from pathlib import Path
 from typing import Any, cast
 
 import hydra
+import mlflow
+import pandas as pd
 from aiohttp import ClientSession, ClientTimeout
 from lightning.pytorch.loggers import Logger
 from omegaconf import DictConfig
@@ -150,24 +152,25 @@ async def qc_main(
             report_request_timeout=report_request_timeout,
         )
 
-        logger.experiment.log_artifacts(run_id=logger.run_id, local_dir=report_path)
+        logger.log_artifacts(local_dir=report_path)
 
 
-@hydra.main(config_path="../../configs", config_name="preprocessing", version_base=None)
+@hydra.main(
+    config_path="../../configs", config_name="preprocessing_base", version_base=None
+)
 @autolog
 def main(config: DictConfig, logger: Logger | None = None) -> None:
     assert logger is not None, "Need logger"
     logger = cast("MLFlowLogger", logger)
 
-    output_path = Path(config.qc_masks.output_path)
+    output_path = Path(config.output_path)
     output_path.mkdir(exist_ok=True, parents=True)
     prostate_cancer_path = config.prostate_cancer_path
 
-    slides = list(Path(config.data_path).resolve().rglob("*.mrxs")) + list(
-        Path(config.test_data_path).resolve().rglob("*.mrxs")
-    )
+    df = pd.read_csv(mlflow.artifacts.download_artifacts(config.slides_df_uri))
+    slides = [Path(path) for path in df["slide_path"]]
 
-    semaphore = asyncio.Semaphore(config.qc_masks.request_limit)
+    semaphore = asyncio.Semaphore(config.request_limit)
 
     with tempfile.TemporaryDirectory(
         prefix="qc_masks_report_", dir=Path(prostate_cancer_path).as_posix()
@@ -183,13 +186,13 @@ def main(config: DictConfig, logger: Logger | None = None) -> None:
                 report_path=report_path.absolute().as_posix(),
                 slides=slides,
                 logger=logger,
-                url=config.qc_masks.url,
-                mask_level=config.qc_masks.mask_level,
-                sample_level=config.qc_masks.sample_level,
+                url=config.url,
+                mask_level=config.mask_level,
+                sample_level=config.sample_level,
                 semaphore=semaphore,
-                request_timeout=config.qc_masks.request_timeout,
-                report_request_timeout=config.qc_masks.report_request_timeout,
-                num_repeats=config.qc_masks.num_repeats,
+                request_timeout=config.request_timeout,
+                report_request_timeout=config.report_request_timeout,
+                num_repeats=config.num_repeats,
             )
         )
 

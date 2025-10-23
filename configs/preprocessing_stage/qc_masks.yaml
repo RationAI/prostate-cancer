@@ -1,0 +1,14 @@
+# @package _global_
+
+request_limit: 10
+request_timeout: 100000
+report_request_timeout: 24000
+num_repeats: 10
+url: "http://rayservice-qc-serve-svc.rationai-jobs-ns.svc.cluster.local:8000/"
+mask_level: 3
+sample_level: 1
+output_path: ${prostate_cancer_path}/qc_masks_${data_name}
+
+metadata:
+  run_name: QC Masks ${data_name}
+  description: QC Masks ${data_name}

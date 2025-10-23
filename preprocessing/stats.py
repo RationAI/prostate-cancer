@@ -61,16 +61,18 @@ def process_slide(slide: SlideTiles) -> None:
         stats_actor.add_stats.remote(sum_, sum_sq, count)
 
 
-@hydra.main(config_path="../configs", config_name="preprocessing", version_base=None)
+@hydra.main(
+    config_path="../configs", config_name="preprocessing_base", version_base=None
+)
 @autolog
 def main(config: DictConfig, logger: Logger | None = None) -> None:
     assert logger is not None, "Need logger"
     logger = cast("MLFlowLogger", logger)
 
     # Log the dataset URIs
-    logger.experiment.log_param(logger.run_id, "dataset_uris", config.stats.uris)
+    logger.experiment.log_param(logger.run_id, "dataset_uris", config.uris)
     dataset = UnlabeledTilesDataset(
-        uris=config.stats.uris,
+        uris=config.uris,
         thresholds=config.thresholds,
     )
 
