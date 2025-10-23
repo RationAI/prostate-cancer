@@ -27,12 +27,16 @@ from explainability.visualizations.image_transforms import save_image_xopat_comp
 # %%
 logging.basicConfig(level=logging.INFO)
 
+
+
+
 @click.command()
 @click.option('--num-clusters', type=int, default=6, help='Number of clusters for NMF clustering.')
 @click.option('--experiment-name', type=str, help='Name of the experiment.')
-def main(num_clusters: int, experiment_name: str):
+@click.option('--clustering-algorithm', type=click.Choice(['NMF', 'KMeans'], case_sensitive=False), default='NMF', help='Clustering algorithm to use.')
+def main(num_clusters: int, experiment_name: str, clustering_algorithm: str = "NMF"):
 
-    OUT_DIR = Path("/mnt/data/rationai/data/XAICNNEmbeddings/")
+    OUT_DIR = Path("/mnt/data/Projects/Explainability/XAICNNEmbeddings/")
     PRECOMPUTE_DIR = OUT_DIR / "PRECOMPUTED"
     ACTIVATIONS_DIR = PRECOMPUTE_DIR / "VGG16_Prostate"
     CLUSTERING_DIR = OUT_DIR / experiment_name
@@ -48,17 +52,16 @@ def main(num_clusters: int, experiment_name: str):
 
     # %%
     # Configuration overrides for prediction
-    overrides = ["experiment=predict/images/vgg16", "mode=predict"]
+    overrides = ["experiment=predict/images/vgg16", "mode=predict", "carcinoma_roi_t=0", "+stratified_filter=null"]
 
     # Initialize Hydra configuration
-    with hydra.initialize(config_path="conf", version_base=None):
+    with hydra.initialize(config_path="../conf", version_base=None):
         config = hydra.compose(config_name="default", overrides=overrides)
 
     print("Configuration loaded successfully!")
     print(f"Mode: {config.mode}")
     print(f"Checkpoint: {config.checkpoint}")
     print(f"Batch size: {config.data.batch_size}")
-
     # %%
     # Instantiate data module and model
     data: DataModule = hydra.utils.instantiate(
@@ -193,7 +196,7 @@ def main(num_clusters: int, experiment_name: str):
 
 
         # =====================================================================
-        # Perform clustering on the assembled activations
+        # Gather embeddings for clustering
         OUT_FILE_PATH_EMBEDDINGS = ACTIVATIONS_DIR / f"embeddings_slide-collected_{i}_{slide_name}.npy"
         if OUT_FILE_PATH_EMBEDDINGS.exists():
             _slide_pbar.write(f"Embeddings for slide {slide_name} exist, skipping.")
@@ -206,6 +209,40 @@ def main(num_clusters: int, experiment_name: str):
             with safe_file_op_ctxm(OUT_FILE_PATH_EMBEDDINGS, unlink_on_exception=True) as emb_numpy_file:
                 np.save(emb_numpy_file, embeddings)
 
+        # =====================================================================
+        # Perform NMF clustering
+        OUT_FILE_PATH_CLUSTERING_INSTANCE = CLUSTERING_DIR / f"clustering-instance_{clustering_algorithm}_{i}_{slide_name}.npy"
+        if OUT_FILE_PATH_CLUSTERING_INSTANCE.exists():
+            _slide_pbar.write(f"Clustering instance for slide {slide_name} exist, skipping.")
+            if clustering_algorithm == "NMF":
+                clustering_model = NMF(n_components=NUM_CLUSTERS, init='nndsvd', random_state=42, max_iter=500)
+                _dictionary = np.load(OUT_FILE_PATH_CLUSTERING_INSTANCE)
+                clustering_model.components_ = _dictionary
+            elif clustering_algorithm == "KMeans":
+                from sklearn.cluster import KMeans
+                clustering_model = KMeans(n_clusters=NUM_CLUSTERS, random_state=42)
+                _centroids = np.load(OUT_FILE_PATH_CLUSTERING_INSTANCE)
+                clustering_model.cluster_centers_ = _centroids
+            else:
+                raise ValueError(f"Unsupported clustering algorithm: {clustering_algorithm}")
+            _slide_pbar.write(f"Clustering model loaded.")
+        else:
+            if clustering_algorithm == "NMF":
+                clustering_model = NMF(n_components=NUM_CLUSTERS, init='nndsvd', random_state=42, max_iter=500)
+            elif clustering_algorithm == "KMeans":
+                from sklearn.cluster import KMeans
+                clustering_model = KMeans(n_clusters=NUM_CLUSTERS, random_state=42)
+            else:
+                raise ValueError(f"Unsupported clustering algorithm: {clustering_algorithm}")
+            _slide_pbar.write(f"Fitting clustering model ({clustering_algorithm}) for slide {slide_name} with embeddings shape {embeddings.shape}")
+
+            clustering_model.fit(embeddings)
+            _slide_pbar.write(f"Clustering model fitted.")
+            with safe_file_op_ctxm(OUT_FILE_PATH_CLUSTERING_INSTANCE, unlink_on_exception=True) as cluster_instance_numpy_file:
+                if clustering_algorithm == "NMF":
+                    np.save(cluster_instance_numpy_file, clustering_model.components_)
+                elif clustering_algorithm == "KMeans":
+                    np.save(cluster_instance_numpy_file, clustering_model.cluster_centers_)
 
         OUT_FILE_PATH_INDS = CLUSTERING_DIR / f"cluster-indices_slide-aggregated_{i}_{slide_name}.npy"
         if OUT_FILE_PATH_INDS.exists():
@@ -214,13 +251,10 @@ def main(num_clusters: int, experiment_name: str):
             _slide_pbar.write(f"Clustering indices have shape: {clustering_indices_memmap.shape}")
             
         else:
+            original_shape = activations_assembled_wsi.shape  # shall be (C, H, W)
+            overlaps_nzi = activations_assembled_wsi_overlaps > 0
+            _slide_pbar.write(f"Original shape: {original_shape}, (non-zero indices {overlaps_nzi.shape})")
             with safe_file_op_ctxm(OUT_FILE_PATH_INDS, unlink_on_exception=True) as cluster_inds_numpy_file:
-                original_shape = activations_assembled_wsi.shape  # shall be (C, H, W)
-                overlaps_nzi = activations_assembled_wsi_overlaps > 0
-                _slide_pbar.write(f"Original shape: {original_shape}, (non-zero indices {overlaps_nzi.shape})")
-
-                clustering_model = NMF(n_components=NUM_CLUSTERS, init='nndsvd', random_state=42, max_iter=500)
-                clustering_model.fit(embeddings)
         
                 # open memmapped array for clustering results
                 clustering_indices_memmap = open_memmap(
