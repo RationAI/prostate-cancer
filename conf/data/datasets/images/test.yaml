@@ -6,5 +6,5 @@ _target_: prostate_cancer.data.datasets.LabeledTilesDataset
 uris:
   - ${test_512_tiles_uri}
 
-stratified_filter: true
+stratified_filter: ${stratified_filter_enabled}
 carcinoma_roi_t: ${carcinoma_roi_t}
