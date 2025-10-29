@@ -36,7 +36,7 @@ logging.basicConfig(level=logging.INFO)
 @click.option('--clustering-algorithm', type=click.Choice(['NMF', 'KMeans'], case_sensitive=False), default='NMF', help='Clustering algorithm to use.')
 def main(num_clusters: int, experiment_name: str, clustering_algorithm: str = "NMF"):
 
-    OUT_DIR = Path("/mnt/data/Projects/Explainability/XAICNNEmbeddings/")
+    OUT_DIR = Path("/mnt/projects/Explainability/XAICNNEmbeddings/")
     PRECOMPUTE_DIR = OUT_DIR / "PRECOMPUTED"
     ACTIVATIONS_DIR = PRECOMPUTE_DIR / "VGG16_Prostate"
     CLUSTERING_DIR = OUT_DIR / experiment_name
@@ -244,7 +244,15 @@ def main(num_clusters: int, experiment_name: str, clustering_algorithm: str = "N
                 elif clustering_algorithm == "KMeans":
                     np.save(cluster_instance_numpy_file, clustering_model.cluster_centers_)
 
-        OUT_FILE_PATH_INDS = CLUSTERING_DIR / f"cluster-indices_slide-aggregated_{i}_{slide_name}.npy"
+        # =====================================================================
+        # Visualise the clusters characteristics to asses quality and centroid distances
+        OUT_FILE_PATH_CLUSTERING_VISUALS = CLUSTERING_DIR / f"clustering-visuals_{clustering_algorithm}_{i}_{slide_name}.svg"
+        if OUT_FILE_PATH_CLUSTERING_VISUALS.exists():
+            _slide_pbar.write(f"Clustering visuals for slide {slide_name} exist, skipping.")
+        else:
+           
+
+        OUT_FILE_PATH_INDS = CLUSTERING_DIR / f"cluster-indices_slide-aggregated_{clustering_algorithm}_{i}_{slide_name}.npy"
         if OUT_FILE_PATH_INDS.exists():
             _slide_pbar.write(f"Clustering indices for slide {slide_name} exist, skipping.")
             clustering_indices_memmap = np.load(OUT_FILE_PATH_INDS, mmap_mode='r+')
@@ -275,8 +283,8 @@ def main(num_clusters: int, experiment_name: str, clustering_algorithm: str = "N
 
         # =====================================================================
         # Visualize the clustering results as overlay on the WSI
-        OUT_FILE_PATH_SEGS = CLUSTERING_DIR           / "clustering_color" / f"{slide_name}.tiff"
-        OUT_FILE_PATH_INDS_GRAYSCALE = CLUSTERING_DIR / "clustering_gray"  / f"{slide_name}.tiff"
+        OUT_FILE_PATH_SEGS = CLUSTERING_DIR           / f"clustering_color_{clustering_algorithm}" / f"{slide_name}.tiff"
+        OUT_FILE_PATH_INDS_GRAYSCALE = CLUSTERING_DIR / f"clustering_gray_{clustering_algorithm}"  / f"{slide_name}.tiff"
         if OUT_FILE_PATH_SEGS.exists() and OUT_FILE_PATH_INDS_GRAYSCALE.exists():
             _slide_pbar.write(f"Segmentation for slide {slide_name} exists, skipping.")
             

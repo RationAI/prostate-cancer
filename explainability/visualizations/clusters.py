@@ -4,7 +4,7 @@ import numpy as np
 from jaxtyping import Int, UInt8
 
 
-def get_overlay_from_clustering(
+def get_overlay_from_clustering_torch(
     indices: Int[torch.Tensor, "B H W"],
     n_indices: int | None = None,
     colormap_lut: UInt8[torch.Tensor, "N 3"] | None = None,

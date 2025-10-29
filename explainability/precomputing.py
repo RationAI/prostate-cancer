@@ -150,6 +150,18 @@ def append_data_to_a_memmap_npy_file(
         npy_file_path (str): Path to the .npy file.
         data_to_append (np.ndarray): Data to append.
     """
+    if not npy_file_path.exists():
+        shape = data_to_append.shape
+        dtype = data_to_append.dtype
+        fortran_order = False  # default to C-order
+        version = (1, 0)
+        np.lib.format.write_array(
+            open(npy_file_path, "wb"),
+            data_to_append,
+            version=version,
+        )
+        return
+
     offset, dtype, shape, fortran_order, version = npy_data_offset(npy_file_path)
     if fortran_order:
         *rest_shape_existing, N_existing = shape

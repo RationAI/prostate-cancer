@@ -40,7 +40,7 @@ class FilterableDataset(MetaTiledSlides[T]):
         ]:
             if percentage in tiles.columns:
                 t = percentage.replace("percentage", "t")
-                assert t in self.thresholds, f"{t} for {percentage}"
+                assert t in self.thresholds, f"Missing threshold! Use \"{t}\" for {percentage}"
                 mask = (
                     tiles[percentage] > self.thresholds[t]
                     if "tissue" in percentage
