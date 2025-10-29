@@ -6,7 +6,7 @@ defaults:
 
 
 # Thresholds for tile filtering
-tissue_roi_t: 0.5
+tissue_roi_t: 0.25
 exclude_t: 0.0
 another_pathology_t: 0.0
 residual_t: 0.25
@@ -14,7 +14,10 @@ blur_t: 0.25
 folding_t: 0.25
 
 # Labeling threshold
-carcinoma_roi_t: 0.5
+carcinoma_roi_t: 0.0
+
+# filter out non-carcinoma
+stratified_filter_enabled: false
 
 
 train_512_tiles_uri: "mlflow-artifacts:/65/0157ba4a0db349b8b86e4a24592d9230/artifacts/Prostate - train"
