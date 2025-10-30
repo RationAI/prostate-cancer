@@ -1,9 +1,6 @@
 import matplotlib.pyplot as plt
 from matplotlib.colors import to_rgb, to_hex
 import numpy as np
-from enum import Enum
-
-
 
 
 class ColorPalette:
