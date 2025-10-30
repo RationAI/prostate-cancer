@@ -150,7 +150,7 @@ def main(num_clusters: int, experiment_name: str, clustering_algorithm: str, clu
         # carcinoma         
         
         # level = slide_metadata.level
-        slide_path = slide_metadata.path
+        slide_path = slide_metadata.path.replace("/mnt/data/Projects/prostate_cancer/cancer/test_data/", "/mnt/data/MOU/prostate/tile_level_annotations_test/")  # TODO: fix hardcoding
         slide_name = Path(slide_path).stem
         _slide_pbar.set_description(f"Started processing slide {slide_name} ({i})")
 
