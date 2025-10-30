@@ -18,10 +18,11 @@ import click
 
 from prostate_cancer.data import DataModule
 from prostate_cancer.prostate_cancer_model import ProstateCancerModel
-from explainability.precomputing import MultichannelHeatmapAssembler, safe_file_op_ctxm
+from explainability.precomputing import MultichannelHeatmapAssembler, safe_file_op_ctxm, ClusteringManager
 from explainability.clustering.tensor_shaping import reshape_for_clustering_universal
-from explainability.visualizations.clusters import  get_overlay_from_clustering_numpy
+from explainability.visualizations.clusters import  get_overlay_from_clustering_numpy, plot_cluster_distance_matrix
 from explainability.visualizations.image_transforms import save_image_xopat_compatible
+from explainability.visualizations.color_palettes import COLOR_PALETTE_ADAM, ColorPalette
 
 
 # %%
@@ -34,7 +35,8 @@ logging.basicConfig(level=logging.INFO)
 @click.option('--num-clusters', type=int, default=6, help='Number of clusters for NMF clustering.')
 @click.option('--experiment-name', type=str, help='Name of the experiment.')
 @click.option('--clustering-algorithm', type=click.Choice(['NMF', 'KMeans'], case_sensitive=False), default='NMF', help='Clustering algorithm to use.')
-def main(num_clusters: int, experiment_name: str, clustering_algorithm: str = "NMF"):
+@click.option('--clustering-instance-fp', type=click.Path(exists=True, file_okay=True, dir_okay=False, path_type=Path), default=None, help='Path to precomputed clustering instance (.npy file). If provided, this instance will be used instead of fitting a new one.')
+def main(num_clusters: int, experiment_name: str, clustering_algorithm: str = "NMF", clustering_instance_fp: Path | None = None):
 
     OUT_DIR = Path("/mnt/projects/Explainability/XAICNNEmbeddings/")
     PRECOMPUTE_DIR = OUT_DIR / "PRECOMPUTED"
@@ -45,6 +47,7 @@ def main(num_clusters: int, experiment_name: str, clustering_algorithm: str = "N
     WSI_LEVEL_TO_MATCH_OUTPUTS_TO = 3
     NUM_CLUSTERS = num_clusters
 
+    TOGGLE_COLORMAP_SEGMENTATIONS_DISABLE = True
 
     # Set random seed for reproducibility
     seed_everything(42, workers=True)
@@ -210,39 +213,68 @@ def main(num_clusters: int, experiment_name: str, clustering_algorithm: str = "N
                 np.save(emb_numpy_file, embeddings)
 
         # =====================================================================
-        # Perform NMF clustering
-        OUT_FILE_PATH_CLUSTERING_INSTANCE = CLUSTERING_DIR / f"clustering-instance_{clustering_algorithm}_{i}_{slide_name}.npy"
-        if OUT_FILE_PATH_CLUSTERING_INSTANCE.exists():
-            _slide_pbar.write(f"Clustering instance for slide {slide_name} exist, skipping.")
-            if clustering_algorithm == "NMF":
-                clustering_model = NMF(n_components=NUM_CLUSTERS, init='nndsvd', random_state=42, max_iter=500)
-                _dictionary = np.load(OUT_FILE_PATH_CLUSTERING_INSTANCE)
-                clustering_model.components_ = _dictionary
-            elif clustering_algorithm == "KMeans":
-                from sklearn.cluster import KMeans
-                clustering_model = KMeans(n_clusters=NUM_CLUSTERS, random_state=42)
-                _centroids = np.load(OUT_FILE_PATH_CLUSTERING_INSTANCE)
-                clustering_model.cluster_centers_ = _centroids
-            else:
-                raise ValueError(f"Unsupported clustering algorithm: {clustering_algorithm}")
-            _slide_pbar.write(f"Clustering model loaded.")
+        # Perform clustering or load the existing instance
+        if clustering_instance_fp is not None:
+            _slide_pbar.write(f"Loading precomputed clustering instance from {clustering_instance_fp}")
+            # if clustering_algorithm == "NMF":
+            #     clustering_model = NMF(n_components=NUM_CLUSTERS, init='nndsvd', random_state=42, max_iter=500)
+            #     _dictionary = np.load(clustering_instance_fp)
+            #     clustering_model.components_ = _dictionary
+            # elif clustering_algorithm == "KMeans":
+            #     from sklearn.cluster import KMeans
+            #     clustering_model = KMeans(n_clusters=NUM_CLUSTERS, random_state=42)
+            #     _centroids = np.load(clustering_instance_fp)
+            #     clustering_model.cluster_centers_ = _centroids
+            # else:
+            #     raise ValueError(f"Unsupported clustering algorithm: {clustering_algorithm}")
+            clustering_model = ClusteringManager.load_model(
+                algorithm=clustering_algorithm,
+                num_clusters=NUM_CLUSTERS,
+                path=clustering_instance_fp
+            )
+            _slide_pbar.write(f"Clustering model loaded from precomputed instance.")
         else:
-            if clustering_algorithm == "NMF":
-                clustering_model = NMF(n_components=NUM_CLUSTERS, init='nndsvd', random_state=42, max_iter=500)
-            elif clustering_algorithm == "KMeans":
-                from sklearn.cluster import KMeans
-                clustering_model = KMeans(n_clusters=NUM_CLUSTERS, random_state=42)
+            OUT_FILE_PATH_CLUSTERING_INSTANCE = CLUSTERING_DIR / f"clustering-instance_{clustering_algorithm}_{i}_{slide_name}.npy"
+            if OUT_FILE_PATH_CLUSTERING_INSTANCE.exists():
+                _slide_pbar.write(f"Clustering instance for slide {slide_name} exist, skipping.")
+                # if clustering_algorithm == "NMF":
+                #     clustering_model = NMF(n_components=NUM_CLUSTERS, init='nndsvd', random_state=42, max_iter=500)
+                #     _dictionary = np.load(OUT_FILE_PATH_CLUSTERING_INSTANCE)
+                #     clustering_model.components_ = _dictionary
+                # elif clustering_algorithm == "KMeans":
+                #     from sklearn.cluster import KMeans
+                #     clustering_model = KMeans(n_clusters=NUM_CLUSTERS, random_state=42)
+                #     _centroids = np.load(OUT_FILE_PATH_CLUSTERING_INSTANCE)
+                #     clustering_model.cluster_centers_ = _centroids
+                # else:
+                #     raise ValueError(f"Unsupported clustering algorithm: {clustering_algorithm}")
+                clustering_model = ClusteringManager.load_model(
+                    algorithm=clustering_algorithm,
+                    num_clusters=NUM_CLUSTERS,
+                    path=OUT_FILE_PATH_CLUSTERING_INSTANCE
+                )
+                _slide_pbar.write(f"Clustering model loaded.")
             else:
-                raise ValueError(f"Unsupported clustering algorithm: {clustering_algorithm}")
-            _slide_pbar.write(f"Fitting clustering model ({clustering_algorithm}) for slide {slide_name} with embeddings shape {embeddings.shape}")
+                # if clustering_algorithm == "NMF":
+                #     clustering_model = NMF(n_components=NUM_CLUSTERS, init='nndsvd', random_state=42, max_iter=500)
+                # elif clustering_algorithm == "KMeans":
+                #     from sklearn.cluster import KMeans
+                #     clustering_model = KMeans(n_clusters=NUM_CLUSTERS, random_state=42)
+                # else:
+                #     raise ValueError(f"Unsupported clustering algorithm: {clustering_algorithm}")
+                clustering_model = ClusteringManager.create_model(
+                    algorithm=clustering_algorithm,
+                    num_clusters=NUM_CLUSTERS
+                )
+                _slide_pbar.write(f"Fitting clustering model ({clustering_algorithm}) for slide {slide_name} with embeddings shape {embeddings.shape}")
 
-            clustering_model.fit(embeddings)
-            _slide_pbar.write(f"Clustering model fitted.")
-            with safe_file_op_ctxm(OUT_FILE_PATH_CLUSTERING_INSTANCE, unlink_on_exception=True) as cluster_instance_numpy_file:
-                if clustering_algorithm == "NMF":
-                    np.save(cluster_instance_numpy_file, clustering_model.components_)
-                elif clustering_algorithm == "KMeans":
-                    np.save(cluster_instance_numpy_file, clustering_model.cluster_centers_)
+                clustering_model.fit(embeddings)
+                _slide_pbar.write(f"Clustering model fitted.")
+                with safe_file_op_ctxm(OUT_FILE_PATH_CLUSTERING_INSTANCE, unlink_on_exception=True) as cluster_instance_numpy_file:
+                    if clustering_algorithm == "NMF":
+                        np.save(cluster_instance_numpy_file, clustering_model.components_)
+                    elif clustering_algorithm == "KMeans":
+                        np.save(cluster_instance_numpy_file, clustering_model.cluster_centers_)
 
         # =====================================================================
         # Visualise the clusters characteristics to asses quality and centroid distances
@@ -250,6 +282,24 @@ def main(num_clusters: int, experiment_name: str, clustering_algorithm: str = "N
         if OUT_FILE_PATH_CLUSTERING_VISUALS.exists():
             _slide_pbar.write(f"Clustering visuals for slide {slide_name} exist, skipping.")
         else:
+            # if clustering_algorithm == "NMF":
+            #     components = clustering_model.components_
+            # elif clustering_algorithm == "KMeans":
+            #     components = clustering_model.cluster_centers_
+            # else:
+            #     raise ValueError(f"Unsupported clustering algorithm: {clustering_algorithm}")
+            components = ClusteringManager.get_components(
+                algorithm=clustering_algorithm,
+                model=clustering_model
+            )
+            
+            distance_matrix = np.linalg.norm(components[:, np.newaxis] - components[np.newaxis, :], axis=2)
+            color_lut = ColorPalette(palette=COLOR_PALETTE_ADAM).get_rgb_lut()
+            plot_cluster_distance_matrix(
+                distance_matrix=distance_matrix,
+                cluster_colors=color_lut,
+                figure_fp=OUT_FILE_PATH_CLUSTERING_VISUALS
+            )
            
 
         OUT_FILE_PATH_INDS = CLUSTERING_DIR / f"cluster-indices_slide-aggregated_{clustering_algorithm}_{i}_{slide_name}.npy"
@@ -283,8 +333,8 @@ def main(num_clusters: int, experiment_name: str, clustering_algorithm: str = "N
 
         # =====================================================================
         # Visualize the clustering results as overlay on the WSI
-        OUT_FILE_PATH_SEGS = CLUSTERING_DIR           / f"clustering_color_{clustering_algorithm}" / f"{slide_name}.tiff"
         OUT_FILE_PATH_INDS_GRAYSCALE = CLUSTERING_DIR / f"clustering_gray_{clustering_algorithm}"  / f"{slide_name}.tiff"
+        OUT_FILE_PATH_SEGS = CLUSTERING_DIR           / f"clustering_color_{clustering_algorithm}" / f"{slide_name}.tiff"
         if OUT_FILE_PATH_SEGS.exists() and OUT_FILE_PATH_INDS_GRAYSCALE.exists():
             _slide_pbar.write(f"Segmentation for slide {slide_name} exists, skipping.")
             
@@ -292,33 +342,42 @@ def main(num_clusters: int, experiment_name: str, clustering_algorithm: str = "N
             # get WSI full extent at a specific level
             slide_handle = openslide.OpenSlide(slide_path)
             level_extent_x, level_extent_y = slide_handle.level_dimensions[WSI_LEVEL_TO_MATCH_OUTPUTS_TO]
-            with safe_file_op_ctxm(OUT_FILE_PATH_SEGS, unlink_on_exception=True) as segs_numpy_file:
-                overlay = get_overlay_from_clustering_numpy(clustering_indices_memmap)
+            if OUT_FILE_PATH_INDS_GRAYSCALE.exists():
+                _slide_pbar.write(f"Grayscale segmentation for slide {slide_name} exist, skipping.")
+            else:
+                with safe_file_op_ctxm(OUT_FILE_PATH_INDS_GRAYSCALE, unlink_on_exception=True) as inds_gray_numpy_file:
+                    
+                    
+                    overlay = (clustering_indices_memmap.astype(np.float32) / (clustering_indices_memmap.max())) * 255.0
+                    overlay = overlay.astype(np.uint8)
 
-                _slide_pbar.write(f"Saving segmentation overlay for slide {slide_name} at level {WSI_LEVEL_TO_MATCH_OUTPUTS_TO} dimensions {level_extent_x}x{level_extent_y}")
-                save_image_xopat_compatible( 
-                    overlay, 
-                    segs_numpy_file, 
-                    target_extent_x=level_extent_x, 
-                    target_extent_y=level_extent_y
-                )
-                _slide_pbar.write(f"Done saving segmentation for {slide_name}!")
-        
-            with safe_file_op_ctxm(OUT_FILE_PATH_INDS_GRAYSCALE, unlink_on_exception=True) as inds_gray_numpy_file:
-                
-                
-                overlay = (clustering_indices_memmap.astype(np.float32) / (clustering_indices_memmap.max())) * 255.0
-                overlay = overlay.astype(np.uint8)
+                    _slide_pbar.write(f"Saving grayscale indices overlay for slide {slide_name} at level {WSI_LEVEL_TO_MATCH_OUTPUTS_TO} dimensions {level_extent_x}x{level_extent_y}")
+                    save_image_xopat_compatible( 
+                        overlay, 
+                        inds_gray_numpy_file, 
+                        target_extent_x=level_extent_x, 
+                        target_extent_y=level_extent_y
+                    )
+                    _slide_pbar.write(f"Done saving grayscale indices for {slide_name}!")
 
-                _slide_pbar.write(f"Saving grayscale indices overlay for slide {slide_name} at level {WSI_LEVEL_TO_MATCH_OUTPUTS_TO} dimensions {level_extent_x}x{level_extent_y}")
-                save_image_xopat_compatible( 
-                    overlay, 
-                    inds_gray_numpy_file, 
-                    target_extent_x=level_extent_x, 
-                    target_extent_y=level_extent_y
-                )
-                _slide_pbar.write(f"Done saving grayscale indices for {slide_name}!")
 
+            if OUT_FILE_PATH_SEGS.exists():
+                _slide_pbar.write(f"Color segmentation for slide {slide_name} exist, skipping.")
+            elif TOGGLE_COLORMAP_SEGMENTATIONS_DISABLE:
+                _slide_pbar.write(f"Color segmentations were disabled in the sourcecode for now.")
+            else:
+                with safe_file_op_ctxm(OUT_FILE_PATH_SEGS, unlink_on_exception=True) as segs_numpy_file:
+                    overlay = get_overlay_from_clustering_numpy(clustering_indices_memmap)
+
+                    _slide_pbar.write(f"Saving segmentation overlay for slide {slide_name} at level {WSI_LEVEL_TO_MATCH_OUTPUTS_TO} dimensions {level_extent_x}x{level_extent_y}")
+                    save_image_xopat_compatible( 
+                        overlay, 
+                        segs_numpy_file, 
+                        target_extent_x=level_extent_x, 
+                        target_extent_y=level_extent_y
+                    )
+                    _slide_pbar.write(f"Done saving segmentation for {slide_name}!")
+            
 
         _slide_pbar.write(f"Finished processing slide {slide_name} ({i})")
 

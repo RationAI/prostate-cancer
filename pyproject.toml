@@ -17,7 +17,6 @@ dependencies = [
     "pandas",
     "torch",
     "torchvision",
-    "triton",
     "tqdm",
     "rationai-masks @ git+https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/masks.git",
     "rationai-mlkit @ git+https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/mlkit.git",

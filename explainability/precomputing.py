@@ -1,13 +1,15 @@
-from numpy.lib.format import open_memmap
 from pathlib import Path
+import contextlib
 import math
 import numpy as np
+import logging
+
+from numpy.lib.format import open_memmap
+import matplotlib.pyplot as plt
+from sklearn.decomposition import NMF
+from sklearn.cluster import KMeans
 import torch
 
-import matplotlib.pyplot as plt
-import contextlib
-
-import logging
 logger = logging.getLogger(__name__)
 
 
@@ -202,3 +204,57 @@ def append_data_to_a_memmap_npy_file(
         dict(descr=dtype.str, fortran_order=fortran_order, shape=new_shape),
         version=version
     )
+
+
+
+class ClusteringManager:
+    """Utility class to create, load, save, and extract clustering models."""
+
+    SUPPORTED = {"NMF", "KMeans"}
+
+    @staticmethod
+    def create_model(algorithm: str, **kwargs):
+        """Return a new clustering model instance based on algorithm name."""
+        if algorithm == "NMF":
+            return NMF(n_components=kwargs.get("num_clusters"), init="nndsvd", random_state=42, max_iter=500)
+        elif algorithm == "KMeans":
+            return KMeans(n_clusters=kwargs.get("num_clusters"), random_state=42)
+        else:
+            raise ValueError(f"Unsupported clustering algorithm: {algorithm}")
+
+    @staticmethod
+    def load_model(algorithm: str, path: Path, **kwargs):
+        """Load clustering model from saved numpy array."""
+        model = ClusteringManager.create_model(algorithm, kwargs.get("num_clusters"))
+        data = np.load(path)
+
+        if algorithm == "NMF":
+            model.components_ = data
+        elif algorithm == "KMeans":
+            model.cluster_centers_ = data
+        else:
+            raise ValueError(f"Unsupported clustering algorithm: {algorithm}")
+
+        return model
+
+    @staticmethod
+    def save_model(algorithm: str, model, path: Path):
+        """Save model centroids/components to a numpy file."""
+        path.parent.mkdir(parents=True, exist_ok=True)
+
+        if algorithm == "NMF":
+            np.save(path, model.components_)
+        elif algorithm == "KMeans":
+            np.save(path, model.cluster_centers_)
+        else:
+            raise ValueError(f"Unsupported clustering algorithm: {algorithm}")
+
+    @staticmethod
+    def get_components(algorithm: str, model):
+        """Return the centroid/component matrix for the given model."""
+        if algorithm == "NMF":
+            return model.components_
+        elif algorithm == "KMeans":
+            return model.cluster_centers_
+        else:
+            raise ValueError(f"Unsupported clustering algorithm: {algorithm}")
