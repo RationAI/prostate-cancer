@@ -70,6 +70,10 @@ class SlideTiles(Dataset[LabeledSample | UnlabeledSample]):
         transforms: TransformType | None = None,
     ) -> None:
         super().__init__()
+        
+        # update the slide paths to reflect the changes in our mounts. /mnt/data/Projects/prostate_cancer/cancer/test_data/ -> /mnt/data/MOU/prostate/tile_level_annotations_test/
+        slide_metadata["path"] = slide_metadata["path"].str.replace("/mnt/data/Projects/prostate_cancer/cancer/test_data/", "/mnt/data/MOU/prostate/tile_level_annotations_test/", regex=False)
+
         self.slide_metadata = slide_metadata
         self.slide_tiles = OpenSlideTilesDataset(
             slide_path=slide_metadata.path,
