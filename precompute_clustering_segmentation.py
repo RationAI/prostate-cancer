@@ -36,14 +36,20 @@ logging.basicConfig(level=logging.INFO)
 @click.option('--experiment-name', type=str, help='Name of the experiment.')
 @click.option('--clustering-algorithm', type=click.Choice(['NMF', 'KMeans'], case_sensitive=False), default='NMF', help='Clustering algorithm to use.')
 @click.option('--clustering-instance-fp', type=click.Path(exists=True, file_okay=True, dir_okay=False, path_type=Path), default=None, help='Path to precomputed clustering instance (.npy file). If provided, this instance will be used instead of fitting a new one.')
-def main(num_clusters: int, experiment_name: str, clustering_algorithm: str = "NMF", clustering_instance_fp: Path | None = None):
+@click.option('--out-dir', type=click.Path(file_okay=False, dir_okay=True, path_type=Path), default=Path("/mnt/projects/Explainability/XAICNNEmbeddings/"), help='Output directory for experiment results. If not provided, a default directory will be used.')
+def main(num_clusters: int, experiment_name: str, clustering_algorithm: str, clustering_instance_fp: Path | None, out_dir: Path | None):
 
-    OUT_DIR = Path("/mnt/projects/Explainability/XAICNNEmbeddings/")
+    if out_dir is None:
+        raise ValueError("out_dir must be provided.")
+    OUT_DIR = out_dir
     PRECOMPUTE_DIR = OUT_DIR / "PRECOMPUTED"
     ACTIVATIONS_DIR = PRECOMPUTE_DIR / "VGG16_Prostate"
-    CLUSTERING_DIR = OUT_DIR / experiment_name
+    # CLUSTERING_DIR = OUT_DIR / experiment_name
+    CLUSTERING_DIR = Path("/tmp/XAI") / experiment_name
+
     CLUSTERING_DIR.mkdir(exist_ok=True)
     ACTIVATIONS_DIR.mkdir(exist_ok=True)
+    
     WSI_LEVEL_TO_MATCH_OUTPUTS_TO = 3
     NUM_CLUSTERS = num_clusters
 
@@ -278,29 +284,30 @@ def main(num_clusters: int, experiment_name: str, clustering_algorithm: str = "N
 
         # =====================================================================
         # Visualise the clusters characteristics to asses quality and centroid distances
-        OUT_FILE_PATH_CLUSTERING_VISUALS = CLUSTERING_DIR / f"clustering-visuals_{clustering_algorithm}_{i}_{slide_name}.svg"
-        if OUT_FILE_PATH_CLUSTERING_VISUALS.exists():
-            _slide_pbar.write(f"Clustering visuals for slide {slide_name} exist, skipping.")
-        else:
-            # if clustering_algorithm == "NMF":
-            #     components = clustering_model.components_
-            # elif clustering_algorithm == "KMeans":
-            #     components = clustering_model.cluster_centers_
-            # else:
-            #     raise ValueError(f"Unsupported clustering algorithm: {clustering_algorithm}")
-            components = ClusteringManager.get_components(
-                algorithm=clustering_algorithm,
-                model=clustering_model
-            )
+        if clustering_instance_fp is None:
+            OUT_FILE_PATH_CLUSTERING_VISUALS = CLUSTERING_DIR / f"clustering-visuals_{clustering_algorithm}_{i}_{slide_name}.svg"
+            if OUT_FILE_PATH_CLUSTERING_VISUALS.exists():
+                _slide_pbar.write(f"Clustering visuals for slide {slide_name} exist, skipping.")
+            else:
+                # if clustering_algorithm == "NMF":
+                #     components = clustering_model.components_
+                # elif clustering_algorithm == "KMeans":
+                #     components = clustering_model.cluster_centers_
+                # else:
+                #     raise ValueError(f"Unsupported clustering algorithm: {clustering_algorithm}")
+                components = ClusteringManager.get_components(
+                    algorithm=clustering_algorithm,
+                    model=clustering_model
+                )
+                
+                distance_matrix = np.linalg.norm(components[:, np.newaxis] - components[np.newaxis, :], axis=2)
+                color_lut = ColorPalette(palette=COLOR_PALETTE_ADAM[1:]).get_rgb_lut()
+                plot_cluster_distance_matrix(
+                    distance_matrix=distance_matrix,
+                    cluster_colors=color_lut,
+                    figure_fp=OUT_FILE_PATH_CLUSTERING_VISUALS
+                )
             
-            distance_matrix = np.linalg.norm(components[:, np.newaxis] - components[np.newaxis, :], axis=2)
-            color_lut = ColorPalette(palette=COLOR_PALETTE_ADAM).get_rgb_lut()
-            plot_cluster_distance_matrix(
-                distance_matrix=distance_matrix,
-                cluster_colors=color_lut,
-                figure_fp=OUT_FILE_PATH_CLUSTERING_VISUALS
-            )
-           
 
         OUT_FILE_PATH_INDS = CLUSTERING_DIR / f"cluster-indices_slide-aggregated_{clustering_algorithm}_{i}_{slide_name}.npy"
         if OUT_FILE_PATH_INDS.exists():
