@@ -1,7 +1,9 @@
 import matplotlib.pyplot as plt
 import torch
 import numpy as np
-from jaxtyping import Int, UInt8
+from jaxtyping import Int, UInt8, Float
+from pathlib import Path
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 
 def get_overlay_from_clustering_torch(
@@ -70,3 +72,61 @@ def get_overlay_from_clustering_numpy(
         colormap_lut[indices.astype(np.int8).reshape(-1)].reshape(*indices.shape, 3)
     )  # [B, H, W, 3]
     return overlays
+
+
+def plot_cluster_distance_matrix(
+    distance_matrix: Float [np.ndarray, "N N"],
+    cluster_colors: Float [np.ndarray, "N 3"],
+    figure_fp: Path | None = None,
+) -> None:
+    """Plots the cluster distance matrix with colored stripes indicating clusters.
+
+    Args:
+        distance_matrix: [N, N] array of distances between clusters
+        cluster_colors: [N, 3] array of RGB colors for each cluster
+    """
+    n_indices = distance_matrix.shape[0]
+
+    fig, ax_matrix = plt.subplots(figsize=(6, 6))
+
+    # Main heatmap
+    im = ax_matrix.imshow(distance_matrix, cmap='viridis', aspect='equal', extent=(0, n_indices, 0, n_indices))
+    ax_matrix.set_xticks([])
+    ax_matrix.set_yticks([])
+
+    # Use AxisDivider to add top and left cluster stripes + colorbar
+    divider = make_axes_locatable(ax_matrix)
+
+    # Top stripe (for columns)
+    ax_col = divider.append_axes("top", size="5%", pad=0.0)
+    ax_col.imshow(
+        cluster_colors[np.newaxis, :, :],
+        aspect='auto',
+        extent=[0, n_indices, 0, 1]
+    )
+    ax_col.set_xlim(0, n_indices)
+    ax_col.set_ylim(0, 1)
+    ax_col.axis('off')
+
+    # Left stripe (for rows)
+    ax_row = divider.append_axes("left", size="5%", pad=0.0)
+    # Flip vertically so first row is at top
+    ax_row.imshow(
+        cluster_colors[::-1, np.newaxis, :],
+        aspect='auto',
+        extent=[0, 1, 0, n_indices]
+    )
+    ax_row.set_xlim(0, 1)
+    ax_row.set_ylim(0, n_indices)
+    ax_row.axis('off')
+
+    # Colorbar on the right
+    cax = divider.append_axes("right", size="5%", pad=0.05)
+    plt.colorbar(im, cax=cax, label='Distance')
+
+    if figure_fp is not None:
+        plt.savefig(figure_fp, bbox_inches='tight')
+        plt.close(fig)
+    else:   
+        plt.show()
+        
