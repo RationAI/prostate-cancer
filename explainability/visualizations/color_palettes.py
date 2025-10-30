@@ -41,4 +41,4 @@ class ColorPalette:
         """
         return self.colors_lut
             
-COLOR_PALETTE_ADAM = ["#00000", "#6B00F5", "#324B47", "#3D324B", "#754B3B", "#A39753", "#2EA32E", "#2E55A3", "#B82E75", "#01F5CC", "#F54701", "#F5F201"]
+COLOR_PALETTE_ADAM = ["#000000", "#6B00F5", "#324B47", "#3D324B", "#754B3B", "#A39753", "#2EA32E", "#2E55A3", "#B82E75", "#01F5CC", "#F54701", "#F5F201"]

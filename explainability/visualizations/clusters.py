@@ -75,8 +75,8 @@ def get_overlay_from_clustering_numpy(
 
 
 def plot_cluster_distance_matrix(
-    distance_matrix: Float [np.ndarray, "N N"],
-    cluster_colors: Float [np.ndarray, "N 3"],
+    distance_matrix: Float[np.ndarray, "N N"],
+    cluster_colors: Float[np.ndarray, "M 3"],
     figure_fp: Path | None = None,
 ) -> None:
     """Plots the cluster distance matrix with colored stripes indicating clusters.
@@ -86,47 +86,67 @@ def plot_cluster_distance_matrix(
         cluster_colors: [N, 3] array of RGB colors for each cluster
     """
     n_indices = distance_matrix.shape[0]
+    cluster_colors = cluster_colors[:n_indices]  # Ensure matching shape
 
     fig, ax_matrix = plt.subplots(figsize=(6, 6))
 
-    # Main heatmap
-    im = ax_matrix.imshow(distance_matrix, cmap='viridis', aspect='equal', extent=(0, n_indices, 0, n_indices))
+    # --- Main heatmap ---
+    im = ax_matrix.imshow(
+        distance_matrix,
+        cmap="viridis",
+        aspect="equal",
+        origin="upper",   # ensures row 0 is at the top
+        extent=(0, n_indices, 0, n_indices),
+    )
     ax_matrix.set_xticks([])
     ax_matrix.set_yticks([])
 
-    # Use AxisDivider to add top and left cluster stripes + colorbar
     divider = make_axes_locatable(ax_matrix)
 
-    # Top stripe (for columns)
+    # --- Top stripe: cluster colors for columns ---
     ax_col = divider.append_axes("top", size="5%", pad=0.0)
     ax_col.imshow(
         cluster_colors[np.newaxis, :, :],
-        aspect='auto',
-        extent=[0, n_indices, 0, 1]
+        aspect="auto",
+        extent=[0, n_indices, 0, 1],
+        origin="upper"
     )
     ax_col.set_xlim(0, n_indices)
     ax_col.set_ylim(0, 1)
-    ax_col.axis('off')
+    ax_col.set_xticks(np.arange(n_indices) + 0.5)
+    ax_col.set_xticklabels([str(i) for i in range(n_indices)], rotation=90, fontsize=6)
+    ax_col.xaxis.set_ticks_position("top")
+    ax_col.set_yticks([])
+    for spine in ax_col.spines.values():
+        spine.set_visible(False)
 
-    # Left stripe (for rows)
+    # --- Left stripe: cluster colors for rows ---
     ax_row = divider.append_axes("left", size="5%", pad=0.0)
-    # Flip vertically so first row is at top
     ax_row.imshow(
-        cluster_colors[::-1, np.newaxis, :],
-        aspect='auto',
-        extent=[0, 1, 0, n_indices]
+        cluster_colors[:, np.newaxis, :],
+        aspect="auto",
+        extent=[0, 1, 0, n_indices],
+        origin="upper"   # ensures row 0 color is at top
     )
     ax_row.set_xlim(0, 1)
     ax_row.set_ylim(0, n_indices)
-    ax_row.axis('off')
+    ax_row.set_yticks(np.arange(n_indices) + 0.5)
+    ax_row.set_yticklabels([str(i) for i in range(n_indices)][::-1], fontsize=6)
+    ax_row.set_xticks([])
+    ax_row.yaxis.set_ticks_position("left")
+    ax_row.yaxis.set_label_position("left")
+    for spine in ax_row.spines.values():
+        spine.set_visible(False)
 
-    # Colorbar on the right
+    # --- Colorbar (distance scale) ---
     cax = divider.append_axes("right", size="5%", pad=0.05)
-    plt.colorbar(im, cax=cax, label='Distance')
+    plt.colorbar(im, cax=cax, label="Distance")
 
+    # --- Output or display ---
     if figure_fp is not None:
-        plt.savefig(figure_fp, bbox_inches='tight')
+        plt.savefig(figure_fp, bbox_inches="tight")
         plt.close(fig)
-    else:   
+    else:
         plt.show()
+
         
