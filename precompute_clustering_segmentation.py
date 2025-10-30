@@ -64,7 +64,7 @@ def main(num_clusters: int, experiment_name: str, clustering_algorithm: str, clu
     overrides = ["experiment=predict/images/vgg16", "mode=predict", "carcinoma_roi_t=0", "+stratified_filter=null"]
 
     # Initialize Hydra configuration
-    with hydra.initialize(config_path="../conf", version_base=None):
+    with hydra.initialize(config_path="conf", version_base=None):
         config = hydra.compose(config_name="default", overrides=overrides)
 
     print("Configuration loaded successfully!")
