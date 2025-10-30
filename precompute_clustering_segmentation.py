@@ -353,6 +353,7 @@ def main(num_clusters: int, experiment_name: str, clustering_algorithm: str, clu
         # Visualize the clustering results as overlay on the WSI
         OUT_FILE_PATH_INDS_GRAYSCALE = CLUSTERING_DIR / f"clustering_gray_{clustering_algorithm}"  / f"{slide_name}.tiff"
         OUT_FILE_PATH_SEGS = CLUSTERING_DIR           / f"clustering_color_{clustering_algorithm}" / f"{slide_name}.tiff"
+        _slide_pbar.write(f"Preparing segmentation {OUT_FILE_PATH_INDS_GRAYSCALE} and {OUT_FILE_PATH_SEGS} for slide {slide_name}")
         if artifact_exists(mlflow_client, mlflow_run_id, "clustering_images", OUT_FILE_PATH_INDS_GRAYSCALE.name):
             _slide_pbar.write(f"Grayscale segmentation for slide {slide_name} exists in MLflow, skipping.")
 
