@@ -395,13 +395,13 @@ def main(num_clusters: int, experiment_name: str, clustering_algorithm: str, clu
                         target_extent_y=level_extent_y
                     )
                     _slide_pbar.write(f"Done saving grayscale indices for {slide_name}!")
-                    upload_image_if_missing(
-                        client=mlflow_client,
-                        run_id=mlflow_run_id,
-                        local_image_path=OUT_FILE_PATH_INDS_GRAYSCALE,
-                        artifact_subdir="clustering_images"
-                    )
-                    _slide_pbar.write(f"Ensured upload of grayscale segmentation for {slide_name} to MLflow!")
+                upload_image_if_missing(
+                    client=mlflow_client,
+                    run_id=mlflow_run_id,
+                    local_image_path=OUT_FILE_PATH_INDS_GRAYSCALE,
+                    artifact_subdir="clustering_images"
+                )
+                _slide_pbar.write(f"Ensured upload of grayscale segmentation for {slide_name} to MLflow!")
 
 
             if OUT_FILE_PATH_SEGS.exists():
