@@ -29,6 +29,10 @@ class FilterableDataset(MetaTiledSlides[T]):
         self.thresholds = thresholds
         super().__init__(uris=uris)
 
+        # update the slide paths to reflect the changes in our mounts. /mnt/data/Projects/prostate_cancer/cancer/test_data/ -> /mnt/data/MOU/prostate/tile_level_annotations_test/
+        self.slides["path"] = self.slides["path"].str.replace("/mnt/data/Projects/prostate_cancer/cancer/test_data/", "/mnt/data/MOU/prostate/tile_level_annotations_test/", regex=False)
+
+
     def filter_tiles_by_thresholds(self, tiles: pd.DataFrame) -> pd.DataFrame:
         for percentage in [
             "tissue_roi_percentage",
@@ -57,9 +61,6 @@ class FilterableDataset(MetaTiledSlides[T]):
         if self.stratified_filter:
             tiles = self.filter_non_carcinoma(tiles)
 
-        # update the slide paths to reflect the changes in our mounts. /mnt/data/Projects/prostate_cancer/cancer/test_data/ -> /mnt/data/MOU/prostate/tile_level_annotations_test/
-        tiles["slide_id"] = tiles["slide_id"].str.replace("/mnt/data/Projects/prostate_cancer/cancer/test_data/", "/mnt/data/MOU/prostate/tile_level_annotations_test/", regex=False)
-        
         return tiles
 
     def filter_non_carcinoma(self, tiles: pd.DataFrame) -> pd.DataFrame:
