@@ -16,6 +16,7 @@ from sklearn.decomposition import NMF
 from tqdm.auto import tqdm
 import click
 
+from explainability.mlflow_persistence.storing import artifact_exists, ensure_mlflow_run, upload_image_if_missing
 from prostate_cancer.data import DataModule
 from prostate_cancer.prostate_cancer_model import ProstateCancerModel
 from explainability.precomputing import MultichannelHeatmapAssembler, safe_file_op_ctxm, ClusteringManager
@@ -37,7 +38,8 @@ logging.basicConfig(level=logging.INFO)
 @click.option('--clustering-algorithm', type=click.Choice(['NMF', 'KMeans'], case_sensitive=False), default='NMF', help='Clustering algorithm to use.')
 @click.option('--clustering-instance-fp', type=click.Path(exists=True, file_okay=True, dir_okay=False, path_type=Path), default=None, help='Path to precomputed clustering instance (.npy file). If provided, this instance will be used instead of fitting a new one.')
 @click.option('--out-dir', type=click.Path(file_okay=False, dir_okay=True, path_type=Path), default=Path("/mnt/projects/Explainability/XAICNNEmbeddings/"), help='Output directory for experiment results. If not provided, a default directory will be used.')
-def main(num_clusters: int, experiment_name: str, clustering_algorithm: str, clustering_instance_fp: Path | None, out_dir: Path | None):
+@click.option('--mlf-runid', type=str, default=None, help='MLflow run ID to associate with the experiment.')
+def main(num_clusters: int, experiment_name: str, clustering_algorithm: str, clustering_instance_fp: Path | None, out_dir: Path | None, mlf_runid: str | None):
 
     if out_dir is None:
         raise ValueError("out_dir must be provided.")
@@ -116,6 +118,15 @@ def main(num_clusters: int, experiment_name: str, clustering_algorithm: str, clu
     dataloaders = data.test_dataloader()
     print(type(data.test_dataloader()))
 
+
+    # %%
+
+    mlflow.set_tracking_uri("http://mlflow.rationai-mlflow:5000/")
+    mlflow_experiment_name = "Testing"
+    mlflow_client, mlflow_exp_id, mlflow_run_id = ensure_mlflow_run(mlflow_experiment_name, mlf_runid)
+    print(f"MLflow run ID: {mlflow_run_id}")
+
+ 
 
     # %%
 
@@ -256,8 +267,8 @@ def main(num_clusters: int, experiment_name: str, clustering_algorithm: str, clu
                 #     raise ValueError(f"Unsupported clustering algorithm: {clustering_algorithm}")
                 clustering_model = ClusteringManager.load_model(
                     algorithm=clustering_algorithm,
+                    path=OUT_FILE_PATH_CLUSTERING_INSTANCE,
                     num_clusters=NUM_CLUSTERS,
-                    path=OUT_FILE_PATH_CLUSTERING_INSTANCE
                 )
                 _slide_pbar.write(f"Clustering model loaded.")
             else:
@@ -342,15 +353,32 @@ def main(num_clusters: int, experiment_name: str, clustering_algorithm: str, clu
         # Visualize the clustering results as overlay on the WSI
         OUT_FILE_PATH_INDS_GRAYSCALE = CLUSTERING_DIR / f"clustering_gray_{clustering_algorithm}"  / f"{slide_name}.tiff"
         OUT_FILE_PATH_SEGS = CLUSTERING_DIR           / f"clustering_color_{clustering_algorithm}" / f"{slide_name}.tiff"
-        if OUT_FILE_PATH_SEGS.exists() and OUT_FILE_PATH_INDS_GRAYSCALE.exists():
+        if artifact_exists(mlflow_client, mlflow_run_id, "clustering_images", OUT_FILE_PATH_INDS_GRAYSCALE.name):
+            _slide_pbar.write(f"Grayscale segmentation for slide {slide_name} exists in MLflow, skipping.")
+
+        elif OUT_FILE_PATH_SEGS.exists() and OUT_FILE_PATH_INDS_GRAYSCALE.exists():
             _slide_pbar.write(f"Segmentation for slide {slide_name} exists, skipping.")
-            
+            upload_image_if_missing(
+                client=mlflow_client,
+                run_id=mlflow_run_id,
+                local_image_path=OUT_FILE_PATH_INDS_GRAYSCALE,
+                artifact_subdir="clustering_images"
+            )
+            _slide_pbar.write(f"Ensured upload of grayscale segmentation for {slide_name} to MLflow!")
+        
         else:    
             # get WSI full extent at a specific level
             slide_handle = openslide.OpenSlide(slide_path)
             level_extent_x, level_extent_y = slide_handle.level_dimensions[WSI_LEVEL_TO_MATCH_OUTPUTS_TO]
             if OUT_FILE_PATH_INDS_GRAYSCALE.exists():
                 _slide_pbar.write(f"Grayscale segmentation for slide {slide_name} exist, skipping.")
+                upload_image_if_missing(
+                    client=mlflow_client,
+                    run_id=mlflow_run_id,
+                    local_image_path=OUT_FILE_PATH_INDS_GRAYSCALE,
+                    artifact_subdir="clustering_images"
+                )
+                _slide_pbar.write(f"Ensured upload of grayscale segmentation for {slide_name} to MLflow!")
             else:
                 with safe_file_op_ctxm(OUT_FILE_PATH_INDS_GRAYSCALE, unlink_on_exception=True) as inds_gray_numpy_file:
                     
@@ -366,6 +394,13 @@ def main(num_clusters: int, experiment_name: str, clustering_algorithm: str, clu
                         target_extent_y=level_extent_y
                     )
                     _slide_pbar.write(f"Done saving grayscale indices for {slide_name}!")
+                    upload_image_if_missing(
+                        client=mlflow_client,
+                        run_id=mlflow_run_id,
+                        local_image_path=OUT_FILE_PATH_INDS_GRAYSCALE,
+                        artifact_subdir="clustering_images"
+                    )
+                    _slide_pbar.write(f"Ensured upload of grayscale segmentation for {slide_name} to MLflow!")
 
 
             if OUT_FILE_PATH_SEGS.exists():
@@ -384,7 +419,6 @@ def main(num_clusters: int, experiment_name: str, clustering_algorithm: str, clu
                         target_extent_y=level_extent_y
                     )
                     _slide_pbar.write(f"Done saving segmentation for {slide_name}!")
-            
 
         _slide_pbar.write(f"Finished processing slide {slide_name} ({i})")
 

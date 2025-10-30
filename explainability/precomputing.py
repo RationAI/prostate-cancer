@@ -218,14 +218,16 @@ class ClusteringManager:
         if algorithm == "NMF":
             return NMF(n_components=kwargs.get("num_clusters"), init="nndsvd", random_state=42, max_iter=500)
         elif algorithm == "KMeans":
-            return KMeans(n_clusters=kwargs.get("num_clusters"), random_state=42)
+            n_clusters = kwargs.get("num_clusters")
+            assert n_clusters is not None, "num_clusters must be provided for KMeans"
+            return KMeans(n_clusters=n_clusters, random_state=42)
         else:
             raise ValueError(f"Unsupported clustering algorithm: {algorithm}")
 
     @staticmethod
     def load_model(algorithm: str, path: Path, **kwargs):
         """Load clustering model from saved numpy array."""
-        model = ClusteringManager.create_model(algorithm, kwargs.get("num_clusters"))
+        model = ClusteringManager.create_model(algorithm, **kwargs)
         data = np.load(path)
 
         if algorithm == "NMF":
