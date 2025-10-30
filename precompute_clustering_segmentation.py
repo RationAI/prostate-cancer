@@ -103,7 +103,7 @@ def main(num_clusters: int, experiment_name: str, clustering_algorithm: str = "N
 
     # %%
     # Get one batch from validation dataset
-    data.batch_size = 16
+    data.batch_size = 32
     data.setup("test")
 
     # %%
