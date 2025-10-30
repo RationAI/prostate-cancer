@@ -47,8 +47,8 @@ def main(num_clusters: int, experiment_name: str, clustering_algorithm: str, clu
     # CLUSTERING_DIR = OUT_DIR / experiment_name
     CLUSTERING_DIR = Path("/tmp/XAI") / experiment_name
 
-    CLUSTERING_DIR.mkdir(exist_ok=True)
-    ACTIVATIONS_DIR.mkdir(exist_ok=True)
+    CLUSTERING_DIR.mkdir(exist_ok=True, parents=True)
+    ACTIVATIONS_DIR.mkdir(exist_ok=True, parents=True)
     
     WSI_LEVEL_TO_MATCH_OUTPUTS_TO = 3
     NUM_CLUSTERS = num_clusters
