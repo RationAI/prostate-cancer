@@ -78,6 +78,7 @@ def plot_cluster_distance_matrix(
     distance_matrix: Float[np.ndarray, "N N"],
     cluster_colors: Float[np.ndarray, "M 3"],
     figure_fp: Path | None = None,
+    title: str = "Cluster Distance Matrix",
 ) -> None:
     """Plots the cluster distance matrix with colored stripes indicating clusters.
 
@@ -141,6 +142,9 @@ def plot_cluster_distance_matrix(
     # --- Colorbar (distance scale) ---
     cax = divider.append_axes("right", size="5%", pad=0.05)
     plt.colorbar(im, cax=cax, label="Distance")
+
+    # --- Title ---
+    ax_matrix.set_title(title, fontsize=12)
 
     # --- Output or display ---
     if figure_fp is not None:
