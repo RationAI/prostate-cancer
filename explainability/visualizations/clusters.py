@@ -143,8 +143,10 @@ def plot_cluster_distance_matrix(
     cax = divider.append_axes("right", size="5%", pad=0.05)
     plt.colorbar(im, cax=cax, label="Distance")
 
-    # --- Title ---
-    ax_matrix.set_title(title, fontsize=12)
+    # --- Add a title to the figure ---
+    fig.suptitle(title, fontsize=12)
+    plt.tight_layout()
+
 
     # --- Output or display ---
     if figure_fp is not None:
