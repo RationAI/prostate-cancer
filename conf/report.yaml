@@ -15,12 +15,13 @@ reporter:
     _target_: report.save.MLFlowReportStorer
     artifact_path: report.html
     metadata:
-        experiment_name: Explainability
+        experiment_name: Testing
         run_name: "📊 NMF clustering - Each WSI separately"
         description: |
             This is a report containing image segmentation using clustering of embedding from a VGG16 Prostate binary classifier mapped back to input image.
             Activation values were first assembled, overlaps resolved using averaging, then reshaped into clusterable embedding along the channel dimension.
             Overlays are present for multiple number of clusters. The clustering algorithm used is NMF (implementation from sklearn.decompose) and argmaxing the clustering result for each embedding.
+            Additionally, heatmaps are present for 
         user: adambajger
   background:
     _target_: report.masks.ParquetSlideDatasetMLFlowMaskRetriever
@@ -42,38 +43,74 @@ reporter:
     #     modifiable: true
     #     color: Turbo
     #   layer_name: LKCell
-    - _target_: report.masks.DriveMasksRetriever
-      layer_name: Clusters NMF 4
-      dir_name: "/mnt/data/Projects/Explainability/XAICNNEmbeddings/VGG16_Prostate_NMF_4clusters/clustering_gray"
-      shader_conf:
-        type: classify
-        classes: 5  # 1 for background (probably?)
-        modifiable: true
-        color: Turbo
-    - _target_: report.masks.DriveMasksRetriever
-      layer_name: Clusters NMF 6
-      dir_name: "/mnt/data/Projects/Explainability/XAICNNEmbeddings/VGG16_Prostate_NMF_6clusters/clustering_gray"
+    - _target_: report.masks.RunIDMlflowMaskRetriever
+      layer_name: "Clusters NMF 6"
+      run_id: c31d6d2acf8441cbac56170abc47c272
+      dir_name: clustering_images
       shader_conf:
         type: classify
         classes: 7  # 1 for background (probably?)
         modifiable: true
-        color: Turbo
-    - _target_: report.masks.DriveMasksRetriever
-      layer_name: Clusters NMF 8
-      dir_name: "/mnt/data/Projects/Explainability/XAICNNEmbeddings/VGG16_Prostate_NMF_8clusters/clustering_gray"
+        color: ["#00000", "#6B00F5", "#324B47", "#3D324B", "#754B3B", "#A39753", "#2EA32E", "#2E55A3"]  #, "#B82E75", "#01F5CC", "#F54701", "#F5F201"]
+    - _target_: report.masks.RunIDMlflowMaskRetriever
+      layer_name: "Clusters KMeans 6"
+      run_id: 5e7689f7cd4c41c5a1558603bb68621c
+      dir_name: clustering_images
       shader_conf:
         type: classify
-        classes: 9  # 1 for background
+        classes: 7  # 1 for background (probably?)
         modifiable: true
-        color: Turbo
-    - _target_: report.masks.DriveMasksRetriever
-      layer_name: Clusters NMF 10
-      dir_name: "/mnt/data/Projects/Explainability/XAICNNEmbeddings/VGG16_Prostate_NMF_10clusters/clustering_gray"
+        color: ["#00000", "#6B00F5", "#324B47", "#3D324B", "#754B3B", "#A39753", "#2EA32E", "#2E55A3"]  #, "#B82E75", "#01F5CC", "#F54701", "#F5F201"]
+    # - _target_: report.masks.RunIDMlflowMaskRetriever
+    #   dir_name: test_cam
+    #   run_id: 64e52667d20347be809d2b2be87ebd91
+    #   layer_name: CAM
+    #   shader_conf:
+    #     type: bipolar-heatmap
+    #     visible: true
+    #     params:
+    #       threshold: 30
+    # - _target_: report.masks.ArtifactURIMasksRetriever
+    #   artifact_uri: mlflow-artifacts:/24/6913a1e9d8304a28b8c4f5642bb8b5b6/artifacts/test_hirescam
+    #   layer_name: HiResCAM
+    #   shader_conf: classify-heatmap
+    # - _target_: report.masks.DriveMasksRetriever
+    #   dir_name: /mnt/data/rationai/data/home/bindas/annotations
+    #   layer_name: Annotation
+    #   shader_conf:
+    #     type: edge
+    - _target_: report.masks.RunIDMlflowMaskRetriever
+      run_id: 76e184184e1b4d53a94fe452cd2a600f
+      dir_name: test_occlusion
+      layer_name: Occlusion explanation Heatmap
       shader_conf:
-        type: classify
-        classes: 11  # 1 for background (probably?)
-        modifiable: true
-        color: Turbo
+        type: bipolar-heatmap
+        visible: 0
+    - _target_: report.masks.RunIDMlflowMaskRetriever
+      dir_name: test_hirescam
+      run_id: c3447c1fa7e24035a5d94bc82b56344d
+      layer_name: HiResCAM
+      shader_conf:
+        type: heatmap
+        color:  
+        - '#3443eb'
+        visible: 0
+    - _target_: report.masks.RunIDMlflowMaskRetriever
+      dir_name: test_cam
+      run_id: 64e52667d20347be809d2b2be87ebd91
+      layer_name: CAM
+      shader_conf:
+        type: bipolar-heatmap
+        visible: 0
+      
+    # - _target_: report.masks.DriveMasksRetriever
+    #   layer_name: Clusters NMF 10
+    #   dir_name: "/mnt/data/Projects/Explainability/XAICNNEmbeddings/VGG16_Prostate_NMF_10clusters/clustering_gray"
+    #   shader_conf:
+    #     type: classify
+    #     classes: 11  # 1 for background (probably?)
+    #     modifiable: true
+    #     color: ["#00000", "#6B00F5", "#324B47", "#3D324B", "#754B3B", "#A39753", "#2EA32E", "#2E55A3", "#B82E75", "#01F5CC", "#F54701", "#F5F201"]
 
     # - _target_: report.masks.DriveMasksRetriever
     #   layer_name: Clusters NMF 4
