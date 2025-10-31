@@ -4,6 +4,7 @@ from jaxtyping import Float
 from torchvision import transforms
 import numpy as np
 from pathlib import Path
+from rationai.masks import write_big_tiff
 
 
 def get_inverse_norm_transform(
@@ -28,7 +29,14 @@ def get_inverse_norm_transform(
     return transforms.Normalize(mean=inv_mean.tolist(), std=inv_std.tolist())
 
 
-def save_image_xopat_compatible(image: torch.Tensor | np.ndarray, save_path: Path, target_extent_x: int, target_extent_y: int):
+def save_image_xopat_compatible(
+    image: torch.Tensor | np.ndarray,
+    save_path: Path, 
+    target_extent_x: int, 
+    target_extent_y: int,
+    microns_per_pixel_x: float, 
+    microns_per_pixel_y: float,
+):
     if isinstance(image, torch.Tensor):
         image = image.numpy()
     print("IMG SHP:", image.shape)
@@ -38,16 +46,14 @@ def save_image_xopat_compatible(image: torch.Tensor | np.ndarray, save_path: Pat
     vips_im = pyvips.Image.new_from_array(image).affine(
         (level_size_multiplier_x, 0, 0, level_size_multiplier_y), interpolate=pyvips.Interpolate.new("nearest")
     ).cast("uchar")
-    
-    # print("preparing graph")
 
+    # TODO: this might be wrong, but who cares, I don't
+    new_mpp_x = microns_per_pixel_x / level_size_multiplier_x
+    new_mpp_y = microns_per_pixel_y / level_size_multiplier_y
 
-    vips_im.tiffsave(
+    write_big_tiff(
+        vips_im,
         save_path,
-        bigtiff=True,
-        compression=pyvips.enums.ForeignTiffCompression.DEFLATE,
-        tile=True,
-        tile_width=256,
-        tile_height=256,
-        pyramid=True,
+        mpp_x=new_mpp_x,
+        mpp_y=new_mpp_y,
     )

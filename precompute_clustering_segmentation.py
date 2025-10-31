@@ -392,7 +392,9 @@ def main(num_clusters: int, experiment_name: str, clustering_algorithm: str, clu
                         overlay, 
                         inds_gray_numpy_file, 
                         target_extent_x=level_extent_x, 
-                        target_extent_y=level_extent_y
+                        target_extent_y=level_extent_y,
+                        microns_per_pixel_x=slide_metadata.mpp_x,
+                        microns_per_pixel_y=slide_metadata.mpp_y,
                     )
                     _slide_pbar.write(f"Done saving grayscale indices for {slide_name}!")
                 upload_image_if_missing(
@@ -417,7 +419,9 @@ def main(num_clusters: int, experiment_name: str, clustering_algorithm: str, clu
                         overlay, 
                         segs_numpy_file, 
                         target_extent_x=level_extent_x, 
-                        target_extent_y=level_extent_y
+                        target_extent_y=level_extent_y,
+                        microns_per_pixel_x=slide_metadata.mpp_x,
+                        microns_per_pixel_y=slide_metadata.mpp_y,
                     )
                     _slide_pbar.write(f"Done saving segmentation for {slide_name}!")
 
