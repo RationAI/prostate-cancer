@@ -1,6 +1,7 @@
 # %%
 import logging
 from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor
 
 import hydra
 import mlflow
@@ -54,6 +55,9 @@ def main(num_clusters: int, experiment_name: str, clustering_algorithm: str, clu
     
     WSI_LEVEL_TO_MATCH_OUTPUTS_TO = 3
     NUM_CLUSTERS = num_clusters
+
+    NUM_WORKERS = 4
+
 
     TOGGLE_COLORMAP_SEGMENTATIONS_DISABLE = True
 
@@ -320,44 +324,69 @@ def main(num_clusters: int, experiment_name: str, clustering_algorithm: str, clu
                 )
             
 
-        OUT_FILE_PATH_INDS = CLUSTERING_DIR / f"cluster-indices_slide-aggregated_{clustering_algorithm}_{i}_{slide_name}.npy"
-        if OUT_FILE_PATH_INDS.exists():
+        # =====================================================================
+        # Assign cluster indices to each subunit in the WSI 
+
+        OUT_FILE_PATH_CLUSTER_SOFT_ASSIGNMENTS = CLUSTERING_DIR / f"cluster-soft-assignments_{clustering_algorithm}_{NUM_CLUSTERS}clusters_{i}_{slide_name}.npy"
+        if OUT_FILE_PATH_CLUSTER_SOFT_ASSIGNMENTS.exists():
+            _slide_pbar.write(f"Soft cluster assignments for slide {slide_name} exist, skipping.")
+            cluster_soft_assignments_memmap = np.load(OUT_FILE_PATH_CLUSTER_SOFT_ASSIGNMENTS, mmap_mode='r')
+            _slide_pbar.write(f"Soft assignments have shape: {cluster_soft_assignments_memmap.shape}")
+        else:
+            original_shape = activations_assembled_wsi.shape  # shall be (C, H, W)
+            overlaps_nzi = activations_assembled_wsi_overlaps > 0
+            with safe_file_op_ctxm(OUT_FILE_PATH_CLUSTER_SOFT_ASSIGNMENTS, unlink_on_exception=True) as soft_assigns_numpy_file:
+                # open memmapped array for soft clustering results
+                cluster_soft_assignments_memmap = open_memmap(
+                    soft_assigns_numpy_file,
+                    mode="w+",
+                    dtype="float32",
+                    shape=(original_shape[1], original_shape[2], NUM_CLUSTERS),
+                )
+        
+                cluster_soft_assignments_memmap[overlaps_nzi, :] = clustering_model.transform(embeddings).astype(np.float32)
+                cluster_soft_assignments_memmap.flush()
+                _slide_pbar.write(f"Saved soft assignments with shape: {cluster_soft_assignments_memmap.shape}")
+
+
+        OUT_FILE_PATH_CLUSTER_HARD_ASSIGNMENTS = CLUSTERING_DIR / f"cluster-indices_slide-aggregated_{clustering_algorithm}_{i}_{slide_name}.npy"
+        if OUT_FILE_PATH_CLUSTER_HARD_ASSIGNMENTS.exists():
             _slide_pbar.write(f"Clustering indices for slide {slide_name} exist, skipping.")
-            clustering_indices_memmap = np.load(OUT_FILE_PATH_INDS, mmap_mode='r+')
-            _slide_pbar.write(f"Clustering indices have shape: {clustering_indices_memmap.shape}")
+            cluster_hard_assignments_memmap = np.load(OUT_FILE_PATH_CLUSTER_HARD_ASSIGNMENTS, mmap_mode='r+')
+            _slide_pbar.write(f"Clustering indices have shape: {cluster_hard_assignments_memmap.shape}")
             
         else:
             original_shape = activations_assembled_wsi.shape  # shall be (C, H, W)
             overlaps_nzi = activations_assembled_wsi_overlaps > 0
             _slide_pbar.write(f"Original shape: {original_shape}, (non-zero indices {overlaps_nzi.shape})")
-            with safe_file_op_ctxm(OUT_FILE_PATH_INDS, unlink_on_exception=True) as cluster_inds_numpy_file:
-        
-                # open memmapped array for clustering results
-                clustering_indices_memmap = open_memmap(
+            with safe_file_op_ctxm(OUT_FILE_PATH_CLUSTER_HARD_ASSIGNMENTS, unlink_on_exception=True) as cluster_inds_numpy_file:
+                # open memmapped array for argmaxxed clustering results
+                cluster_hard_assignments_memmap = open_memmap(
                     cluster_inds_numpy_file,
                     mode="w+",
                     dtype="int8",
                     shape=(original_shape[1], original_shape[2]),
                 )
+
         
-                clustering_indices_memmap[overlaps_nzi] = (
-                    np.argmax(clustering_model.transform(embeddings), axis=1)
+                cluster_hard_assignments_memmap[overlaps_nzi] = (
+                    np.argmax(cluster_soft_assignments_memmap[overlaps_nzi], axis=1)
                     .astype(np.int8)
                     + 1
                 )
-                clustering_indices_memmap.flush()
+                cluster_hard_assignments_memmap.flush()
 
 
 
         # =====================================================================
         # Visualize the clustering results as overlay on the WSI
         OUT_FILE_PATH_INDS_GRAYSCALE = CLUSTERING_DIR / f"clustering_gray_{clustering_algorithm}"  / f"{slide_name}.tiff"
-        OUT_FILE_PATH_SEGS = CLUSTERING_DIR           / f"clustering_color_{clustering_algorithm}" / f"{slide_name}.tiff"
-        _slide_pbar.write(f"Preparing segmentation {OUT_FILE_PATH_INDS_GRAYSCALE} and {OUT_FILE_PATH_SEGS} for slide {slide_name}")
+        # OUT_FILE_PATH_SEGS = CLUSTERING_DIR           / f"clustering_color_{clustering_algorithm}" / f"{slide_name}.tiff"
+        _slide_pbar.write(f"Preparing segmentation {OUT_FILE_PATH_INDS_GRAYSCALE} for slide {slide_name}")
         if artifact_exists(mlflow_client, mlflow_run_id, "clustering_images", OUT_FILE_PATH_INDS_GRAYSCALE.name):
             _slide_pbar.write(f"Grayscale segmentation for slide {slide_name} exists in MLflow, skipping.")
 
-        elif OUT_FILE_PATH_SEGS.exists() and OUT_FILE_PATH_INDS_GRAYSCALE.exists():
+        elif OUT_FILE_PATH_INDS_GRAYSCALE.exists():
             _slide_pbar.write(f"Segmentation for slide {slide_name} exists, skipping.")
             upload_image_if_missing(
                 client=mlflow_client,
@@ -371,61 +400,96 @@ def main(num_clusters: int, experiment_name: str, clustering_algorithm: str, clu
             # get WSI full extent at a specific level
             slide_handle = openslide.OpenSlide(slide_path)
             level_extent_x, level_extent_y = slide_handle.level_dimensions[WSI_LEVEL_TO_MATCH_OUTPUTS_TO]
-            if OUT_FILE_PATH_INDS_GRAYSCALE.exists():
-                _slide_pbar.write(f"Grayscale segmentation for slide {slide_name} exist, skipping.")
-                upload_image_if_missing(
-                    client=mlflow_client,
-                    run_id=mlflow_run_id,
-                    local_image_path=OUT_FILE_PATH_INDS_GRAYSCALE,
-                    artifact_subdir="clustering_images"
+            
+            with safe_file_op_ctxm(OUT_FILE_PATH_INDS_GRAYSCALE, unlink_on_exception=True) as inds_gray_numpy_file:
+                overlay = (cluster_hard_assignments_memmap.astype(np.float32) / (cluster_hard_assignments_memmap.max())) * 255.0
+                overlay = overlay.astype(np.uint8)
+
+                _slide_pbar.write(f"Saving grayscale indices overlay for slide {slide_name} at level {WSI_LEVEL_TO_MATCH_OUTPUTS_TO} dimensions {level_extent_x}x{level_extent_y}")
+                save_image_xopat_compatible( 
+                    overlay, 
+                    inds_gray_numpy_file, 
+                    target_extent_x=level_extent_x, 
+                    target_extent_y=level_extent_y,
+                    microns_per_pixel_x=slide_metadata.mpp_x,
+                    microns_per_pixel_y=slide_metadata.mpp_y,
                 )
-                _slide_pbar.write(f"Ensured upload of grayscale segmentation for {slide_name} to MLflow!")
-            else:
-                with safe_file_op_ctxm(OUT_FILE_PATH_INDS_GRAYSCALE, unlink_on_exception=True) as inds_gray_numpy_file:
-                    
-                    
-                    overlay = (clustering_indices_memmap.astype(np.float32) / (clustering_indices_memmap.max())) * 255.0
-                    overlay = overlay.astype(np.uint8)
+                _slide_pbar.write(f"Done saving grayscale indices for {slide_name}!")
+            upload_image_if_missing(
+                client=mlflow_client,
+                run_id=mlflow_run_id,
+                local_image_path=OUT_FILE_PATH_INDS_GRAYSCALE,
+                artifact_subdir="clustering_images"
+            )
+            _slide_pbar.write(f"Ensured upload of grayscale segmentation for {slide_name} to MLflow!")
 
-                    _slide_pbar.write(f"Saving grayscale indices overlay for slide {slide_name} at level {WSI_LEVEL_TO_MATCH_OUTPUTS_TO} dimensions {level_extent_x}x{level_extent_y}")
-                    save_image_xopat_compatible( 
-                        overlay, 
-                        inds_gray_numpy_file, 
-                        target_extent_x=level_extent_x, 
-                        target_extent_y=level_extent_y,
-                        microns_per_pixel_x=slide_metadata.mpp_x,
-                        microns_per_pixel_y=slide_metadata.mpp_y,
+
+        SINGLE_OVERLAYS_DIR = CLUSTERING_DIR / f"single_cluster_overlays_{clustering_algorithm}_{NUM_CLUSTERS}clusters"
+        with ThreadPoolExecutor(max_workers=NUM_WORKERS) as executor:
+            tasks_futures = []
+            for cluster_idx in range(NUM_CLUSTERS):
+                OUT_FILE_PATH_SINGLE_CLUSTER_OVERLAY = SINGLE_OVERLAYS_DIR / str(cluster_idx) / f"{slide_name}.tiff"
+                if artifact_exists(mlflow_client, mlflow_run_id, "clustering_single_cluster_overlays", OUT_FILE_PATH_SINGLE_CLUSTER_OVERLAY.name):
+                    _slide_pbar.write(f"Single cluster overlay for cluster {cluster_idx} for slide {slide_name} exists in MLflow, skipping.")
+                    continue
+                elif OUT_FILE_PATH_SINGLE_CLUSTER_OVERLAY.exists():
+                    _slide_pbar.write(f"Single cluster overlay for cluster {cluster_idx} for slide {slide_name} exists, checking if uploaded to ML Flow.")
+                    upload_image_if_missing(
+                        client=mlflow_client,
+                        run_id=mlflow_run_id,
+                        local_image_path=OUT_FILE_PATH_SINGLE_CLUSTER_OVERLAY,
+                        artifact_subdir="clustering_single_cluster_overlays"
                     )
-                    _slide_pbar.write(f"Done saving grayscale indices for {slide_name}!")
-                upload_image_if_missing(
-                    client=mlflow_client,
-                    run_id=mlflow_run_id,
-                    local_image_path=OUT_FILE_PATH_INDS_GRAYSCALE,
-                    artifact_subdir="clustering_images"
-                )
-                _slide_pbar.write(f"Ensured upload of grayscale segmentation for {slide_name} to MLflow!")
-
-
-            if OUT_FILE_PATH_SEGS.exists():
-                _slide_pbar.write(f"Color segmentation for slide {slide_name} exist, skipping.")
-            elif TOGGLE_COLORMAP_SEGMENTATIONS_DISABLE:
-                _slide_pbar.write(f"Color segmentations were disabled in the sourcecode for now.")
-            else:
-                with safe_file_op_ctxm(OUT_FILE_PATH_SEGS, unlink_on_exception=True) as segs_numpy_file:
-                    overlay = get_overlay_from_clustering_numpy(clustering_indices_memmap)
-
-                    _slide_pbar.write(f"Saving segmentation overlay for slide {slide_name} at level {WSI_LEVEL_TO_MATCH_OUTPUTS_TO} dimensions {level_extent_x}x{level_extent_y}")
-                    save_image_xopat_compatible( 
-                        overlay, 
-                        segs_numpy_file, 
-                        target_extent_x=level_extent_x, 
-                        target_extent_y=level_extent_y,
-                        microns_per_pixel_x=slide_metadata.mpp_x,
-                        microns_per_pixel_y=slide_metadata.mpp_y,
+                    _slide_pbar.write(f"Ensured upload of single cluster overlay for cluster {cluster_idx} for {slide_name} to MLflow!")
+                    continue
+                else:
+                    # get WSI full extent at a specific level
+                    slide_handle = openslide.OpenSlide(slide_path)
+                    level_extent_x, level_extent_y = slide_handle.level_dimensions[WSI_LEVEL_TO_MATCH_OUTPUTS_TO]
+                    
+                    # parrallel_save_upload_overlay_tiff_single_cluster(WSI_LEVEL_TO_MATCH_OUTPUTS_TO, mlflow_client, mlflow_run_id, _slide_pbar, slide_metadata, slide_name, cluster_soft_assignments_memmap, level_extent_x, level_extent_y, cluster_idx, OUT_FILE_PATH_SINGLE_CLUSTER_OVERLAY)
+                    tasks_futures.append(
+                        executor.submit(
+                            parrallel_save_upload_overlay_tiff_single_cluster,
+                            WSI_LEVEL_TO_MATCH_OUTPUTS_TO,
+                            mlflow_client,
+                            mlflow_run_id,
+                            _slide_pbar,
+                            slide_metadata,
+                            slide_name,
+                            cluster_soft_assignments_memmap,
+                            level_extent_x,
+                            level_extent_y,
+                            cluster_idx,
+                            OUT_FILE_PATH_SINGLE_CLUSTER_OVERLAY
+                        )
                     )
-                    _slide_pbar.write(f"Done saving segmentation for {slide_name}!")
-
+            # wait for all tasks to complete
+            for cluster_idx, future in enumerate(tasks_futures):
+                future.result()
+                _slide_pbar.write(f"Finished processing single cluster overlay for cluster {cluster_idx} for slide {slide_name}")
         _slide_pbar.write(f"Finished processing slide {slide_name} ({i})")
+
+def parrallel_save_upload_overlay_tiff_single_cluster(WSI_LEVEL_TO_MATCH_OUTPUTS_TO, mlflow_client, mlflow_run_id, _slide_pbar, slide_metadata, slide_name, cluster_soft_assignments_memmap, level_extent_x, level_extent_y, cluster_idx, OUT_FILE_PATH_SINGLE_CLUSTER_OVERLAY):
+    with safe_file_op_ctxm(OUT_FILE_PATH_SINGLE_CLUSTER_OVERLAY, unlink_on_exception=True) as single_cluster_overlay_numpy_file:
+                    # save overlay as tiff
+        _slide_pbar.write(f"Saving single cluster overlay for cluster {cluster_idx} for slide {slide_name} at level {WSI_LEVEL_TO_MATCH_OUTPUTS_TO} dimensions {level_extent_x}x{level_extent_y}")
+        save_image_xopat_compatible( 
+                        cluster_soft_assignments_memmap[:, :, cluster_idx], 
+                        single_cluster_overlay_numpy_file, 
+                        target_extent_x=level_extent_x, 
+                        target_extent_y=level_extent_y,
+                        microns_per_pixel_x=slide_metadata.mpp_x,
+                        microns_per_pixel_y=slide_metadata.mpp_y,
+                    )
+        _slide_pbar.write(f"Done saving single cluster overlay for cluster {cluster_idx} for {slide_name}!")
+    upload_image_if_missing(
+                    client=mlflow_client,
+                    run_id=mlflow_run_id,
+                    local_image_path=OUT_FILE_PATH_SINGLE_CLUSTER_OVERLAY,
+                    artifact_subdir="clustering_single_cluster_overlays"
+                )
+    _slide_pbar.write(f"Ensured upload of single cluster overlay for cluster {cluster_idx} for {slide_name} to MLflow!")
 
 if __name__ == "__main__":
     main()
