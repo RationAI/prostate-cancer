@@ -38,7 +38,7 @@ logging.basicConfig(level=logging.INFO)
 @click.option('--experiment-name', type=str, help='Name of the experiment.')
 @click.option('--clustering-algorithm', type=click.Choice(['NMF', 'KMeans'], case_sensitive=False), default='NMF', help='Clustering algorithm to use.')
 @click.option('--clustering-instance-fp', type=click.Path(exists=True, file_okay=True, dir_okay=False, path_type=Path), default=None, help='Path to precomputed clustering instance (.npy file). If provided, this instance will be used instead of fitting a new one.')
-@click.option('--out-dir', type=click.Path(file_okay=False, dir_okay=True, path_type=Path), default=Path("/mnt/projects/Explainability/XAICNNEmbeddings/"), help='Output directory for experiment results. If not provided, a default directory will be used.')
+@click.option('--out-dir', type=click.Path(file_okay=False, dir_okay=True, path_type=Path), default=Path("/mnt/projects/explainability/XAICNNEmbeddings/"), help='Output directory for experiment results. If not provided, a default directory will be used.')
 @click.option('--mlf-runid', type=str, default=None, help='MLflow run ID to associate with the experiment.')
 def main(num_clusters: int, experiment_name: str, clustering_algorithm: str, clustering_instance_fp: Path | None, out_dir: Path | None, mlf_runid: str | None):
 
@@ -438,7 +438,7 @@ def main(num_clusters: int, experiment_name: str, clustering_algorithm: str, clu
                         client=mlflow_client,
                         run_id=mlflow_run_id,
                         local_image_path=OUT_FILE_PATH_SINGLE_CLUSTER_OVERLAY,
-                        artifact_subdir="clustering_single_cluster_overlays"
+                        artifact_subdir=f"clustering_single_cluster_overlays/{cluster_idx}"
                     )
                     _slide_pbar.write(f"Ensured upload of single cluster overlay for cluster {cluster_idx} for {slide_name} to MLflow!")
                     continue
@@ -487,7 +487,7 @@ def parrallel_save_upload_overlay_tiff_single_cluster(WSI_LEVEL_TO_MATCH_OUTPUTS
                     client=mlflow_client,
                     run_id=mlflow_run_id,
                     local_image_path=OUT_FILE_PATH_SINGLE_CLUSTER_OVERLAY,
-                    artifact_subdir="clustering_single_cluster_overlays"
+                    artifact_subdir=f"clustering_single_cluster_overlays/{cluster_idx}"
                 )
     _slide_pbar.write(f"Ensured upload of single cluster overlay for cluster {cluster_idx} for {slide_name} to MLflow!")
 
