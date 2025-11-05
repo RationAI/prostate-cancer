@@ -1,5 +1,6 @@
 import torch
 from jaxtyping import Float
+import numpy as np
 
 
 # from explainability.cams.abstract import AbstractCAMHook
@@ -57,3 +58,31 @@ def grad_cam_pp(
     cams = (weights * activations).sum(dim=1)  # [B,H,W]
     cams = torch.clamp(cams, min=0)
     return cams
+
+def grad_cam_pp_numpy(
+    activations: np.ndarray,
+    gradients: np.ndarray,
+    eps: float = 1e-6,
+) -> np.ndarray:
+    """Compute Grad-CAM++ maps given activations and gradients.
+
+    Args:
+        activations: Activation maps from the target layer, shape [B, C, H, W].
+        gradients: Gradients w.r.t. the activations, shape [B, C, H, W].
+        eps: Small value to avoid division by zero.
+
+    Returns:
+        cams: Grad-CAM++ maps, shape [B, H, W].
+    """
+    activations = np.maximum(activations, 0)
+    # g = gradients
+    g2 = gradients * gradients
+    # g3 = g2 * gradients
+    # sum_a = activations.sum(axis=(2, 3), keepdims=True)  # [B,C,1,1]
+    # alpha_num = g2
+    # alpha_den = 2.0 * g2 + sum_a * g3 + eps
+    # alpha = g2 / alpha_den  # [B,C,H,W]
+    # weights = ((g2 / alpha_den) * np.maximum(gradients, 0)).sum(axis=(2, 3), keepdims=True)  # [B,C,1,1]
+    # cams = ((((g2 / alpha_den) * np.maximum(gradients, 0)).sum(axis=(2, 3), keepdims=True)) * activations).sum(axis=1)  # [B,H,W]
+    # cams = np.clip((((((g2 / alpha_den) * np.maximum(gradients, 0)).sum(axis=(2, 3), keepdims=True)) * activations).sum(axis=1)), a_min=0, a_max=None)
+    return np.clip((((((g2 / (2.0 * g2 + (activations.sum(axis=(2, 3), keepdims=True)) * (g2 * gradients) + eps)) * np.maximum(gradients, 0)).sum(axis=(2, 3), keepdims=True)) * activations).sum(axis=1)), a_min=0, a_max=None)

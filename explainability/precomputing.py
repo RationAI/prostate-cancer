@@ -126,6 +126,64 @@ class MultichannelHeatmapAssembler:
 # test_heatmap_assembler()
 
 
+class EdgeClippingMultiscaleHeatmapAssembler(MultichannelHeatmapAssembler):
+    """A heatmap assembler that clips edges of the input tiles before assembling them into the heatmap."""
+    def __init__(self, clip_top: int, clip_bottom: int, clip_left: int, clip_right: int, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.clip_top = clip_top
+        self.clip_bottom = clip_bottom
+        self.clip_left = clip_left
+        self.clip_right = clip_right
+
+    def update_batch_torch(self, data: np.ndarray, xs: np.ndarray, ys: np.ndarray) -> None:
+        # Clip the edges of the input tiles
+        data = data[..., self.clip_top:-self.clip_bottom, self.clip_left:-self.clip_right]
+        xs = xs + self.clip_left
+        ys = ys + self.clip_top
+        super().update_batch_torch(data, xs, ys)
+
+
+# perform sanity checks to make sure the assembler works as expected
+# def test_edge_clipping_heatmap_assembler():
+#     heatmap_width = 256
+#     heatmap_height = 128
+#     heatmap_channels = 3
+#     tile_extent = 32
+#     clip = 4
+#     npy_file_path = Path("test_edge_clipping_heatmap.npy")
+
+#     assembler = EdgeClippingMultiscaleHeatmapAssembler(
+#         clip_top=clip,
+#         clip_bottom=clip,
+#         clip_left=clip,
+#         clip_right=clip,
+#         heatmap_width=heatmap_width,
+#         heatmap_height=heatmap_height,
+#         heatmap_channels=heatmap_channels,
+#         heatmap_npy_fp=npy_file_path
+#     )
+#     # create dummy data
+#     B = 4
+#     example_tile_batch = np.ones((B, heatmap_channels, tile_extent, tile_extent), dtype=np.float32)
+#     increment = example_tile_batch[..., clip:-clip, clip:-clip].sum()
+#     assert increment == B*heatmap_channels*(tile_extent - 2*clip)*(tile_extent - 2*clip), f"Checksum mismatch in example tile batch: Should be {B*heatmap_channels*(tile_extent - 2*clip)*(tile_extent - 2*clip)}, is {example_tile_batch[..., clip:-clip, clip:-clip].sum()}"
+#     xs = []
+#     ys = []
+#     # add the tiles randomly to cover the heatmap
+#     for i in range(7):
+#         x, y = (np.random.rand(B,)*(heatmap_width - (tile_extent - 2*clip))).astype(int), (np.random.rand(B,)*(heatmap_height - (tile_extent - 2*clip))).astype(int)
+#         assembler.update_batch_torch(example_tile_batch, x, y)
+#         assert assembler.heatmap_accumulator.sum() == (i+1)*increment, f"Checksum mismatch in heatmap accumulator after update {i+1}. Is {assembler.heatmap_accumulator.sum()}, but expected {(i+1)*increment}"
+
+#     assert assembler.heatmap_accumulator.sum() == 7*B*(tile_extent - 2*clip)*(tile_extent - 2*clip)*heatmap_channels, f"Checksum mismatch in heatmap accumulator after updates. Is {assembler.heatmap_accumulator.sum()}, but expected {7*B*(tile_extent - 2*clip)*(tile_extent - 2*clip)*heatmap_channels}"
+
+#     assembled_heatmap, overlap_counter = assembler.finalize()
+#     assert assembled_heatmap.shape == (heatmap_channels, heatmap_height, heatmap_width), f"Assembled heatmap has incorrect shape: {assembled_heatmap.shape}"
+#     assert overlap_counter.shape == (1, heatmap_height, heatmap_width), f"Overlap counter has incorrect shape: {overlap_counter.shape}"
+#     assert overlap_counter.sum() == 7*B*(tile_extent - 2*clip)*(tile_extent - 2*clip), f"Checksum mismatch in overlap counter after finalization. Is {overlap_counter.sum()}, but expected {7*B*(tile_extent - 2*clip)*(tile_extent - 2*clip)}"
+#     assert assembled_heatmap.max() == 1.0, f"Assembled heatmap values should be normalized to 1.0 after finalization: {assembled_heatmap.max()}"    
+# test_edge_clipping_heatmap_assembler()
+
 
 def npy_data_offset(filename: Path):
     """Return (offset, dtype, shape, fortran_order) for a .npy file."""

@@ -1,5 +1,6 @@
 import torch
 from jaxtyping import Float
+import numpy as np
 
 
 # class LayerCAMBatchHook(AbstractCAMHook):
@@ -35,3 +36,23 @@ def layer_cam(
     cams = cams.sum(dim=1)
     cams = torch.relu(cams)
     return cams
+
+
+def layer_cam_numpy(
+    activations: np.ndarray,
+    gradients: np.ndarray,
+) -> np.ndarray:
+    """Compute Layer-CAM maps given activations and gradients (numpy version).
+
+    Args:
+        activations: Activation maps from the target layer, shape [B, C, H, W].
+        gradients: Gradients w.r.t. the activations, shape [B, C, H, W].
+
+    Returns:
+        cams: Layer-CAM maps, shape [B, H, W].
+    """
+    # cams = np.maximum(gradients, 0) * np.maximum(activations, 0)
+    # cams = cams.sum(axis=1)
+    # cams = np.maximum(cams, 0)
+    # return cams
+    return np.maximum((np.maximum(gradients, 0) * np.maximum(activations, 0)).sum(axis=1), 0)

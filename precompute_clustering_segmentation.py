@@ -17,10 +17,11 @@ from sklearn.decomposition import NMF
 from tqdm.auto import tqdm
 import click
 
+from explainability.cams import grad_cam_pp_numpy, layer_cam_numpy
 from explainability.mlflow_persistence.storing import artifact_exists, ensure_mlflow_run, upload_image_if_missing
 from prostate_cancer.data import DataModule
 from prostate_cancer.prostate_cancer_model import ProstateCancerModel
-from explainability.precomputing import MultichannelHeatmapAssembler, safe_file_op_ctxm, ClusteringManager
+from explainability.precomputing import MultichannelHeatmapAssembler, EdgeClippingMultiscaleHeatmapAssembler, safe_file_op_ctxm, ClusteringManager
 from explainability.clustering.tensor_shaping import reshape_for_clustering_universal
 from explainability.visualizations.clusters import  get_overlay_from_clustering_numpy, plot_cluster_distance_matrix
 from explainability.visualizations.image_transforms import save_image_xopat_compatible
@@ -55,6 +56,8 @@ def main(num_clusters: int, experiment_name: str, clustering_algorithm: str, clu
     
     WSI_LEVEL_TO_MATCH_OUTPUTS_TO = 3
     NUM_CLUSTERS = num_clusters
+
+    CUT_EDGE_SUBTILES = 2 # number of subtiles to cut from each edge to avoid border artifacts
 
     NUM_WORKERS = 4
 
@@ -161,62 +164,124 @@ def main(num_clusters: int, experiment_name: str, clustering_algorithm: str, clu
         # =====================================================================
         # Assemble activations for the whole slide
         OUT_FILE_PATH_ACTS = ACTIVATIONS_DIR / f"activations_slide-aggregated_{i}_{slide_name}.npy"
+        OUT_FILE_PATH_GRADS = ACTIVATIONS_DIR / f"gradients_slide-aggregated_{i}_{slide_name}.npy"
         OUT_FILE_PATH_ACT_OVERLAPS = OUT_FILE_PATH_ACTS.with_suffix(f".nzi{OUT_FILE_PATH_ACTS.suffix}")
-        if OUT_FILE_PATH_ACTS.exists() and OUT_FILE_PATH_ACT_OVERLAPS.exists():
+
+        _bool_acts_exists = OUT_FILE_PATH_ACTS.exists()
+        _bool_grads_exists = OUT_FILE_PATH_GRADS.exists()
+        _bool_act_overlaps_exists = OUT_FILE_PATH_ACT_OVERLAPS.exists()
+
+        if _bool_acts_exists:
             _slide_pbar.write(f"Slide {slide_name} exists, skipping.")
             activations_assembled_wsi =     np.load(OUT_FILE_PATH_ACTS,     mmap_mode='r+')
+        if _bool_grads_exists:
+            _slide_pbar.write(f"Gradients for slide {slide_name} exist, skipping.")
+            gradients_assembled_wsi = np.load(OUT_FILE_PATH_GRADS, mmap_mode='r+')
+        if _bool_act_overlaps_exists:
+            _slide_pbar.write(f"Activation overlaps for slide {slide_name} exist, skipping.")
             activations_assembled_wsi_overlaps = np.load(OUT_FILE_PATH_ACT_OVERLAPS, mmap_mode='r+')
-        else:
+        
+        if not (_bool_acts_exists and _bool_grads_exists and _bool_act_overlaps_exists):
             first_input, first_label, first_m = dataloader.dataset[0]
             hooked_model(first_input.unsqueeze(0).to("cuda:0"))
-            first_activations = hooked_model.get_activations(target_layer)
-            _slide_pbar.write(f"First activations shape: {first_activations.shape}")
-            _, heatmap_channels, heatmap_tile_height, heatmap_tile_width = first_activations.shape
 
-            
-            slide_width = slide_metadata.extent_x  # the width of the slide at the level used for sampling 
+            slide_width = slide_metadata.extent_x  # the width of the slide at the level used for sampling
             slide_height = slide_metadata.extent_y
             tile_width = slide_metadata.tile_extent_x
             tile_height = slide_metadata.tile_extent_y
             tile_stride_x = slide_metadata.stride_x
             tile_stride_y = slide_metadata.stride_y
 
-            slide_to_heatmap_ratio_x = heatmap_tile_width / tile_width
-            slide_to_heatmap_ratio_y = heatmap_tile_height / tile_height
+            if not _bool_acts_exists:
+                first_activations = hooked_model.get_activations(target_layer)
+                _slide_pbar.write(f"First activations shape: {first_activations.shape}")
+                _, heatmap_channels, act_heatmap_tile_height, act_heatmap_tile_width = first_activations.shape
+                slide_to_heatmap_ratio_x = act_heatmap_tile_width / tile_width
+                slide_to_heatmap_ratio_y = act_heatmap_tile_height / tile_height
 
-            heatmap_width = int(slide_width * slide_to_heatmap_ratio_x)
-            heatmap_height = int(slide_height * slide_to_heatmap_ratio_y)
-            heatmap_tile_stride_x = int(tile_stride_x * slide_to_heatmap_ratio_x)
-            heatmap_tile_stride_y = int(tile_stride_y * slide_to_heatmap_ratio_y)
+                act_heatmap_width = int(slide_width * slide_to_heatmap_ratio_x)
+                act_heatmap_height = int(slide_height * slide_to_heatmap_ratio_y)
+                act_heatmap_tile_stride_x = int(tile_stride_x * slide_to_heatmap_ratio_x)
+                act_heatmap_tile_stride_y = int(tile_stride_y * slide_to_heatmap_ratio_y)
 
-            # assert square heatmap tiles and strides
-            assert heatmap_tile_width == heatmap_tile_height
-            assert heatmap_tile_stride_x == heatmap_tile_stride_y
+                # assert square heatmap tiles and strides
+                assert act_heatmap_tile_width == act_heatmap_tile_height
+                assert act_heatmap_tile_stride_x == act_heatmap_tile_stride_y
+                _slide_pbar.write(f"Heatmap width and height: {act_heatmap_width} | {act_heatmap_height}")  
 
-            _slide_pbar.write(f"Tile extent and stride: {heatmap_tile_width} | {heatmap_tile_stride_x}")
+            if not _bool_grads_exists:
+                first_gradients = hooked_model.get_gradients(target_layer)
+                _slide_pbar.write(f"First gradients shape: {first_gradients.shape}")
+                _, gradient_channels, gradient_tile_height, gradient_tile_width = first_gradients.shape
+                slide_to_heatmap_ratio_x = gradient_tile_width / tile_width
+                slide_to_heatmap_ratio_y = gradient_tile_height / tile_height
 
-            with safe_file_op_ctxm(OUT_FILE_PATH_ACTS) as act_numpy_file:
-                heatmap_assembler = MultichannelHeatmapAssembler(
-                    heatmap_width=heatmap_width,
-                    heatmap_height=heatmap_height,
-                    heatmap_channels=heatmap_channels,
-                    heatmap_npy_fp=act_numpy_file
-                )
+                grad_heatmap_width = int(slide_width * slide_to_heatmap_ratio_x)
+                grad_heatmap_height = int(slide_height * slide_to_heatmap_ratio_y)
+                grad_heatmap_tile_stride_x = int(tile_stride_x * slide_to_heatmap_ratio_x)
+                grad_heatmap_tile_stride_y = int(tile_stride_y * slide_to_heatmap_ratio_y)
+                # assert square heatmap tiles and strides
+                assert gradient_tile_width == gradient_tile_height
+                assert grad_heatmap_tile_stride_x == grad_heatmap_tile_stride_y
+                _slide_pbar.write(f"Gradient heatmap width and height: {grad_heatmap_width} | {grad_heatmap_height}")
+
+            with safe_file_op_ctxm(OUT_FILE_PATH_ACTS) as act_numpy_file, safe_file_op_ctxm(OUT_FILE_PATH_GRADS) as grad_numpy_file:
+                if not _bool_acts_exists:
+                    heatmap_assembler = MultichannelHeatmapAssembler(
+                        heatmap_width=act_heatmap_width,
+                        heatmap_height=act_heatmap_height,
+                        heatmap_channels=heatmap_channels,
+                        heatmap_npy_fp=act_numpy_file
+                    )
+                if not _bool_grads_exists:
+                    gradient_assembler = MultichannelHeatmapAssembler(
+                        heatmap_width=grad_heatmap_width,
+                        heatmap_height=grad_heatmap_height,
+                        heatmap_channels=gradient_channels,
+                        heatmap_npy_fp=grad_numpy_file
+                    )
 
                 for batch in tqdm(dataloader, desc="Batch"):
                     inputs, labels, metadata = batch
                     # print(metadata)  # slide, x, y
+                    X = (metadata['x'] * slide_to_heatmap_ratio_x).to(torch.int64)
+                    Y = (metadata['y'] * slide_to_heatmap_ratio_y).to(torch.int64)
                     
                     inputs = inputs.to("cuda:0")
                     hooked_model(inputs)
-                    A = hooked_model.get_activations(target_layer)
-                    X = (metadata['x'] * slide_to_heatmap_ratio_x).to(torch.int64)
-                    Y = (metadata['y'] * slide_to_heatmap_ratio_y).to(torch.int64)
-                    heatmap_assembler.update_batch_torch(A.cpu().numpy(), X.cpu().numpy(), Y.cpu().numpy())
+                    if not _bool_acts_exists:
+                        A = hooked_model.get_activations(target_layer)
+                        heatmap_assembler.update_batch_torch(A.cpu().numpy(), X.cpu().numpy(), Y.cpu().numpy())
+                    if not _bool_grads_exists:
+                        G = hooked_model.get_gradients(target_layer)
+                        gradient_assembler.update_batch_torch(G.cpu().numpy(), X.cpu().numpy(), Y.cpu().numpy())
 
-                activations_assembled_wsi, activations_assembled_wsi_overlaps = heatmap_assembler.finalize()
+                if not _bool_acts_exists:
+                    activations_assembled_wsi, activations_assembled_wsi_overlaps = heatmap_assembler.finalize()
+                    _slide_pbar.write(f"Saved activations to {OUT_FILE_PATH_ACTS}")
+                    np.save(OUT_FILE_PATH_ACT_OVERLAPS, activations_assembled_wsi_overlaps)
+                if not _bool_grads_exists:
+                    gradients_assembled_wsi, gradients_assembled_wsi_overlaps = gradient_assembler.finalize()
+                    _slide_pbar.write(f"Saved gradients to {OUT_FILE_PATH_GRADS}")
+                    np.save(OUT_FILE_PATH_GRADS_OVERLAPS, gradients_assembled_wsi_overlaps)
+        # OUTPUTS: activations_assembled_wsi, activations_assembled_wsi_overlaps, gradients_assembled_wsi, gradients_assembled_wsi_overlaps
 
-            np.save(OUT_FILE_PATH_ACT_OVERLAPS, activations_assembled_wsi_overlaps)
+
+        # =====================================================================
+        # Create XAI masks from activations and gradients
+        OUT_FILE_PATH_XAI_GRADCAM = ACTIVATIONS_DIR / f"xai-gradcam_slide-aggregated_{i}_{slide_name}.npy"
+        if OUT_FILE_PATH_XAI_GRADCAM.exists():
+            _slide_pbar.write(f"Grad-CAM for slide {slide_name} exist, skipping.")
+            xai_gradcam_assembled_wsi = np.load(OUT_FILE_PATH_XAI_GRADCAM, mmap_mode='r+')
+            _slide_pbar.write(f"Grad-CAM has shape: {xai_gradcam_assembled_wsi.shape}")
+        else:
+            xai_mask = grad_cam_pp_numpy(
+                activations=activations_assembled_wsi,
+                gradients=gradients_assembled_wsi,
+                eps=1e-6,
+            )
+
+
 
 
         # =====================================================================
