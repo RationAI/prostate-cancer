@@ -144,14 +144,16 @@ class EdgeClippingMultiscaleHeatmapAssembler(MultichannelHeatmapAssembler):
         super().update_batch_torch(data, xs, ys)
 
 
-# perform sanity checks to make sure the assembler works as expected
+# # perform sanity checks to make sure the assembler works as expected
 # def test_edge_clipping_heatmap_assembler():
 #     heatmap_width = 256
 #     heatmap_height = 128
 #     heatmap_channels = 3
 #     tile_extent = 32
-#     clip = 4
+#     clip = 12
 #     npy_file_path = Path("test_edge_clipping_heatmap.npy")
+#     num_batches = 16
+#     B = 32
 
 #     assembler = EdgeClippingMultiscaleHeatmapAssembler(
 #         clip_top=clip,
@@ -164,24 +166,27 @@ class EdgeClippingMultiscaleHeatmapAssembler(MultichannelHeatmapAssembler):
 #         heatmap_npy_fp=npy_file_path
 #     )
 #     # create dummy data
-#     B = 4
 #     example_tile_batch = np.ones((B, heatmap_channels, tile_extent, tile_extent), dtype=np.float32)
-#     increment = example_tile_batch[..., clip:-clip, clip:-clip].sum()
-#     assert increment == B*heatmap_channels*(tile_extent - 2*clip)*(tile_extent - 2*clip), f"Checksum mismatch in example tile batch: Should be {B*heatmap_channels*(tile_extent - 2*clip)*(tile_extent - 2*clip)}, is {example_tile_batch[..., clip:-clip, clip:-clip].sum()}"
+    
+#     increment = example_tile_batch[..., clip:tile_extent-clip, clip:tile_extent-clip].sum()
+#     assert increment == B*heatmap_channels*(tile_extent - 2*clip)*(tile_extent - 2*clip), f"Checksum mismatch in example tile batch: Should be {B*heatmap_channels*(tile_extent - 2*clip)*(tile_extent - 2*clip)}, is {example_tile_batch[..., clip:tile_extent-clip, clip:tile_extent-clip].sum()}"
 #     xs = []
 #     ys = []
 #     # add the tiles randomly to cover the heatmap
-#     for i in range(7):
-#         x, y = (np.random.rand(B,)*(heatmap_width - (tile_extent - 2*clip))).astype(int), (np.random.rand(B,)*(heatmap_height - (tile_extent - 2*clip))).astype(int)
+    
+#     for i in range(num_batches):
+#         x, y = (np.random.rand(B,)*(heatmap_width - (tile_extent - clip))).astype(int), (np.random.rand(B,)*(heatmap_height - (tile_extent - clip))).astype(int)
 #         assembler.update_batch_torch(example_tile_batch, x, y)
+#         plt.imshow((assembler.heatmap_accumulator.transpose(1, 2, 0)*32).astype(np.uint8))
+#         plt.show()
 #         assert assembler.heatmap_accumulator.sum() == (i+1)*increment, f"Checksum mismatch in heatmap accumulator after update {i+1}. Is {assembler.heatmap_accumulator.sum()}, but expected {(i+1)*increment}"
 
-#     assert assembler.heatmap_accumulator.sum() == 7*B*(tile_extent - 2*clip)*(tile_extent - 2*clip)*heatmap_channels, f"Checksum mismatch in heatmap accumulator after updates. Is {assembler.heatmap_accumulator.sum()}, but expected {7*B*(tile_extent - 2*clip)*(tile_extent - 2*clip)*heatmap_channels}"
+#     assert assembler.heatmap_accumulator.sum() == num_batches*B*(tile_extent - 2*clip)*(tile_extent - 2*clip)*heatmap_channels, f"Checksum mismatch in heatmap accumulator after updates. Is {assembler.heatmap_accumulator.sum()}, but expected {num_batches*B*(tile_extent - 2*clip)*(tile_extent - 2*clip)*heatmap_channels}"
 
 #     assembled_heatmap, overlap_counter = assembler.finalize()
-#     assert assembled_heatmap.shape == (heatmap_channels, heatmap_height, heatmap_width), f"Assembled heatmap has incorrect shape: {assembled_heatmap.shape}"
-#     assert overlap_counter.shape == (1, heatmap_height, heatmap_width), f"Overlap counter has incorrect shape: {overlap_counter.shape}"
-#     assert overlap_counter.sum() == 7*B*(tile_extent - 2*clip)*(tile_extent - 2*clip), f"Checksum mismatch in overlap counter after finalization. Is {overlap_counter.sum()}, but expected {7*B*(tile_extent - 2*clip)*(tile_extent - 2*clip)}"
+#     assert assembled_heatmap.shape == (heatmap_channels, heatmap_height, heatmap_width), f"Assembled heatmap has incorrect shape: {assembled_heatmap.shape}, shall be {(heatmap_channels, heatmap_height, heatmap_width)}"
+#     assert overlap_counter.shape == (heatmap_height, heatmap_width), f"Overlap counter has incorrect shape: {overlap_counter.shape}, shall be {(heatmap_height, heatmap_width)}"
+#     assert overlap_counter.sum() == num_batches*B*(tile_extent - 2*clip)*(tile_extent - 2*clip), f"Checksum mismatch in overlap counter after finalization. Is {overlap_counter.sum()}, but expected {num_batches*B*(tile_extent - 2*clip)*(tile_extent - 2*clip)}"
 #     assert assembled_heatmap.max() == 1.0, f"Assembled heatmap values should be normalized to 1.0 after finalization: {assembled_heatmap.max()}"    
 # test_edge_clipping_heatmap_assembler()
 
