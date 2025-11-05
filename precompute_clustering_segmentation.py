@@ -425,49 +425,60 @@ def main(num_clusters: int, experiment_name: str, clustering_algorithm: str, clu
 
 
         SINGLE_OVERLAYS_DIR = CLUSTERING_DIR / f"single_cluster_overlays_{clustering_algorithm}_{NUM_CLUSTERS}clusters"
-        with ThreadPoolExecutor(max_workers=NUM_WORKERS) as executor:
-            tasks_futures = []
-            for cluster_idx in range(NUM_CLUSTERS):
-                OUT_FILE_PATH_SINGLE_CLUSTER_OVERLAY = SINGLE_OVERLAYS_DIR / str(cluster_idx) / f"{slide_name}.tiff"
-                if artifact_exists(mlflow_client, mlflow_run_id, "clustering_single_cluster_overlays", OUT_FILE_PATH_SINGLE_CLUSTER_OVERLAY.name):
-                    _slide_pbar.write(f"Single cluster overlay for cluster {cluster_idx} for slide {slide_name} exists in MLflow, skipping.")
-                    continue
-                elif OUT_FILE_PATH_SINGLE_CLUSTER_OVERLAY.exists():
-                    _slide_pbar.write(f"Single cluster overlay for cluster {cluster_idx} for slide {slide_name} exists, checking if uploaded to ML Flow.")
-                    upload_image_if_missing(
-                        client=mlflow_client,
-                        run_id=mlflow_run_id,
-                        local_image_path=OUT_FILE_PATH_SINGLE_CLUSTER_OVERLAY,
-                        artifact_subdir=f"clustering_single_cluster_overlays/{cluster_idx}"
-                    )
-                    _slide_pbar.write(f"Ensured upload of single cluster overlay for cluster {cluster_idx} for {slide_name} to MLflow!")
-                    continue
-                else:
-                    # get WSI full extent at a specific level
-                    slide_handle = openslide.OpenSlide(slide_path)
-                    level_extent_x, level_extent_y = slide_handle.level_dimensions[WSI_LEVEL_TO_MATCH_OUTPUTS_TO]
-                    
-                    # parrallel_save_upload_overlay_tiff_single_cluster(WSI_LEVEL_TO_MATCH_OUTPUTS_TO, mlflow_client, mlflow_run_id, _slide_pbar, slide_metadata, slide_name, cluster_soft_assignments_memmap, level_extent_x, level_extent_y, cluster_idx, OUT_FILE_PATH_SINGLE_CLUSTER_OVERLAY)
-                    tasks_futures.append(
-                        executor.submit(
-                            parrallel_save_upload_overlay_tiff_single_cluster,
-                            WSI_LEVEL_TO_MATCH_OUTPUTS_TO,
-                            mlflow_client,
-                            mlflow_run_id,
-                            _slide_pbar,
-                            slide_metadata,
-                            slide_name,
-                            cluster_soft_assignments_memmap,
-                            level_extent_x,
-                            level_extent_y,
-                            cluster_idx,
-                            OUT_FILE_PATH_SINGLE_CLUSTER_OVERLAY
-                        )
-                    )
-            # wait for all tasks to complete
-            for cluster_idx, future in enumerate(tasks_futures):
-                future.result()
-                _slide_pbar.write(f"Finished processing single cluster overlay for cluster {cluster_idx} for slide {slide_name}")
+        # with ThreadPoolExecutor(max_workers=NUM_WORKERS) as executor:
+        tasks_futures = []
+        for cluster_idx in range(NUM_CLUSTERS):
+            OUT_FILE_PATH_SINGLE_CLUSTER_OVERLAY = SINGLE_OVERLAYS_DIR / str(cluster_idx) / f"{slide_name}.tiff"
+            if artifact_exists(mlflow_client, mlflow_run_id, "clustering_single_cluster_overlays", OUT_FILE_PATH_SINGLE_CLUSTER_OVERLAY.name):
+                _slide_pbar.write(f"Single cluster overlay for cluster {cluster_idx} for slide {slide_name} exists in MLflow, skipping.")
+                continue
+            elif OUT_FILE_PATH_SINGLE_CLUSTER_OVERLAY.exists():
+                _slide_pbar.write(f"Single cluster overlay for cluster {cluster_idx} for slide {slide_name} exists, checking if uploaded to ML Flow.")
+                upload_image_if_missing(
+                    client=mlflow_client,
+                    run_id=mlflow_run_id,
+                    local_image_path=OUT_FILE_PATH_SINGLE_CLUSTER_OVERLAY,
+                    artifact_subdir=f"clustering_single_cluster_overlays/{cluster_idx}"
+                )
+                _slide_pbar.write(f"Ensured upload of single cluster overlay for cluster {cluster_idx} for {slide_name} to MLflow!")
+                continue
+            else:
+                # get WSI full extent at a specific level
+                slide_handle = openslide.OpenSlide(slide_path)
+                level_extent_x, level_extent_y = slide_handle.level_dimensions[WSI_LEVEL_TO_MATCH_OUTPUTS_TO]
+                
+                parrallel_save_upload_overlay_tiff_single_cluster(
+                    WSI_LEVEL_TO_MATCH_OUTPUTS_TO, 
+                    mlflow_client, 
+                    mlflow_run_id, 
+                    _slide_pbar, 
+                    slide_metadata, 
+                    slide_name,
+                    cluster_soft_assignments_memmap, 
+                    level_extent_x, 
+                    level_extent_y, 
+                    cluster_idx, 
+                    OUT_FILE_PATH_SINGLE_CLUSTER_OVERLAY)
+                # tasks_futures.append(
+                #     executor.submit(
+                #         parrallel_save_upload_overlay_tiff_single_cluster,
+                #         WSI_LEVEL_TO_MATCH_OUTPUTS_TO,
+                #         mlflow_client,
+                #         mlflow_run_id,
+                #         _slide_pbar,
+                #         slide_metadata,
+                #         slide_name,
+                #         cluster_soft_assignments_memmap,
+                #         level_extent_x,
+                #         level_extent_y,
+                #         cluster_idx,
+                #         OUT_FILE_PATH_SINGLE_CLUSTER_OVERLAY
+                #     )
+                # )
+            # # wait for all tasks to complete
+            # for cluster_idx, future in enumerate(tasks_futures):
+            #     future.result()
+            #     _slide_pbar.write(f"Finished processing single cluster overlay for cluster {cluster_idx} for slide {slide_name}")
         _slide_pbar.write(f"Finished processing slide {slide_name} ({i})")
 
 def parrallel_save_upload_overlay_tiff_single_cluster(WSI_LEVEL_TO_MATCH_OUTPUTS_TO, mlflow_client, mlflow_run_id, _slide_pbar, slide_metadata, slide_name, cluster_soft_assignments_memmap, level_extent_x, level_extent_y, cluster_idx, OUT_FILE_PATH_SINGLE_CLUSTER_OVERLAY):
@@ -475,7 +486,7 @@ def parrallel_save_upload_overlay_tiff_single_cluster(WSI_LEVEL_TO_MATCH_OUTPUTS
                     # save overlay as tiff
         _slide_pbar.write(f"Saving single cluster overlay for cluster {cluster_idx} for slide {slide_name} at level {WSI_LEVEL_TO_MATCH_OUTPUTS_TO} dimensions {level_extent_x}x{level_extent_y}")
         save_image_xopat_compatible( 
-                        cluster_soft_assignments_memmap[:, :, cluster_idx], 
+                        cluster_soft_assignments_memmap[:, :, cluster_idx]*255.0, 
                         single_cluster_overlay_numpy_file, 
                         target_extent_x=level_extent_x, 
                         target_extent_y=level_extent_y,
