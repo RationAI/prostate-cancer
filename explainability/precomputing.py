@@ -126,7 +126,7 @@ class MultichannelHeatmapAssembler:
 # test_heatmap_assembler()
 
 
-class EdgeClippingMultiscaleHeatmapAssembler(MultichannelHeatmapAssembler):
+class EdgeClippingMultichannelHeatmapAssembler(MultichannelHeatmapAssembler):
     """A heatmap assembler that clips edges of the input tiles before assembling them into the heatmap."""
     def __init__(self, clip_top: int, clip_bottom: int, clip_left: int, clip_right: int, *args, **kwargs):
         super().__init__(*args, **kwargs)

@@ -1,6 +1,6 @@
 import numpy as np
 from pathlib import Path
-from explainability.precomputing import EdgeClippingMultiscaleHeatmapAssembler
+from explainability.precomputing import EdgeClippingMultichannelHeatmapAssembler
 
 
 def test_edge_clipping_heatmap_assembler(tmp_path):
@@ -23,7 +23,7 @@ def test_edge_clipping_heatmap_assembler(tmp_path):
     num_batches = 4
     B = 8
 
-    assembler = EdgeClippingMultiscaleHeatmapAssembler(
+    assembler = EdgeClippingMultichannelHeatmapAssembler(
         clip_top=clip,
         clip_bottom=clip,
         clip_left=clip,

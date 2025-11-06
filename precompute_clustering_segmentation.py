@@ -21,7 +21,7 @@ from explainability.cams import grad_cam_pp_numpy, layer_cam_numpy
 from explainability.mlflow_persistence.storing import artifact_exists, ensure_mlflow_run, upload_image_if_missing
 from prostate_cancer.data import DataModule
 from prostate_cancer.prostate_cancer_model import ProstateCancerModel
-from explainability.precomputing import MultichannelHeatmapAssembler, EdgeClippingMultiscaleHeatmapAssembler, safe_file_op_ctxm, ClusteringManager
+from explainability.precomputing import MultichannelHeatmapAssembler, EdgeClippingMultichannelHeatmapAssembler, safe_file_op_ctxm, ClusteringManager
 from explainability.clustering.tensor_shaping import reshape_for_clustering_universal
 from explainability.visualizations.clusters import  get_overlay_from_clustering_numpy, plot_cluster_distance_matrix
 from explainability.visualizations.image_transforms import save_image_xopat_compatible
@@ -47,7 +47,7 @@ def main(num_clusters: int, experiment_name: str, clustering_algorithm: str, clu
         raise ValueError("out_dir must be provided.")
     OUT_DIR = out_dir
     PRECOMPUTE_DIR = OUT_DIR / "PRECOMPUTED"
-    ACTIVATIONS_DIR = PRECOMPUTE_DIR / "VGG16_Prostate"
+    ACTIVATIONS_DIR = PRECOMPUTE_DIR / "VGG16_Prostate_edgeClipped"
     # CLUSTERING_DIR = OUT_DIR / experiment_name
     CLUSTERING_DIR = Path("/tmp/XAI") / experiment_name
 
@@ -227,14 +227,22 @@ def main(num_clusters: int, experiment_name: str, clustering_algorithm: str, clu
 
             with safe_file_op_ctxm(OUT_FILE_PATH_ACTS) as act_numpy_file, safe_file_op_ctxm(OUT_FILE_PATH_GRADS) as grad_numpy_file:
                 if not _bool_acts_exists:
-                    heatmap_assembler = MultichannelHeatmapAssembler(
+                    heatmap_assembler = EdgeClippingMultichannelHeatmapAssembler(
+                        clip_top=CUT_EDGE_SUBTILES,
+                        clip_bottom=CUT_EDGE_SUBTILES,
+                        clip_left=CUT_EDGE_SUBTILES,
+                        clip_right=CUT_EDGE_SUBTILES,
                         heatmap_width=act_heatmap_width,
                         heatmap_height=act_heatmap_height,
                         heatmap_channels=heatmap_channels,
                         heatmap_npy_fp=act_numpy_file
                     )
                 if not _bool_grads_exists:
-                    gradient_assembler = MultichannelHeatmapAssembler(
+                    gradient_assembler = EdgeClippingMultichannelHeatmapAssembler(
+                        clip_top=CUT_EDGE_SUBTILES,
+                        clip_bottom=CUT_EDGE_SUBTILES,
+                        clip_left=CUT_EDGE_SUBTILES,
+                        clip_right=CUT_EDGE_SUBTILES,
                         heatmap_width=grad_heatmap_width,
                         heatmap_height=grad_heatmap_height,
                         heatmap_channels=gradient_channels,
