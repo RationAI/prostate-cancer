@@ -39,6 +39,8 @@ dependencies = [
     "opencv-contrib-python>=4.11.0.86",
     "opencv-python>=4.11.0.86",
     "report @ git+ssh://git@gitlab.ics.muni.cz/rationai/digital-pathology/pipeline/report.git@feature/infer-slide-name-from-path",
+    "huggingface-hub>=1.0.1",
+    "pytest>=8.4.2",
 ]
 
 [tool.pdm.scripts]
