@@ -36,22 +36,22 @@ logging.basicConfig(level=logging.INFO)
 
 @click.command()
 @click.option('--num-clusters', type=int, default=6, help='Number of clusters for NMF clustering.')
-@click.option('--experiment-name', type=str, help='Name of the experiment.')
+@click.option('--experiment-directory', type=str, help='Name of the experiment directory to store reusable results and artifacts.')
 @click.option('--clustering-algorithm', type=click.Choice(['NMF', 'KMeans'], case_sensitive=False), default='NMF', help='Clustering algorithm to use.')
 @click.option('--clustering-instance-fp', type=click.Path(exists=True, file_okay=True, dir_okay=False, path_type=Path), default=None, help='Path to precomputed clustering instance (.npy file). If provided, this instance will be used instead of fitting a new one.')
 @click.option('--out-dir', type=click.Path(file_okay=False, dir_okay=True, path_type=Path), default=Path("/mnt/projects/explainability/XAICNNEmbeddings/"), help='Output directory for experiment results. If not provided, a default directory will be used.')
 @click.option('--mlf-runid', type=str, default=None, help='MLflow run ID to associate with the experiment.')
-def main(num_clusters: int, experiment_name: str, clustering_algorithm: str, clustering_instance_fp: Path | None, out_dir: Path | None, mlf_runid: str | None):
+def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str, clustering_instance_fp: Path | None, out_dir: Path | None, mlf_runid: str | None):
 
     if out_dir is None:
         raise ValueError("out_dir must be provided.")
     OUT_DIR = out_dir
     PRECOMPUTE_DIR = OUT_DIR / "PRECOMPUTED"
-    ACTIVATIONS_DIR = PRECOMPUTE_DIR / "VGG16_Prostate_edgeClipped"
+    ACTIVATIONS_DIR = PRECOMPUTE_DIR / "VGG16_Prostate_EdgeClipped"
     # CLUSTERING_DIR = OUT_DIR / experiment_name
-    CLUSTERING_DIR = Path("/tmp/XAI") / experiment_name
+    TMP_DIR = Path("/tmp/XAI") / experiment_directory
 
-    CLUSTERING_DIR.mkdir(exist_ok=True, parents=True)
+    TMP_DIR.mkdir(exist_ok=True, parents=True)
     ACTIVATIONS_DIR.mkdir(exist_ok=True, parents=True)
     
     WSI_LEVEL_TO_MATCH_OUTPUTS_TO = 3
@@ -277,20 +277,83 @@ def main(num_clusters: int, experiment_name: str, clustering_algorithm: str, clu
 
         # =====================================================================
         # Create XAI masks from activations and gradients
-        OUT_FILE_PATH_XAI_GRADCAM = ACTIVATIONS_DIR / f"xai-gradcam_slide-aggregated_{i}_{slide_name}.npy"
+        OUT_FILE_PATH_XAI_GRADCAM = ACTIVATIONS_DIR / "xai-gradcam" / f"{slide_name}.npy"
+        OUT_FILE_PATH_XAI_GRADCAM_TIFF = TMP_DIR / "xai-gradcam" / f"{slide_name}.tiff"
         if OUT_FILE_PATH_XAI_GRADCAM.exists():
             _slide_pbar.write(f"Grad-CAM for slide {slide_name} exist, skipping.")
-            xai_gradcam_assembled_wsi = np.load(OUT_FILE_PATH_XAI_GRADCAM, mmap_mode='r+')
+            xai_gradcam_assembled_wsi = np.load(OUT_FILE_PATH_XAI_GRADCAM, mmap_mode='r')
             _slide_pbar.write(f"Grad-CAM has shape: {xai_gradcam_assembled_wsi.shape}")
         else:
-            xai_mask = grad_cam_pp_numpy(
-                activations=activations_assembled_wsi,
-                gradients=gradients_assembled_wsi,
-                eps=1e-6,
+            with safe_file_op_ctxm(OUT_FILE_PATH_XAI_GRADCAM, unlink_on_exception=True) as xai_gradcam_numpy_file:
+                xai_gradcam_assembled_wsi = open_memmap(
+                    xai_gradcam_numpy_file,
+                    mode='r+',
+                    shape=activations_assembled_wsi.shape
+                )
+                xai_gradcam_assembled_wsi[:] = grad_cam_pp_numpy(
+                    activations=activations_assembled_wsi,
+                    gradients=gradients_assembled_wsi,
+                    eps=1e-6,
+                )
+                xai_gradcam_assembled_wsi.flush()
+                _slide_pbar.write(f"Saved Grad-CAM to {OUT_FILE_PATH_XAI_GRADCAM} with shape {xai_gradcam_assembled_wsi.shape}")
+            # save image tiff mask
+            with safe_file_op_ctxm(OUT_FILE_PATH_XAI_GRADCAM_TIFF, unlink_on_exception=True) as xai_gradcam_tiff_file:
+                save_image_xopat_compatible(
+                    image=xai_gradcam_assembled_wsi,
+                    save_path=xai_gradcam_tiff_file,
+                    target_extent_x=slide_metadata.extent_x,
+                    target_extent_y=slide_metadata.extent_y,
+                    microns_per_pixel_x=slide_metadata.mpp_x,
+                    microns_per_pixel_y=slide_metadata.mpp_y,
+                )
+            # upload to mlflow
+            upload_image_if_missing(
+                client=mlflow_client,
+                run_id=mlflow_run_id,
+                local_image_path=OUT_FILE_PATH_XAI_GRADCAM_TIFF,
+                artifact_subdir="xai/gradcam/"
             )
-
-
-
+            _slide_pbar.write(f"Uploaded Grad-CAM TIFF to MLflow.")
+        
+        OUT_FILE_PATH_XAI_LAYERCAM = ACTIVATIONS_DIR / "xai-layercam" / f"{slide_name}.npy"
+        OUT_FILE_PATH_XAI_LAYERCAM_TIFF = TMP_DIR / "xai-layercam" / f"{slide_name}.tiff"
+        if OUT_FILE_PATH_XAI_LAYERCAM.exists():
+            _slide_pbar.write(f"Layer-CAM for slide {slide_name} exist, skipping.")
+            xai_layercam_assembled_wsi = np.load(OUT_FILE_PATH_XAI_LAYERCAM, mmap_mode='r')
+            _slide_pbar.write(f"Layer-CAM has shape: {xai_layercam_assembled_wsi.shape}")
+        else:
+            with safe_file_op_ctxm(OUT_FILE_PATH_XAI_LAYERCAM, unlink_on_exception=True) as xai_layercam_numpy_file:
+                xai_layercam_assembled_wsi = open_memmap(
+                    xai_layercam_numpy_file,
+                    mode='r+',
+                    shape=activations_assembled_wsi.shape
+                )
+                xai_layercam_assembled_wsi[:] = layer_cam_numpy(
+                    activations=activations_assembled_wsi,
+                    gradients=gradients_assembled_wsi,
+                    eps=1e-6,
+                )
+                xai_layercam_assembled_wsi.flush()
+                _slide_pbar.write(f"Saved Layer-CAM to {OUT_FILE_PATH_XAI_LAYERCAM} with shape {xai_layercam_assembled_wsi.shape}")
+            # save image tiff mask
+            with safe_file_op_ctxm(OUT_FILE_PATH_XAI_LAYERCAM_TIFF, unlink_on_exception=True) as xai_layercam_tiff_file:
+                save_image_xopat_compatible(
+                    image=xai_layercam_assembled_wsi,
+                    save_path=xai_layercam_tiff_file,
+                    target_extent_x=slide_metadata.extent_x,
+                    target_extent_y=slide_metadata.extent_y,
+                    microns_per_pixel_x=slide_metadata.mpp_x,
+                    microns_per_pixel_y=slide_metadata.mpp_y,
+                )
+            # upload to mlflow
+            upload_image_if_missing(
+                client=mlflow_client,
+                run_id=mlflow_run_id,
+                local_image_path=OUT_FILE_PATH_XAI_LAYERCAM_TIFF,
+                artifact_subdir="xai/layercam/"
+            )
+            _slide_pbar.write(f"Uploaded Layer-CAM TIFF to MLflow.")
 
         # =====================================================================
         # Gather embeddings for clustering
@@ -328,7 +391,7 @@ def main(num_clusters: int, experiment_name: str, clustering_algorithm: str, clu
             )
             _slide_pbar.write(f"Clustering model loaded from precomputed instance.")
         else:
-            OUT_FILE_PATH_CLUSTERING_INSTANCE = CLUSTERING_DIR / f"clustering-instance_{clustering_algorithm}_{i}_{slide_name}.npy"
+            OUT_FILE_PATH_CLUSTERING_INSTANCE = TMP_DIR / f"clustering-instance_{clustering_algorithm}_{i}_{slide_name}.npy"
             if OUT_FILE_PATH_CLUSTERING_INSTANCE.exists():
                 _slide_pbar.write(f"Clustering instance for slide {slide_name} exist, skipping.")
                 # if clustering_algorithm == "NMF":
@@ -373,7 +436,7 @@ def main(num_clusters: int, experiment_name: str, clustering_algorithm: str, clu
         # =====================================================================
         # Visualise the clusters characteristics to asses quality and centroid distances
         if clustering_instance_fp is None:
-            OUT_FILE_PATH_CLUSTERING_VISUALS = CLUSTERING_DIR / f"clustering-visuals_{clustering_algorithm}_{i}_{slide_name}.svg"
+            OUT_FILE_PATH_CLUSTERING_VISUALS = TMP_DIR / f"clustering-visuals_{clustering_algorithm}_{i}_{slide_name}.svg"
             if OUT_FILE_PATH_CLUSTERING_VISUALS.exists():
                 _slide_pbar.write(f"Clustering visuals for slide {slide_name} exist, skipping.")
             else:
@@ -400,7 +463,7 @@ def main(num_clusters: int, experiment_name: str, clustering_algorithm: str, clu
         # =====================================================================
         # Assign cluster indices to each subunit in the WSI 
 
-        OUT_FILE_PATH_CLUSTER_SOFT_ASSIGNMENTS = CLUSTERING_DIR / f"cluster-soft-assignments_{clustering_algorithm}_{NUM_CLUSTERS}clusters_{i}_{slide_name}.npy"
+        OUT_FILE_PATH_CLUSTER_SOFT_ASSIGNMENTS = TMP_DIR / f"cluster-soft-assignments_{clustering_algorithm}_{NUM_CLUSTERS}clusters_{i}_{slide_name}.npy"
         if OUT_FILE_PATH_CLUSTER_SOFT_ASSIGNMENTS.exists():
             _slide_pbar.write(f"Soft cluster assignments for slide {slide_name} exist, skipping.")
             cluster_soft_assignments_memmap = np.load(OUT_FILE_PATH_CLUSTER_SOFT_ASSIGNMENTS, mmap_mode='r')
@@ -422,7 +485,7 @@ def main(num_clusters: int, experiment_name: str, clustering_algorithm: str, clu
                 _slide_pbar.write(f"Saved soft assignments with shape: {cluster_soft_assignments_memmap.shape}")
 
 
-        OUT_FILE_PATH_CLUSTER_HARD_ASSIGNMENTS = CLUSTERING_DIR / f"cluster-indices_slide-aggregated_{clustering_algorithm}_{i}_{slide_name}.npy"
+        OUT_FILE_PATH_CLUSTER_HARD_ASSIGNMENTS = TMP_DIR / f"cluster-indices_slide-aggregated_{clustering_algorithm}_{i}_{slide_name}.npy"
         if OUT_FILE_PATH_CLUSTER_HARD_ASSIGNMENTS.exists():
             _slide_pbar.write(f"Clustering indices for slide {slide_name} exist, skipping.")
             cluster_hard_assignments_memmap = np.load(OUT_FILE_PATH_CLUSTER_HARD_ASSIGNMENTS, mmap_mode='r+')
@@ -453,7 +516,7 @@ def main(num_clusters: int, experiment_name: str, clustering_algorithm: str, clu
 
         # =====================================================================
         # Visualize the clustering results as overlay on the WSI
-        OUT_FILE_PATH_INDS_GRAYSCALE = CLUSTERING_DIR / f"clustering_gray_{clustering_algorithm}"  / f"{slide_name}.tiff"
+        OUT_FILE_PATH_INDS_GRAYSCALE = TMP_DIR / f"clustering_gray_{clustering_algorithm}"  / f"{slide_name}.tiff"
         # OUT_FILE_PATH_SEGS = CLUSTERING_DIR           / f"clustering_color_{clustering_algorithm}" / f"{slide_name}.tiff"
         _slide_pbar.write(f"Preparing segmentation {OUT_FILE_PATH_INDS_GRAYSCALE} for slide {slide_name}")
         if artifact_exists(mlflow_client, mlflow_run_id, "clustering_images", OUT_FILE_PATH_INDS_GRAYSCALE.name):
@@ -497,7 +560,7 @@ def main(num_clusters: int, experiment_name: str, clustering_algorithm: str, clu
             _slide_pbar.write(f"Ensured upload of grayscale segmentation for {slide_name} to MLflow!")
 
 
-        SINGLE_OVERLAYS_DIR = CLUSTERING_DIR / f"single_cluster_overlays_{clustering_algorithm}_{NUM_CLUSTERS}clusters"
+        SINGLE_OVERLAYS_DIR = TMP_DIR / f"single_cluster_overlays_{clustering_algorithm}_{NUM_CLUSTERS}clusters"
         # with ThreadPoolExecutor(max_workers=NUM_WORKERS) as executor:
         tasks_futures = []
         for cluster_idx in range(NUM_CLUSTERS):
