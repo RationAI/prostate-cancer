@@ -261,8 +261,8 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
                     Y = (metadata['y'] * slide_to_heatmap_ratio_y).to(torch.int64)
                     
                     inputs = inputs.to("cuda:0")
-                    hooked_model(inputs)
-                    loss = loss_fn(hooked_model.get_activations(target_layer), labels.to("cuda:0").float())
+                    outputs_ = hooked_model(inputs)
+                    loss = loss_fn(outputs_, labels.to("cuda:0").float())
                     loss.backward()
                     if not _bool_acts_exists:
                         A = hooked_model.get_activations(target_layer)
