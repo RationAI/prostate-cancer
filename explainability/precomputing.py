@@ -139,10 +139,11 @@ class EdgeClippingMultichannelHeatmapAssembler(MultichannelHeatmapAssembler):
     def update_batch_torch(self, data: np.ndarray, xs: np.ndarray, ys: np.ndarray) -> None:
         # Clip the edges of the input tiles
         extent_x, extent_y = data.shape[3], data.shape[2]
-        data = data[..., self.clip_top:extent_y-self.clip_bottom, self.clip_left:extent_x-self.clip_right]
-        xs = xs + self.clip_left
-        ys = ys + self.clip_top
-        super().update_batch_torch(data, xs, ys)
+        super().update_batch_torch(
+            data[..., self.clip_top:extent_y-self.clip_bottom, self.clip_left:extent_x-self.clip_right],
+            xs + self.clip_left, 
+            ys + self.clip_top
+        )
 
 
 # # perform sanity checks to make sure the assembler works as expected

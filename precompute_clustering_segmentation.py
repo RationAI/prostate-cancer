@@ -157,7 +157,7 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
         # path             /mnt/data/Projects/prostate_cancer/cancer/test...
         # level                                                            1
         # carcinoma         
-        
+        print("DEBUG: Slide metadata:", slide_metadata)
         # level = slide_metadata.level
         slide_path = slide_metadata.path.replace("/mnt/data/Projects/prostate_cancer/cancer/test_data/", "/mnt/data/MOU/prostate/tile_level_annotations_test/")  # TODO: fix hardcoding
         slide_name = Path(slide_path).stem
@@ -269,9 +269,12 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
                     if not _bool_acts_exists:
                         A = hooked_model.get_activations(target_layer)
                         heatmap_assembler.update_batch_torch(A.cpu().numpy(), X.cpu().numpy(), Y.cpu().numpy())
+                        del A
                     if not _bool_grads_exists:
                         G = hooked_model.get_gradients(target_layer)
                         gradient_assembler.update_batch_torch(G.cpu().numpy(), X.cpu().numpy(), Y.cpu().numpy())
+                        del G
+                    del inputs, outputs_, loss
 
                 if not _bool_acts_exists:
                     activations_assembled_wsi, activations_assembled_wsi_overlaps = heatmap_assembler.finalize()
