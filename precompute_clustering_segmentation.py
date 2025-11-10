@@ -121,12 +121,11 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
 
     # %%
     # Get one batch from validation dataset
-    data.batch_size = 32
+    data.batch_size = 16
     data.setup("test")
 
     # %%
     dataloaders = data.test_dataloader()
-    print(type(data.test_dataloader()))
 
 
     # %%

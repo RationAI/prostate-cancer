@@ -22,7 +22,8 @@ def safe_file_op_ctxm(target_file: Path, unlink_on_exception: bool = True):
     temp_file_path.unlink(missing_ok=True)  # Ensure temp file does not exist
     try:
         yield temp_file_path
-        temp_file_path.rename(target_file)
+        if temp_file_path.exists():
+            temp_file_path.rename(target_file)
     except Exception as e:
         if unlink_on_exception:
             temp_file_path.unlink(missing_ok=True)
