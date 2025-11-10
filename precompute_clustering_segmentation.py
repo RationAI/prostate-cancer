@@ -121,7 +121,7 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
 
     # %%
     # Get one batch from validation dataset
-    data.batch_size = 16
+    data.batch_size = 4
     data.setup("test")
 
     # %%
@@ -257,6 +257,7 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
                 print("DEBUG: Beginning batch processing.", flush=True)
                 for batch in tqdm(dataloader, desc="Batch"):
                     inputs, labels, metadata = batch
+                    print(f"DEBUG: Processing new batch. SHAPE: {inputs.shape}", flush=True)
                     # print(metadata)  # slide, x, y
                     X = (metadata['x'] * slide_to_heatmap_ratio_x).to(torch.int64)
                     Y = (metadata['y'] * slide_to_heatmap_ratio_y).to(torch.int64)
