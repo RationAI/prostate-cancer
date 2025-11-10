@@ -335,13 +335,13 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
                 xai_layercam_assembled_wsi = open_memmap(
                     xai_layercam_numpy_file,
                     mode='w+',
-                    shape=activations_assembled_wsi.shape
+                    shape=activations_assembled_wsi.shape[1:3]
                 )
                 xai_layercam_assembled_wsi[:] = layer_cam_numpy(
-                    activations=activations_assembled_wsi,
-                    gradients=gradients_assembled_wsi,
+                    activations=activations_assembled_wsi[np.newaxis, ...],
+                    gradients=gradients_assembled_wsi[np.newaxis, ...],
                     eps=1e-6,
-                )
+                ).squeeze(0)
                 xai_layercam_assembled_wsi.flush()
                 _slide_pbar.write(f"Saved Layer-CAM to {OUT_FILE_PATH_XAI_LAYERCAM} with shape {xai_layercam_assembled_wsi.shape}")
             # save image tiff mask
