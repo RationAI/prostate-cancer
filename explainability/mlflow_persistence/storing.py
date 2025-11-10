@@ -1,3 +1,4 @@
+import os
 from pathlib import Path
 from mlflow.tracking import MlflowClient
 from mlflow.utils.mlflow_tags import MLFLOW_USER, MLFLOW_SOURCE_NAME, MLFLOW_GIT_COMMIT, MLFLOW_GIT_REPO_URL
@@ -12,6 +13,16 @@ def ensure_mlflow_run(experiment_name: str, run_id: str | None = None):
     else:
         exp_id = exp.experiment_id
 
+    # get username from git config (if present),
+    # otherwise try to get it from the MLFLOW_TRACKING_USERNAME env var,
+    # otherwise fail
+    try:
+        username = git.Repo(search_parent_directories=True).git.config('--get', 'user.name')
+    except Exception:
+        username = os.getenv("MLFLOW_TRACKING_USERNAME")
+        if username is None:
+            raise ValueError("Username not found in git config or MLFLOW_TRACKING_USERNAME environment variable.")
+
     if run_id is not None:
         run = client.get_run(run_id)
         if run.info.lifecycle_stage == "active":
@@ -24,7 +35,7 @@ def ensure_mlflow_run(experiment_name: str, run_id: str | None = None):
             MLFLOW_SOURCE_NAME: "precompute_clustering_segmentation.py",
             MLFLOW_GIT_REPO_URL: git.Repo(search_parent_directories=True).remotes.origin.url,
             MLFLOW_GIT_COMMIT: git.Repo(search_parent_directories=True).head.commit.hexsha,
-            MLFLOW_USER: git.Repo(search_parent_directories=True).git.config('--get', 'user.name'),
+            MLFLOW_USER: username,
         })
         print(f"Created new MLflow run: {run.info.run_id}")
 
