@@ -9,6 +9,7 @@ import openslide  #IMPORT BEFORE TORCH
 import pyvips  #IMPORT BEFORE TORCH
 
 import torch
+import torch.nn as nn
 from lightning import seed_everything
 
 import numpy as np
@@ -183,7 +184,11 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
         
         if not (_bool_acts_exists and _bool_grads_exists and _bool_act_overlaps_exists):
             first_input, first_label, first_m = dataloader.dataset[0]
-            hooked_model(first_input.unsqueeze(0).to("cuda:0"))
+            acts_ = hooked_model(first_input.unsqueeze(0).to("cuda:0"))
+            # get loss and backprop to get gradients
+            loss_fn = nn.BCEWithLogitsLoss(reduction="mean")
+            loss = loss_fn(acts_, first_label.unsqueeze(0).to("cuda:0").float())
+            loss.backward()
 
             slide_width = slide_metadata.extent_x  # the width of the slide at the level used for sampling
             slide_height = slide_metadata.extent_y
