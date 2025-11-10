@@ -276,9 +276,9 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
                     _slide_pbar.write(f"Saved activations to {OUT_FILE_PATH_ACTS}")
                     np.save(OUT_FILE_PATH_ACT_OVERLAPS, activations_assembled_wsi_overlaps)
                 if not _bool_grads_exists:
-                    gradients_assembled_wsi, gradients_assembled_wsi_overlaps = gradient_assembler.finalize()
+                    gradients_assembled_wsi, _ = gradient_assembler.finalize()
                     _slide_pbar.write(f"Saved gradients to {OUT_FILE_PATH_GRADS}")
-                    np.save(OUT_FILE_PATH_GRADS_OVERLAPS, gradients_assembled_wsi_overlaps)
+                    # np.save(OUT_FILE_PATH_GRADS_OVERLAPS, gradients_assembled_wsi_overlaps)  # NO NEED, same as activations overlaps
         # OUTPUTS: activations_assembled_wsi, activations_assembled_wsi_overlaps, gradients_assembled_wsi, gradients_assembled_wsi_overlaps
 
 
