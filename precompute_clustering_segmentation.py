@@ -184,6 +184,7 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
             activations_assembled_wsi_overlaps = np.load(OUT_FILE_PATH_ACT_OVERLAPS, mmap_mode='r+')
         
         if not (_bool_acts_exists and _bool_grads_exists and _bool_act_overlaps_exists):
+            print("DEBUG: Starting assembly of activations and gradients.")
             first_input, first_label, first_m = dataloader.dataset[0]
             acts_ = hooked_model(first_input.unsqueeze(0).to("cuda:0"))
             loss = loss_fn(acts_, first_label.unsqueeze(0).to("cuda:0").float())
@@ -229,6 +230,7 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
                 assert grad_heatmap_tile_stride_x == grad_heatmap_tile_stride_y
                 _slide_pbar.write(f"Gradient heatmap width and height: {grad_heatmap_width} | {grad_heatmap_height}")
 
+            print("DEBUG: Starting assembly of activations and gradients.", flush=True)
             with safe_file_op_ctxm(OUT_FILE_PATH_ACTS) as act_numpy_file, safe_file_op_ctxm(OUT_FILE_PATH_GRADS) as grad_numpy_file:
                 if not _bool_acts_exists:
                     heatmap_assembler = EdgeClippingMultichannelHeatmapAssembler(
@@ -252,7 +254,7 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
                         heatmap_channels=gradient_channels,
                         heatmap_npy_fp=grad_numpy_file
                     )
-
+                print("DEBUG: Beginning batch processing.", flush=True)
                 for batch in tqdm(dataloader, desc="Batch"):
                     inputs, labels, metadata = batch
                     # print(metadata)  # slide, x, y
