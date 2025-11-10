@@ -296,7 +296,7 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
                 xai_gradcam_assembled_wsi = open_memmap(
                     xai_gradcam_numpy_file,
                     mode='w+',
-                    shape=activations_assembled_wsi.shape[[1, 2]]
+                    shape=activations_assembled_wsi.shape[1:3]
                 )
                 xai_gradcam_assembled_wsi[:] = grad_cam_pp_numpy(
                     activations=activations_assembled_wsi[np.newaxis, ...],

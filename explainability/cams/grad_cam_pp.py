@@ -60,10 +60,10 @@ def grad_cam_pp(
     return cams
 
 def grad_cam_pp_numpy(
-    activations: np.ndarray,
-    gradients: np.ndarray,
+    activations: Float[np.ndarray, "B C H W"],
+    gradients: Float[np.ndarray, "B C H W"],
     eps: float = 1e-6,
-) -> np.ndarray:
+) -> Float[np.ndarray, "B H W"]:
     """Compute Grad-CAM++ maps given activations and gradients.
 
     Args:
