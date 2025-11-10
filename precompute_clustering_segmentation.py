@@ -294,7 +294,7 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
             with safe_file_op_ctxm(OUT_FILE_PATH_XAI_GRADCAM, unlink_on_exception=True) as xai_gradcam_numpy_file:
                 xai_gradcam_assembled_wsi = open_memmap(
                     xai_gradcam_numpy_file,
-                    mode='r+',
+                    mode='w+',
                     shape=activations_assembled_wsi.shape
                 )
                 xai_gradcam_assembled_wsi[:] = grad_cam_pp_numpy(
@@ -333,7 +333,7 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
             with safe_file_op_ctxm(OUT_FILE_PATH_XAI_LAYERCAM, unlink_on_exception=True) as xai_layercam_numpy_file:
                 xai_layercam_assembled_wsi = open_memmap(
                     xai_layercam_numpy_file,
-                    mode='r+',
+                    mode='w+',
                     shape=activations_assembled_wsi.shape
                 )
                 xai_layercam_assembled_wsi[:] = layer_cam_numpy(
