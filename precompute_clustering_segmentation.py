@@ -116,6 +116,8 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
     print(model)
     hooked_model = HookedModule(model, layer_names=[target_layer])
     modify_ReLU_inplace(hooked_model, inplace=False)
+    # get loss and backprop to get gradients
+    loss_fn = nn.BCEWithLogitsLoss(reduction="mean")
 
     # %%
     # Get one batch from validation dataset
@@ -185,8 +187,6 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
         if not (_bool_acts_exists and _bool_grads_exists and _bool_act_overlaps_exists):
             first_input, first_label, first_m = dataloader.dataset[0]
             acts_ = hooked_model(first_input.unsqueeze(0).to("cuda:0"))
-            # get loss and backprop to get gradients
-            loss_fn = nn.BCEWithLogitsLoss(reduction="mean")
             loss = loss_fn(acts_, first_label.unsqueeze(0).to("cuda:0").float())
             loss.backward()
 
@@ -262,6 +262,8 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
                     
                     inputs = inputs.to("cuda:0")
                     hooked_model(inputs)
+                    loss = loss_fn(hooked_model.get_activations(target_layer), labels.to("cuda:0").float())
+                    loss.backward()
                     if not _bool_acts_exists:
                         A = hooked_model.get_activations(target_layer)
                         heatmap_assembler.update_batch_torch(A.cpu().numpy(), X.cpu().numpy(), Y.cpu().numpy())
