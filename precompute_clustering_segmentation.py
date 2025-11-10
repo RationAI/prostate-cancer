@@ -292,16 +292,17 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
             _slide_pbar.write(f"Grad-CAM has shape: {xai_gradcam_assembled_wsi.shape}")
         else:
             with safe_file_op_ctxm(OUT_FILE_PATH_XAI_GRADCAM, unlink_on_exception=True) as xai_gradcam_numpy_file:
+                _slide_pbar.write(f"DEBUG: Shape of activations: {activations_assembled_wsi.shape}, Shape of gradients: {gradients_assembled_wsi.shape}")
                 xai_gradcam_assembled_wsi = open_memmap(
                     xai_gradcam_numpy_file,
                     mode='w+',
-                    shape=activations_assembled_wsi.shape
+                    shape=activations_assembled_wsi.shape[[1, 2]]
                 )
                 xai_gradcam_assembled_wsi[:] = grad_cam_pp_numpy(
-                    activations=activations_assembled_wsi,
-                    gradients=gradients_assembled_wsi,
+                    activations=activations_assembled_wsi[np.newaxis, ...],
+                    gradients=gradients_assembled_wsi[np.newaxis, ...],
                     eps=1e-6,
-                )
+                ).squeeze(0)
                 xai_gradcam_assembled_wsi.flush()
                 _slide_pbar.write(f"Saved Grad-CAM to {OUT_FILE_PATH_XAI_GRADCAM} with shape {xai_gradcam_assembled_wsi.shape}")
             # save image tiff mask
