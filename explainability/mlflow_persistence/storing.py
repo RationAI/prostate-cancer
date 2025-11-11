@@ -74,7 +74,7 @@ def upload_image_if_missing(
         return False
     else:
         print(f"Uploading '{file_name}' to MLflow under {artifact_subdir}/")
-        client.log_artifact(run_id, local_image_path.as_posix(), artifact_path=artifact_subdir)
+        client.log_artifact(run_id, local_path=local_image_path.as_posix(), artifact_path=artifact_subdir)
         return True
 
 

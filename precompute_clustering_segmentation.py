@@ -1,4 +1,5 @@
 # %%
+from functools import partial
 import logging
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
@@ -32,6 +33,15 @@ from explainability.visualizations.color_palettes import COLOR_PALETTE_ADAM, Col
 # %%
 logging.basicConfig(level=logging.INFO)
 
+
+def tile_operation_to_wsi(operation, tile_size: int, inputs: dict, output_array: np.memmap):
+    HEIGHT, WIDTH = output_array.shape
+    for y_start in tqdm(range(0, HEIGHT, tile_size), desc="Grad-CAM++ Y Tiles"):
+        y_end = min(y_start + tile_size, HEIGHT)
+        for x_start in tqdm(range(0, WIDTH, tile_size), desc="Grad-CAM++ X Tiles", leave=False):
+            x_end = min(x_start + tile_size, WIDTH)
+            tile_inputs = {k: v[:, y_start:y_end, x_start:x_end] for k, v in inputs.items()}
+            output_array[y_start:y_end, x_start:x_end] = operation(**tile_inputs)
 
 
 
@@ -305,12 +315,34 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
                     shape=activations_assembled_wsi.shape[1:3]
                 )
                 print(f"DEBUG: Computing Grad-CAM++ with shape {xai_gradcam_assembled_wsi.shape}", flush=True)
-                grad_cam_pp_numpy_memmapped(
-                    activations=activations_assembled_wsi,
-                    gradients=gradients_assembled_wsi,
-                    eps=1e-6,
-                    out=xai_gradcam_assembled_wsi,
+                # grad_cam_pp_numpy_memmapped(
+                #     activations=activations_assembled_wsi,
+                #     gradients=gradients_assembled_wsi,
+                #     eps=1e-6,
+                #     out=xai_gradcam_assembled_wsi,
+                # )
+                #process the gradcam in smaller tiles to reduce memory usage, use tqdm to show progress
+                # HEIGHT, WIDTH = xai_gradcam_assembled_wsi.shape
+                # TILE_SIZE = 1024
+                # for y_start in tqdm(range(0, HEIGHT, TILE_SIZE), desc="Grad-CAM++ Y Tiles"):
+                #     y_end = min(y_start + TILE_SIZE, HEIGHT)
+                #     for x_start in tqdm(range(0, WIDTH, TILE_SIZE), desc="Grad-CAM++ X Tiles", leave=False):
+                #         x_end = min(x_start + TILE_SIZE, WIDTH)
+                #         xai_gradcam_assembled_wsi[y_start:y_end, x_start:x_end] = grad_cam_pp_numpy(
+                #             activations=activations_assembled_wsi[:, y_start:y_end, x_start:x_end],
+                #             gradients=gradients_assembled_wsi[:, y_start:y_end, x_start:x_end],
+                #             eps=1e-6,
+                #         )
+                tile_operation_to_wsi(
+                    operation=partial(grad_cam_pp_numpy, eps=1e-6),
+                    tile_size=2048,
+                    inputs={
+                        "activations": activations_assembled_wsi,
+                        "gradients": gradients_assembled_wsi,
+                    },
+                    output_array=xai_gradcam_assembled_wsi
                 )
+                
                 print("DEBUG: Grad-CAM++ computation done.", flush=True)
                 xai_gradcam_assembled_wsi.flush()
                 _slide_pbar.write(f"Saved Grad-CAM to {OUT_FILE_PATH_XAI_GRADCAM} with shape {xai_gradcam_assembled_wsi.shape}")
@@ -329,7 +361,7 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
                 client=mlflow_client,
                 run_id=mlflow_run_id,
                 local_image_path=OUT_FILE_PATH_XAI_GRADCAM_TIFF,
-                artifact_subdir="xai/gradcam/"
+                artifact_subdir="xai/gradcam"
             )
             _slide_pbar.write(f"Uploaded Grad-CAM TIFF to MLflow.")
         
@@ -347,12 +379,21 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
                     shape=activations_assembled_wsi.shape[1:3]
                 )
                 print("DEBUG: Computing Layer-CAM...", flush=True)
-                xai_layercam_assembled_wsi[:] = layer_cam_numpy(
-                    activations=activations_assembled_wsi,
-                    gradients=gradients_assembled_wsi,
-                    eps=1e-6,
+                # xai_layercam_assembled_wsi[:] = layer_cam_numpy(
+                #     activations=activations_assembled_wsi,
+                #     gradients=gradients_assembled_wsi,
+                #     eps=1e-6,
+                # )
+                # xai_layercam_assembled_wsi.flush()
+                tile_operation_to_wsi(
+                    operation=layer_cam_numpy,
+                    tile_size=2048,
+                    inputs={
+                        "activations": activations_assembled_wsi,
+                        "gradients": gradients_assembled_wsi,
+                    },
+                    output_array=xai_layercam_assembled_wsi
                 )
-                xai_layercam_assembled_wsi.flush()
                 _slide_pbar.write(f"Saved Layer-CAM to {OUT_FILE_PATH_XAI_LAYERCAM} with shape {xai_layercam_assembled_wsi.shape}")
             # save image tiff mask
             with safe_file_op_ctxm(OUT_FILE_PATH_XAI_LAYERCAM_TIFF, unlink_on_exception=True) as xai_layercam_tiff_file:
@@ -369,7 +410,7 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
                 client=mlflow_client,
                 run_id=mlflow_run_id,
                 local_image_path=OUT_FILE_PATH_XAI_LAYERCAM_TIFF,
-                artifact_subdir="xai/layercam/"
+                artifact_subdir="xai/layercam"
             )
             _slide_pbar.write(f"Uploaded Layer-CAM TIFF to MLflow.")
 

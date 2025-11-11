@@ -39,20 +39,20 @@ def layer_cam(
 
 
 def layer_cam_numpy(
-    activations: np.ndarray,
-    gradients: np.ndarray,
-) -> np.ndarray:
+    activations: Float[np.ndarray, "C H W"],
+    gradients: Float[np.ndarray, "C H W"],
+) -> Float[np.ndarray, "H W"]:
     """Compute Layer-CAM maps given activations and gradients (numpy version).
 
     Args:
-        activations: Activation maps from the target layer, shape [B, C, H, W].
-        gradients: Gradients w.r.t. the activations, shape [B, C, H, W].
+        activations: Activation maps from the target layer, shape [C, H, W].
+        gradients: Gradients w.r.t. the activations, shape [C, H, W].
 
     Returns:
-        cams: Layer-CAM maps, shape [B, H, W].
+        cams: Layer-CAM maps, shape [H, W].
     """
     # cams = np.maximum(gradients, 0) * np.maximum(activations, 0)
     # cams = cams.sum(axis=1)
     # cams = np.maximum(cams, 0)
     # return cams
-    return np.maximum((np.maximum(gradients, 0) * np.maximum(activations, 0)).sum(axis=1), 0)
+    return np.maximum((np.maximum(gradients, 0) * np.maximum(activations, 0)).sum(axis=0), 0)
