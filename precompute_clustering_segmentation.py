@@ -304,12 +304,14 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
                     mode='w+',
                     shape=activations_assembled_wsi.shape[1:3]
                 )
+                print(f"DEBUG: Computing Grad-CAM++ with shape {xai_gradcam_assembled_wsi.shape}", flush=True)
                 grad_cam_pp_numpy_memmapped(
                     activations=activations_assembled_wsi,
                     gradients=gradients_assembled_wsi,
                     eps=1e-6,
                     out=xai_gradcam_assembled_wsi,
                 )
+                print("DEBUG: Grad-CAM++ computation done.", flush=True)
                 xai_gradcam_assembled_wsi.flush()
                 _slide_pbar.write(f"Saved Grad-CAM to {OUT_FILE_PATH_XAI_GRADCAM} with shape {xai_gradcam_assembled_wsi.shape}")
             # save image tiff mask
@@ -344,11 +346,12 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
                     mode='w+',
                     shape=activations_assembled_wsi.shape[1:3]
                 )
+                print("DEBUG: Computing Layer-CAM...", flush=True)
                 xai_layercam_assembled_wsi[:] = layer_cam_numpy(
-                    activations=activations_assembled_wsi[np.newaxis, ...],
-                    gradients=gradients_assembled_wsi[np.newaxis, ...],
+                    activations=activations_assembled_wsi,
+                    gradients=gradients_assembled_wsi,
                     eps=1e-6,
-                ).squeeze(0)
+                )
                 xai_layercam_assembled_wsi.flush()
                 _slide_pbar.write(f"Saved Layer-CAM to {OUT_FILE_PATH_XAI_LAYERCAM} with shape {xai_layercam_assembled_wsi.shape}")
             # save image tiff mask

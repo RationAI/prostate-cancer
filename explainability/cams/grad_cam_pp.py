@@ -110,6 +110,8 @@ def grad_cam_pp_numpy_memmapped(
         eps: Small value to avoid division by zero.
         out: memmap for the Grad-CAM++ maps, shape [H, W].
     """
+    if out is None:
+        raise ValueError("Output memmap 'out' must be provided.")
     with tempfile.TemporaryDirectory() as temp_dir:
         _dir_path = Path(temp_dir)
 
@@ -120,7 +122,7 @@ def grad_cam_pp_numpy_memmapped(
             shape=activations.shape,  # (C, H, W)
         )
         np.maximum(activations, 0, out=relu_activations)
-
+        print(f"DEBUG: relu_activations min", flush=True)
         g2 = np.lib.format.open_memmap(
             filename=_dir_path / "g2.npy",
             mode="w+",
@@ -128,7 +130,7 @@ def grad_cam_pp_numpy_memmapped(
             shape=gradients.shape,  # (C, H, W)
         )
         np.multiply(gradients, gradients, out=g2)
-
+        print(f"DEBUG: g2 min", flush=True)
         sum_a = np.lib.format.open_memmap(
             filename=_dir_path / "sum_a.npy",
             mode="w+",
@@ -136,13 +138,14 @@ def grad_cam_pp_numpy_memmapped(
             shape=(relu_activations.shape[0], 1, 1),  # (C, 1, 1)
         )
         np.sum(relu_activations, axis=(1, 2), keepdims=True, out=sum_a)
-
+        print(f"DEBUG: sum_a min", flush=True)
         alpha_den = np.lib.format.open_memmap(
             filename=_dir_path / "alpha_den.npy",
             mode="w+",
             dtype=g2.dtype,
             shape=g2.shape,  # (C, H, W)
         )
+        print(f"DEBUG: alpha_den min", flush=True)
         # alpha_den = 2*g2 + sum_a * (g2 * gradients) + eps
         np.add(
             2.0 * g2,
@@ -150,22 +153,21 @@ def grad_cam_pp_numpy_memmapped(
             out=alpha_den,
         )
         alpha_den += eps
-
+        print(f"DEBUG: alpha_den min after adding eps", flush=True)
         weights = np.lib.format.open_memmap(
             filename=_dir_path / "weights.npy",
             mode="w+",
             dtype=g2.dtype,
             shape=(g2.shape[0], 1, 1),  # (C, 1, 1)
         )
+        print(f"DEBUG: weights min", flush=True)
         np.sum(
             (g2 / alpha_den) * np.maximum(gradients, 0),
             axis=(1, 2),
             keepdims=True,
             out=weights,
         )
-
-        if out is None:
-            raise ValueError("Output memmap 'out' must be provided.")
+        print(f"DEBUG: weights min after sum", flush=True)
 
         # Combine channel weights with activations and sum over channels -> (H, W)
         np.sum(
@@ -173,6 +175,8 @@ def grad_cam_pp_numpy_memmapped(
             axis=0,
             out=out,
         )
+        print(f"DEBUG: out min after sum", flush=True)
         np.clip(out, a_min=0, a_max=None, out=out)
+        print(f"DEBUG: out min after clip", flush=True)
 
 
