@@ -168,6 +168,7 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
         OUT_FILE_PATH_ACTS = ACTIVATIONS_DIR / f"activations_slide-aggregated_{i}_{slide_name}.npy"
         OUT_FILE_PATH_GRADS = ACTIVATIONS_DIR / f"gradients_slide-aggregated_{i}_{slide_name}.npy"
         OUT_FILE_PATH_ACT_OVERLAPS = OUT_FILE_PATH_ACTS.with_suffix(f".nzi{OUT_FILE_PATH_ACTS.suffix}")
+        print(f"DEBUG: Initializes paths: {OUT_FILE_PATH_ACTS},\n {OUT_FILE_PATH_GRADS},\n {OUT_FILE_PATH_ACT_OVERLAPS}", flush=True)
 
         _bool_acts_exists = OUT_FILE_PATH_ACTS.exists()
         _bool_grads_exists = OUT_FILE_PATH_GRADS.exists()
@@ -182,7 +183,7 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
         if _bool_act_overlaps_exists:
             _slide_pbar.write(f"Activation overlaps for slide {slide_name} exist, skipping.")
             activations_assembled_wsi_overlaps = np.load(OUT_FILE_PATH_ACT_OVERLAPS, mmap_mode='r+')
-        
+        print(f"DEBUG: Existence flags - Acts: {_bool_acts_exists}, Grads: {_bool_grads_exists}, Act Overlaps: {_bool_act_overlaps_exists}", flush=True)
         if not (_bool_acts_exists and _bool_grads_exists and _bool_act_overlaps_exists):
             print("DEBUG: Starting assembly of activations and gradients.")
             first_input, first_label, first_m = dataloader.dataset[0]
