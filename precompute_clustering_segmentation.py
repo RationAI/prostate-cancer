@@ -18,7 +18,7 @@ from sklearn.decomposition import NMF
 from tqdm.auto import tqdm
 import click
 
-from explainability.cams import grad_cam_pp_numpy, layer_cam_numpy
+from explainability.cams import grad_cam_pp_numpy, layer_cam_numpy, grad_cam_pp_numpy_memmapped
 from explainability.mlflow_persistence.storing import artifact_exists, ensure_mlflow_run, upload_image_if_missing
 from prostate_cancer.data import DataModule
 from prostate_cancer.prostate_cancer_model import ProstateCancerModel
@@ -304,10 +304,11 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
                     mode='w+',
                     shape=activations_assembled_wsi.shape[1:3]
                 )
-                xai_gradcam_assembled_wsi[:] = grad_cam_pp_numpy(
+                grad_cam_pp_numpy_memmapped(
                     activations=activations_assembled_wsi[np.newaxis, ...],
                     gradients=gradients_assembled_wsi[np.newaxis, ...],
                     eps=1e-6,
+                    out=xai_gradcam_assembled_wsi[np.newaxis, ...],
                 ).squeeze(0)
                 xai_gradcam_assembled_wsi.flush()
                 _slide_pbar.write(f"Saved Grad-CAM to {OUT_FILE_PATH_XAI_GRADCAM} with shape {xai_gradcam_assembled_wsi.shape}")
