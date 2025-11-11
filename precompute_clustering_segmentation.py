@@ -306,6 +306,7 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
             _slide_pbar.write(f"Grad-CAM for slide {slide_name} exist, skipping.")
             xai_gradcam_assembled_wsi = np.load(OUT_FILE_PATH_XAI_GRADCAM, mmap_mode='r')
             _slide_pbar.write(f"Grad-CAM has shape: {xai_gradcam_assembled_wsi.shape}")
+
         else:
             with safe_file_op_ctxm(OUT_FILE_PATH_XAI_GRADCAM, unlink_on_exception=True) as xai_gradcam_numpy_file:
                 _slide_pbar.write(f"DEBUG: Shape of activations: {activations_assembled_wsi.shape}, Shape of gradients: {gradients_assembled_wsi.shape}")
@@ -342,10 +343,17 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
                     },
                     output_array=xai_gradcam_assembled_wsi
                 )
-                
-                print("DEBUG: Grad-CAM++ computation done.", flush=True)
+                xai_gradcam_assembled_wsi /= xai_gradcam_assembled_wsi.max()
+                xai_gradcam_assembled_wsi *= 255.0
                 xai_gradcam_assembled_wsi.flush()
                 _slide_pbar.write(f"Saved Grad-CAM to {OUT_FILE_PATH_XAI_GRADCAM} with shape {xai_gradcam_assembled_wsi.shape}")
+            
+        if not artifact_exists(
+            client=mlflow_client,
+            run_id=mlflow_run_id,
+            artifact_path=f"xai/gradcam/{slide_name}.tiff",
+            file_name=OUT_FILE_PATH_XAI_GRADCAM_TIFF.name
+        ):
             # save image tiff mask
             with safe_file_op_ctxm(OUT_FILE_PATH_XAI_GRADCAM_TIFF, unlink_on_exception=True) as xai_gradcam_tiff_file:
                 save_image_xopat_compatible(
@@ -356,14 +364,14 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
                     microns_per_pixel_x=slide_metadata.mpp_x,
                     microns_per_pixel_y=slide_metadata.mpp_y,
                 )
-            # upload to mlflow
-            upload_image_if_missing(
-                client=mlflow_client,
-                run_id=mlflow_run_id,
-                local_image_path=OUT_FILE_PATH_XAI_GRADCAM_TIFF,
-                artifact_subdir="xai/gradcam"
-            )
-            _slide_pbar.write(f"Uploaded Grad-CAM TIFF to MLflow.")
+        # upload to mlflow
+        upload_image_if_missing(
+            client=mlflow_client,
+            run_id=mlflow_run_id,
+            local_image_path=OUT_FILE_PATH_XAI_GRADCAM_TIFF,
+            artifact_subdir="xai/gradcam"
+        )
+        _slide_pbar.write(f"Ensured Grad-CAM TIFF is uploaded to MLflow.")
         
         OUT_FILE_PATH_XAI_LAYERCAM = ACTIVATIONS_DIR / "xai-layercam" / f"{slide_name}.npy"
         OUT_FILE_PATH_XAI_LAYERCAM_TIFF = TMP_DIR / "xai-layercam" / f"{slide_name}.tiff"
@@ -394,7 +402,15 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
                     },
                     output_array=xai_layercam_assembled_wsi
                 )
+                xai_layercam_assembled_wsi /= xai_layercam_assembled_wsi.max()
+                xai_layercam_assembled_wsi *= 255.0
                 _slide_pbar.write(f"Saved Layer-CAM to {OUT_FILE_PATH_XAI_LAYERCAM} with shape {xai_layercam_assembled_wsi.shape}")
+        if not artifact_exists(
+            client=mlflow_client,   
+            run_id=mlflow_run_id,
+            artifact_path=f"xai/layercam/{slide_name}.tiff",
+            file_name=OUT_FILE_PATH_XAI_LAYERCAM_TIFF.name
+        ):
             # save image tiff mask
             with safe_file_op_ctxm(OUT_FILE_PATH_XAI_LAYERCAM_TIFF, unlink_on_exception=True) as xai_layercam_tiff_file:
                 save_image_xopat_compatible(
@@ -405,14 +421,14 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
                     microns_per_pixel_x=slide_metadata.mpp_x,
                     microns_per_pixel_y=slide_metadata.mpp_y,
                 )
-            # upload to mlflow
-            upload_image_if_missing(
-                client=mlflow_client,
-                run_id=mlflow_run_id,
-                local_image_path=OUT_FILE_PATH_XAI_LAYERCAM_TIFF,
-                artifact_subdir="xai/layercam"
-            )
-            _slide_pbar.write(f"Uploaded Layer-CAM TIFF to MLflow.")
+        # upload to mlflow
+        upload_image_if_missing(
+            client=mlflow_client,
+            run_id=mlflow_run_id,
+            local_image_path=OUT_FILE_PATH_XAI_LAYERCAM_TIFF,
+            artifact_subdir="xai/layercam"
+        )
+        _slide_pbar.write(f"Ensured Layer-CAM TIFF is uploaded to MLflow.")
 
         # =====================================================================
         # Gather embeddings for clustering
