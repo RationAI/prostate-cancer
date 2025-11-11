@@ -74,9 +74,12 @@ def grad_cam_pp_numpy(
     Returns:
         cams: Grad-CAM++ maps, shape [B, H, W].
     """
+    print(f"DEBUG: Inside grad_cam_pp_numpy with activations shape {activations.shape} and gradients shape {gradients.shape}")
     activations = np.maximum(activations, 0)
+    print(f"DEBUG: After ReLU, activations min {activations.min()}, max {activations.max()}")
     # g = gradients
     g2 = gradients * gradients
+    print(f"DEBUG: g2 min {g2.min()}, max {g2.max()}", flush=True)
     # g3 = g2 * gradients
     # sum_a = activations.sum(axis=(2, 3), keepdims=True)  # [B,C,1,1]
     # alpha_num = g2
