@@ -142,13 +142,20 @@ def grad_cam_pp_numpy_memmapped(
 
         # alpha_den = 2*g2 + sum_a * (g2 * gradients) + eps
         # 2 * g2 + sum_a *g2 * gradients = g2 * (2 + sum_a * gradients)
-        sum_a *= gradients  # reuse sum_a memmap for sum_a * gradients
-        sum_a += 2  # add 2 to each element in sum_a
+
+        alpha_den = np.lib.format.open_memmap(
+            filename=_dir_path / "alpha_den.npy",
+            mode="w+",
+            dtype=gradients.dtype,
+            shape=gradients.shape,  # (C, H, W)
+        )
+        np.multiply(sum_a, gradients, out=alpha_den)  # reuse alpha_den memmap for sum_a * gradients
+        print(f"DEBUG: alpha_den min after sum", flush=True)
+        
+        alpha_den += 2  # add 2 to each element in sum_a
         print(f"DEBUG: sum_a min after adding 2", flush=True)
-        sum_a *= g2  # multiply by g2 to complete alpha_den calculation
+        alpha_den *= g2  # multiply by g2 to complete alpha_den calculation
         print(f"DEBUG: sum_a min after multiplying by g2", flush=True)
-        alpha_den = sum_a  # reuse sum_a memmap for alpha_den
-        print(f"DEBUG: alpha_den min before adding eps", flush=True)
         alpha_den += eps # add eps to avoid div by zero
         print(f"DEBUG: alpha_den min after adding eps", flush=True)
         # weights = (g2 / alpha_den) * max(gradients, 0)
@@ -156,8 +163,8 @@ def grad_cam_pp_numpy_memmapped(
         weights = np.lib.format.open_memmap(
             filename=_dir_path / "weights.npy",
             mode="w+",
-            dtype=g2.dtype,
-            shape=(g2.shape[0], 1, 1),  # (C, 1, 1)
+            dtype=gradients.dtype,
+            shape=gradients.shape,  # (C, 1, 1)
         )
     
         np.clip(gradients, a_min=0, a_max=None, out=weights)  # reuse weights memmap for max(gradients, 0)
