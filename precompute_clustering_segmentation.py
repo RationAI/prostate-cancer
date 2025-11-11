@@ -305,11 +305,11 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
                     shape=activations_assembled_wsi.shape[1:3]
                 )
                 grad_cam_pp_numpy_memmapped(
-                    activations=activations_assembled_wsi[np.newaxis, ...],
-                    gradients=gradients_assembled_wsi[np.newaxis, ...],
+                    activations=activations_assembled_wsi,
+                    gradients=gradients_assembled_wsi,
                     eps=1e-6,
-                    out=xai_gradcam_assembled_wsi[np.newaxis, ...],
-                ).squeeze(0)
+                    out=xai_gradcam_assembled_wsi,
+                )
                 xai_gradcam_assembled_wsi.flush()
                 _slide_pbar.write(f"Saved Grad-CAM to {OUT_FILE_PATH_XAI_GRADCAM} with shape {xai_gradcam_assembled_wsi.shape}")
             # save image tiff mask
