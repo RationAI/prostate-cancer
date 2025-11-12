@@ -192,3 +192,7 @@ lightning_logs/
 
 # Project
 /data
+
+evaluations/
+
+figures/
