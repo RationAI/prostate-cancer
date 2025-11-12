@@ -32,7 +32,7 @@ from explainability.visualizations.color_palettes import COLOR_PALETTE_ADAM, Col
 
 
 # %%
-logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 def tile_operation_to_wsi(operation, tile_size: int, inputs: dict, output_array: np.memmap):
@@ -51,30 +51,26 @@ def tile_operation_to_wsi(operation, tile_size: int, inputs: dict, output_array:
 @click.option('--experiment-directory', type=str, help='Name of the experiment directory to store reusable results and artifacts.')
 @click.option('--clustering-algorithm', type=click.Choice(['NMF', 'KMeans'], case_sensitive=False), default='NMF', help='Clustering algorithm to use.')
 @click.option('--clustering-instance-fp', type=click.Path(exists=True, file_okay=True, dir_okay=False, path_type=Path), default=None, help='Path to precomputed clustering instance (.npy file). If provided, this instance will be used instead of fitting a new one.')
-@click.option('--out-dir', type=click.Path(file_okay=False, dir_okay=True, path_type=Path), default=Path("/mnt/projects/explainability/XAICNNEmbeddings/"), help='Output directory for experiment results. If not provided, a default directory will be used.')
+@click.option('-pdd', '--precomputed-data-directory', type=click.Path(file_okay=False, dir_okay=True, path_type=Path), default=Path("/mnt/projects/explainability/XAICNNEmbeddings/"), help='Output directory for experiment results. If not provided, a default directory will be used.')
+@click.option('-cut', '--cut-edge-subtiles', type=int, default=0, help='Number of subtiles to cut from each edge to avoid border artifacts.')
 @click.option('--mlf-runid', type=str, default=None, help='MLflow run ID to associate with the experiment.')
-def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str, clustering_instance_fp: Path | None, out_dir: Path | None, mlf_runid: str | None):
+def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str, clustering_instance_fp: Path | None, precomputed_data_directory: Path | None, cut_edge_subtiles: int, mlf_runid: str | None):
 
-    if out_dir is None:
-        raise ValueError("out_dir must be provided.")
-    OUT_DIR = out_dir
-    PRECOMPUTE_DIR = OUT_DIR / "PRECOMPUTED"
-    ACTIVATIONS_DIR = PRECOMPUTE_DIR / "VGG16_Prostate_EdgeClipped"
+    logging.basicConfig(level=logging.INFO)
+
+    if precomputed_data_directory is None:
+        raise ValueError("precomputed_data_directory must be provided.")
+    PRECOMPUTED_DATA_DIR = precomputed_data_directory 
     # CLUSTERING_DIR = OUT_DIR / experiment_name
     TMP_DIR = Path("/tmp/XAI") / experiment_directory
 
     TMP_DIR.mkdir(exist_ok=True, parents=True)
-    ACTIVATIONS_DIR.mkdir(exist_ok=True, parents=True)
+    PRECOMPUTED_DATA_DIR.mkdir(exist_ok=True, parents=True)
     
     WSI_LEVEL_TO_MATCH_OUTPUTS_TO = 3
     NUM_CLUSTERS = num_clusters
 
-    CUT_EDGE_SUBTILES = 2 # number of subtiles to cut from each edge to avoid border artifacts
-
-    NUM_WORKERS = 4
-
-
-    TOGGLE_COLORMAP_SEGMENTATIONS_DISABLE = True
+    CUT_EDGE_SUBTILES = cut_edge_subtiles # number of subtiles to cut from each edge to avoid border artifacts
 
     # Set random seed for reproducibility
     seed_everything(42, workers=True)
@@ -88,10 +84,10 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
     with hydra.initialize(config_path="conf", version_base=None):
         config = hydra.compose(config_name="default", overrides=overrides)
 
-    print("Configuration loaded successfully!")
-    print(f"Mode: {config.mode}")
-    print(f"Checkpoint: {config.checkpoint}")
-    print(f"Batch size: {config.data.batch_size}")
+    logger.info("Configuration loaded successfully!")
+    logger.info(f"Mode: {config.mode}")
+    logger.info(f"Checkpoint: {config.checkpoint}")
+    logger.info(f"Batch size: {config.data.batch_size}")
     # %%
     # Instantiate data module and model
     data: DataModule = hydra.utils.instantiate(
@@ -109,9 +105,9 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
     model = model.to("cuda:0")
 
 
-    print("Data module and model instantiated successfully!")
-    print(f"Model type: {type(model)}")
-    print(f"Data module type: {type(data)}")
+    logger.info("Data module and model instantiated successfully!")
+    logger.info(f"Model type: {type(model)}")
+    logger.info(f"Data module type: {type(data)}")
 
     # %%
     model.eval()
@@ -144,7 +140,7 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
     mlflow.set_tracking_uri("http://mlflow.rationai-mlflow:5000/")
     mlflow_experiment_name = "Testing"
     mlflow_client, mlflow_exp_id, mlflow_run_id = ensure_mlflow_run(mlflow_experiment_name, mlf_runid)
-    print(f"MLflow run ID: {mlflow_run_id}")
+    logger.info(f"MLflow run ID: {mlflow_run_id}")
 
  
 
@@ -168,18 +164,18 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
         # path             /mnt/data/Projects/prostate_cancer/cancer/test...
         # level                                                            1
         # carcinoma         
-        print("DEBUG: Slide metadata:", slide_metadata)
-        # level = slide_metadata.level
+        logger.debug("Slide metadata: %s", slide_metadata)
+       
         slide_path = slide_metadata.path.replace("/mnt/data/Projects/prostate_cancer/cancer/test_data/", "/mnt/data/MOU/prostate/tile_level_annotations_test/")  # TODO: fix hardcoding
         slide_name = Path(slide_path).stem
         _slide_pbar.set_description(f"Started processing slide {slide_name} ({i})")
 
         # =====================================================================
         # Assemble activations for the whole slide
-        OUT_FILE_PATH_ACTS = ACTIVATIONS_DIR / f"activations_slide-aggregated_{i}_{slide_name}.npy"
-        OUT_FILE_PATH_GRADS = ACTIVATIONS_DIR / f"gradients_slide-aggregated_{i}_{slide_name}.npy"
+        OUT_FILE_PATH_ACTS = PRECOMPUTED_DATA_DIR / f"activations_slide-aggregated_{i}_{slide_name}.npy"
+        OUT_FILE_PATH_GRADS = PRECOMPUTED_DATA_DIR / f"gradients_slide-aggregated_{i}_{slide_name}.npy"
         OUT_FILE_PATH_ACT_OVERLAPS = OUT_FILE_PATH_ACTS.with_suffix(f".nzi{OUT_FILE_PATH_ACTS.suffix}")
-        print(f"DEBUG: Initializes paths: {OUT_FILE_PATH_ACTS},\n {OUT_FILE_PATH_GRADS},\n {OUT_FILE_PATH_ACT_OVERLAPS}", flush=True)
+        logger.debug(f"DEBUG: Initializes paths: {OUT_FILE_PATH_ACTS},\n {OUT_FILE_PATH_GRADS},\n {OUT_FILE_PATH_ACT_OVERLAPS}")
 
         _bool_acts_exists = OUT_FILE_PATH_ACTS.exists()
         _bool_grads_exists = OUT_FILE_PATH_GRADS.exists()
@@ -194,9 +190,9 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
         if _bool_act_overlaps_exists:
             _slide_pbar.write(f"Activation overlaps for slide {slide_name} exist, skipping.")
             activations_assembled_wsi_overlaps = np.load(OUT_FILE_PATH_ACT_OVERLAPS, mmap_mode='r+')
-        print(f"DEBUG: Existence flags - Acts: {_bool_acts_exists}, Grads: {_bool_grads_exists}, Act Overlaps: {_bool_act_overlaps_exists}", flush=True)
+    
         if not (_bool_acts_exists and _bool_grads_exists and _bool_act_overlaps_exists):
-            print("DEBUG: Starting assembly of activations and gradients.")
+            logger.debug("Starting assembly of activations and gradients.")
             first_input, first_label, first_m = dataloader.dataset[0]
             acts_ = hooked_model(first_input.unsqueeze(0).to("cuda:0"))
             loss = loss_fn(acts_, first_label.unsqueeze(0).to("cuda:0").float())
@@ -211,7 +207,7 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
 
             if not _bool_acts_exists:
                 first_activations = hooked_model.get_activations(target_layer)
-                _slide_pbar.write(f"First activations shape: {first_activations.shape}")
+                logger.debug(f"First activations shape: {first_activations.shape}")
                 _, heatmap_channels, act_heatmap_tile_height, act_heatmap_tile_width = first_activations.shape
                 slide_to_heatmap_ratio_x = act_heatmap_tile_width / tile_width
                 slide_to_heatmap_ratio_y = act_heatmap_tile_height / tile_height
@@ -224,11 +220,11 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
                 # assert square heatmap tiles and strides
                 assert act_heatmap_tile_width == act_heatmap_tile_height
                 assert act_heatmap_tile_stride_x == act_heatmap_tile_stride_y
-                _slide_pbar.write(f"Heatmap width and height: {act_heatmap_width} | {act_heatmap_height}")  
+                logger.debug(f"Heatmap width and height: {act_heatmap_width} | {act_heatmap_height}")  
 
             if not _bool_grads_exists:
                 first_gradients = hooked_model.get_gradients(target_layer)
-                _slide_pbar.write(f"First gradients shape: {first_gradients.shape}")
+                logger.debug(f"First gradients shape: {first_gradients.shape}")
                 _, gradient_channels, gradient_tile_height, gradient_tile_width = first_gradients.shape
                 slide_to_heatmap_ratio_x = gradient_tile_width / tile_width
                 slide_to_heatmap_ratio_y = gradient_tile_height / tile_height
@@ -240,9 +236,9 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
                 # assert square heatmap tiles and strides
                 assert gradient_tile_width == gradient_tile_height
                 assert grad_heatmap_tile_stride_x == grad_heatmap_tile_stride_y
-                _slide_pbar.write(f"Gradient heatmap width and height: {grad_heatmap_width} | {grad_heatmap_height}")
+                logger.debug(f"Gradient heatmap width and height: {grad_heatmap_width} | {grad_heatmap_height}")
 
-            print("DEBUG: Starting assembly of activations and gradients.", flush=True)
+            logger.debug("Starting assembly of activations and gradients.")
             with safe_file_op_ctxm(OUT_FILE_PATH_ACTS) as act_numpy_file, safe_file_op_ctxm(OUT_FILE_PATH_GRADS) as grad_numpy_file:
                 if not _bool_acts_exists:
                     heatmap_assembler = EdgeClippingMultichannelHeatmapAssembler(
@@ -266,10 +262,10 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
                         heatmap_channels=gradient_channels,
                         heatmap_npy_fp=grad_numpy_file
                     )
-                print("DEBUG: Beginning batch processing.", flush=True)
+                logger.debug("Beginning batch processing.")
                 for batch in tqdm(dataloader, desc="Batch"):
                     inputs, labels, metadata = batch
-                    print(f"DEBUG: Processing new batch. SHAPE: {inputs.shape}", flush=True)
+                    logger.debug(f"Processing new batch. SHAPE: {inputs.shape}")
                     # print(metadata)  # slide, x, y
                     X = (metadata['x'] * slide_to_heatmap_ratio_x).to(torch.int64)
                     Y = (metadata['y'] * slide_to_heatmap_ratio_y).to(torch.int64)
@@ -301,40 +297,21 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
 
         # =====================================================================
         # Create XAI masks from activations and gradients
-        OUT_FILE_PATH_XAI_GRADCAM = ACTIVATIONS_DIR / "xai-gradcam" / f"{slide_name}.npy"
+        OUT_FILE_PATH_XAI_GRADCAM = PRECOMPUTED_DATA_DIR / "xai-gradcam" / f"{slide_name}.npy"
         OUT_FILE_PATH_XAI_GRADCAM_TIFF = TMP_DIR / "xai-gradcam" / f"{slide_name}.tiff"
         if OUT_FILE_PATH_XAI_GRADCAM.exists():
             _slide_pbar.write(f"Grad-CAM for slide {slide_name} exist, skipping.")
             xai_gradcam_assembled_wsi = np.load(OUT_FILE_PATH_XAI_GRADCAM, mmap_mode='r')
-            _slide_pbar.write(f"Grad-CAM has shape: {xai_gradcam_assembled_wsi.shape}")
+            logger.debug(f"Grad-CAM has shape: {xai_gradcam_assembled_wsi.shape}")
 
         else:
             with safe_file_op_ctxm(OUT_FILE_PATH_XAI_GRADCAM, unlink_on_exception=True) as xai_gradcam_numpy_file:
-                _slide_pbar.write(f"DEBUG: Shape of activations: {activations_assembled_wsi.shape}, Shape of gradients: {gradients_assembled_wsi.shape}")
+                logger.debug(f"DEBUG: Shape of activations: {activations_assembled_wsi.shape}, Shape of gradients: {gradients_assembled_wsi.shape}")
                 xai_gradcam_assembled_wsi = open_memmap(
                     xai_gradcam_numpy_file,
                     mode='w+',
                     shape=activations_assembled_wsi.shape[1:3]
                 )
-                print(f"DEBUG: Computing Grad-CAM++ with shape {xai_gradcam_assembled_wsi.shape}", flush=True)
-                # grad_cam_pp_numpy_memmapped(
-                #     activations=activations_assembled_wsi,
-                #     gradients=gradients_assembled_wsi,
-                #     eps=1e-6,
-                #     out=xai_gradcam_assembled_wsi,
-                # )
-                #process the gradcam in smaller tiles to reduce memory usage, use tqdm to show progress
-                # HEIGHT, WIDTH = xai_gradcam_assembled_wsi.shape
-                # TILE_SIZE = 1024
-                # for y_start in tqdm(range(0, HEIGHT, TILE_SIZE), desc="Grad-CAM++ Y Tiles"):
-                #     y_end = min(y_start + TILE_SIZE, HEIGHT)
-                #     for x_start in tqdm(range(0, WIDTH, TILE_SIZE), desc="Grad-CAM++ X Tiles", leave=False):
-                #         x_end = min(x_start + TILE_SIZE, WIDTH)
-                #         xai_gradcam_assembled_wsi[y_start:y_end, x_start:x_end] = grad_cam_pp_numpy(
-                #             activations=activations_assembled_wsi[:, y_start:y_end, x_start:x_end],
-                #             gradients=gradients_assembled_wsi[:, y_start:y_end, x_start:x_end],
-                #             eps=1e-6,
-                #         )
                 tile_operation_to_wsi(
                     operation=partial(grad_cam_pp_numpy, eps=1e-6),
                     tile_size=2048,
@@ -374,7 +351,7 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
         )
         _slide_pbar.write(f"Ensured Grad-CAM TIFF is uploaded to MLflow.")
         
-        OUT_FILE_PATH_XAI_LAYERCAM = ACTIVATIONS_DIR / "xai-layercam" / f"{slide_name}.npy"
+        OUT_FILE_PATH_XAI_LAYERCAM = PRECOMPUTED_DATA_DIR / "xai-layercam" / f"{slide_name}.npy"
         OUT_FILE_PATH_XAI_LAYERCAM_TIFF = TMP_DIR / "xai-layercam" / f"{slide_name}.tiff"
         if OUT_FILE_PATH_XAI_LAYERCAM.exists():
             _slide_pbar.write(f"Layer-CAM for slide {slide_name} exist, skipping.")
@@ -388,12 +365,6 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
                     shape=activations_assembled_wsi.shape[1:3]
                 )
                 print("DEBUG: Computing Layer-CAM...", flush=True)
-                # xai_layercam_assembled_wsi[:] = layer_cam_numpy(
-                #     activations=activations_assembled_wsi,
-                #     gradients=gradients_assembled_wsi,
-                #     eps=1e-6,
-                # )
-                # xai_layercam_assembled_wsi.flush()
                 tile_operation_to_wsi(
                     operation=layer_cam_numpy,
                     tile_size=2048,
@@ -431,7 +402,7 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
         )
         _slide_pbar.write(f"Ensured Layer-CAM TIFF is uploaded to MLflow.")
 
-        OUT_FILE_PATH_XAI_GRADCAMRAW = ACTIVATIONS_DIR / "xai-gradcamraw" / f"{slide_name}.npy"
+        OUT_FILE_PATH_XAI_GRADCAMRAW = PRECOMPUTED_DATA_DIR / "xai-gradcamraw" / f"{slide_name}.npy"
         OUT_FILE_PATH_XAI_GRADCAMRAW_TIFF = TMP_DIR / "xai-gradcamraw" / f"{slide_name}.tiff"
         if OUT_FILE_PATH_XAI_GRADCAMRAW.exists():
             _slide_pbar.write(f"Raw Grad-CAM for slide {slide_name} exist, skipping.")
@@ -445,12 +416,6 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
                     shape=activations_assembled_wsi.shape[1:3]
                 )
                 print("DEBUG: Computing Raw Grad-CAM...", flush=True)
-                # xai_gradcamraw_assembled_wsi[:] = grad_cam_raw_numpy(
-                #     activations=activations_assembled_wsi,
-                #     gradients=gradients_assembled_wsi,
-                #     eps=1e-6,
-                # )
-                # xai_gradcamraw_assembled_wsi.flush()
                 tile_operation_to_wsi(
                     operation=grad_cam_raw_numpy,
                     tile_size=2048,
@@ -489,7 +454,7 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
 
         # =====================================================================
         # Gather embeddings for clustering
-        OUT_FILE_PATH_EMBEDDINGS = ACTIVATIONS_DIR / f"embeddings_slide-collected_{i}_{slide_name}.npy"
+        OUT_FILE_PATH_EMBEDDINGS = PRECOMPUTED_DATA_DIR / f"embeddings_slide-collected_{i}_{slide_name}.npy"
         if OUT_FILE_PATH_EMBEDDINGS.exists():
             _slide_pbar.write(f"Embeddings for slide {slide_name} exist, skipping.")
             embeddings = np.load(OUT_FILE_PATH_EMBEDDINGS, mmap_mode='r+')
@@ -505,17 +470,6 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
         # Perform clustering or load the existing instance
         if clustering_instance_fp is not None:
             _slide_pbar.write(f"Loading precomputed clustering instance from {clustering_instance_fp}")
-            # if clustering_algorithm == "NMF":
-            #     clustering_model = NMF(n_components=NUM_CLUSTERS, init='nndsvd', random_state=42, max_iter=500)
-            #     _dictionary = np.load(clustering_instance_fp)
-            #     clustering_model.components_ = _dictionary
-            # elif clustering_algorithm == "KMeans":
-            #     from sklearn.cluster import KMeans
-            #     clustering_model = KMeans(n_clusters=NUM_CLUSTERS, random_state=42)
-            #     _centroids = np.load(clustering_instance_fp)
-            #     clustering_model.cluster_centers_ = _centroids
-            # else:
-            #     raise ValueError(f"Unsupported clustering algorithm: {clustering_algorithm}")
             clustering_model = ClusteringManager.load_model(
                 algorithm=clustering_algorithm,
                 num_clusters=NUM_CLUSTERS,
@@ -526,17 +480,6 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
             OUT_FILE_PATH_CLUSTERING_INSTANCE = TMP_DIR / f"clustering-instance_{clustering_algorithm}_{i}_{slide_name}.npy"
             if OUT_FILE_PATH_CLUSTERING_INSTANCE.exists():
                 _slide_pbar.write(f"Clustering instance for slide {slide_name} exist, skipping.")
-                # if clustering_algorithm == "NMF":
-                #     clustering_model = NMF(n_components=NUM_CLUSTERS, init='nndsvd', random_state=42, max_iter=500)
-                #     _dictionary = np.load(OUT_FILE_PATH_CLUSTERING_INSTANCE)
-                #     clustering_model.components_ = _dictionary
-                # elif clustering_algorithm == "KMeans":
-                #     from sklearn.cluster import KMeans
-                #     clustering_model = KMeans(n_clusters=NUM_CLUSTERS, random_state=42)
-                #     _centroids = np.load(OUT_FILE_PATH_CLUSTERING_INSTANCE)
-                #     clustering_model.cluster_centers_ = _centroids
-                # else:
-                #     raise ValueError(f"Unsupported clustering algorithm: {clustering_algorithm}")
                 clustering_model = ClusteringManager.load_model(
                     algorithm=clustering_algorithm,
                     path=OUT_FILE_PATH_CLUSTERING_INSTANCE,
@@ -544,13 +487,6 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
                 )
                 _slide_pbar.write(f"Clustering model loaded.")
             else:
-                # if clustering_algorithm == "NMF":
-                #     clustering_model = NMF(n_components=NUM_CLUSTERS, init='nndsvd', random_state=42, max_iter=500)
-                # elif clustering_algorithm == "KMeans":
-                #     from sklearn.cluster import KMeans
-                #     clustering_model = KMeans(n_clusters=NUM_CLUSTERS, random_state=42)
-                # else:
-                #     raise ValueError(f"Unsupported clustering algorithm: {clustering_algorithm}")
                 clustering_model = ClusteringManager.create_model(
                     algorithm=clustering_algorithm,
                     num_clusters=NUM_CLUSTERS
@@ -572,12 +508,6 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
             if OUT_FILE_PATH_CLUSTERING_VISUALS.exists():
                 _slide_pbar.write(f"Clustering visuals for slide {slide_name} exist, skipping.")
             else:
-                # if clustering_algorithm == "NMF":
-                #     components = clustering_model.components_
-                # elif clustering_algorithm == "KMeans":
-                #     components = clustering_model.cluster_centers_
-                # else:
-                #     raise ValueError(f"Unsupported clustering algorithm: {clustering_algorithm}")
                 components = ClusteringManager.get_components(
                     algorithm=clustering_algorithm,
                     model=clustering_model
@@ -727,26 +657,6 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
                     level_extent_y, 
                     cluster_idx, 
                     OUT_FILE_PATH_SINGLE_CLUSTER_OVERLAY)
-                # tasks_futures.append(
-                #     executor.submit(
-                #         parrallel_save_upload_overlay_tiff_single_cluster,
-                #         WSI_LEVEL_TO_MATCH_OUTPUTS_TO,
-                #         mlflow_client,
-                #         mlflow_run_id,
-                #         _slide_pbar,
-                #         slide_metadata,
-                #         slide_name,
-                #         cluster_soft_assignments_memmap,
-                #         level_extent_x,
-                #         level_extent_y,
-                #         cluster_idx,
-                #         OUT_FILE_PATH_SINGLE_CLUSTER_OVERLAY
-                #     )
-                # )
-            # # wait for all tasks to complete
-            # for cluster_idx, future in enumerate(tasks_futures):
-            #     future.result()
-            #     _slide_pbar.write(f"Finished processing single cluster overlay for cluster {cluster_idx} for slide {slide_name}")
         _slide_pbar.write(f"Finished processing slide {slide_name} ({i})")
 
 def parrallel_save_upload_overlay_tiff_single_cluster(WSI_LEVEL_TO_MATCH_OUTPUTS_TO, mlflow_client, mlflow_run_id, _slide_pbar, slide_metadata, slide_name, cluster_soft_assignments_memmap, level_extent_x, level_extent_y, cluster_idx, OUT_FILE_PATH_SINGLE_CLUSTER_OVERLAY):
