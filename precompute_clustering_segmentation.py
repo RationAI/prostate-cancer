@@ -3,6 +3,7 @@ from functools import partial
 import logging
 from pathlib import Path
 from concurrent.futures import ThreadPoolExecutor
+from scipy.special import expit
 
 import hydra
 import mlflow
@@ -19,7 +20,7 @@ from sklearn.decomposition import NMF
 from tqdm.auto import tqdm
 import click
 
-from explainability.cams import grad_cam_pp_numpy, layer_cam_numpy, grad_cam_pp_numpy_memmapped
+from explainability.cams import grad_cam_pp_numpy, layer_cam_numpy, grad_cam_raw_numpy
 from explainability.mlflow_persistence.storing import artifact_exists, ensure_mlflow_run, upload_image_if_missing
 from prostate_cancer.data import DataModule
 from prostate_cancer.prostate_cancer_model import ProstateCancerModel
@@ -343,7 +344,7 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
                     },
                     output_array=xai_gradcam_assembled_wsi
                 )
-                xai_gradcam_assembled_wsi /= xai_gradcam_assembled_wsi.max()
+                xai_gradcam_assembled_wsi = expit(xai_gradcam_assembled_wsi)  # apply sigmoid to normalize between 0 and 1
                 xai_gradcam_assembled_wsi *= 255.0
                 xai_gradcam_assembled_wsi.flush()
                 _slide_pbar.write(f"Saved Grad-CAM to {OUT_FILE_PATH_XAI_GRADCAM} with shape {xai_gradcam_assembled_wsi.shape}")
@@ -402,7 +403,7 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
                     },
                     output_array=xai_layercam_assembled_wsi
                 )
-                xai_layercam_assembled_wsi /= xai_layercam_assembled_wsi.max()
+                xai_layercam_assembled_wsi = expit(xai_layercam_assembled_wsi)  # apply sigmoid to normalize between 0 and 1
                 xai_layercam_assembled_wsi *= 255.0
                 _slide_pbar.write(f"Saved Layer-CAM to {OUT_FILE_PATH_XAI_LAYERCAM} with shape {xai_layercam_assembled_wsi.shape}")
         if not artifact_exists(
@@ -429,6 +430,62 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
             artifact_subdir="xai/layercam"
         )
         _slide_pbar.write(f"Ensured Layer-CAM TIFF is uploaded to MLflow.")
+
+        OUT_FILE_PATH_XAI_GRADCAMRAW = ACTIVATIONS_DIR / "xai-gradcamraw" / f"{slide_name}.npy"
+        OUT_FILE_PATH_XAI_GRADCAMRAW_TIFF = TMP_DIR / "xai-gradcamraw" / f"{slide_name}.tiff"
+        if OUT_FILE_PATH_XAI_GRADCAMRAW.exists():
+            _slide_pbar.write(f"Raw Grad-CAM for slide {slide_name} exist, skipping.")
+            xai_gradcamraw_assembled_wsi = np.load(OUT_FILE_PATH_XAI_GRADCAMRAW, mmap_mode='r')
+            _slide_pbar.write(f"Raw Grad-CAM has shape: {xai_gradcamraw_assembled_wsi.shape}")
+        else:
+            with safe_file_op_ctxm(OUT_FILE_PATH_XAI_GRADCAMRAW, unlink_on_exception=True) as xai_gradcamraw_numpy_file:
+                xai_gradcamraw_assembled_wsi = open_memmap(
+                    xai_gradcamraw_numpy_file,
+                    mode='w+',
+                    shape=activations_assembled_wsi.shape[1:3]
+                )
+                print("DEBUG: Computing Raw Grad-CAM...", flush=True)
+                # xai_gradcamraw_assembled_wsi[:] = grad_cam_raw_numpy(
+                #     activations=activations_assembled_wsi,
+                #     gradients=gradients_assembled_wsi,
+                #     eps=1e-6,
+                # )
+                # xai_gradcamraw_assembled_wsi.flush()
+                tile_operation_to_wsi(
+                    operation=grad_cam_raw_numpy,
+                    tile_size=2048,
+                    inputs={
+                        "activations": activations_assembled_wsi,
+                        "gradients": gradients_assembled_wsi,
+                    },
+                    output_array=xai_gradcamraw_assembled_wsi
+                )
+                xai_gradcamraw_assembled_wsi = expit(xai_gradcamraw_assembled_wsi)  # apply sigmoid to normalize between 0 and 1
+                xai_gradcamraw_assembled_wsi *= 255.0
+                _slide_pbar.write(f"Saved Raw Grad-CAM to {OUT_FILE_PATH_XAI_GRADCAMRAW} with shape {xai_gradcamraw_assembled_wsi.shape}")
+        if not artifact_exists(
+            client=mlflow_client,
+            run_id=mlflow_run_id,
+            artifact_path=f"xai/gradcamraw/{slide_name}.tiff",
+            file_name=OUT_FILE_PATH_XAI_GRADCAMRAW_TIFF.name
+        ):
+            # save image tiff mask
+            with safe_file_op_ctxm(OUT_FILE_PATH_XAI_GRADCAMRAW_TIFF, unlink_on_exception=True) as xai_gradcamraw_tiff_file:
+                save_image_xopat_compatible(
+                    image=xai_gradcamraw_assembled_wsi,
+                    save_path=xai_gradcamraw_tiff_file,
+                    target_extent_x=slide_metadata.extent_x,
+                    target_extent_y=slide_metadata.extent_y,
+                    microns_per_pixel_x=slide_metadata.mpp_x,
+                    microns_per_pixel_y=slide_metadata.mpp_y,
+                )
+        # upload to mlflow
+        upload_image_if_missing(
+            client=mlflow_client,
+            run_id=mlflow_run_id,
+            local_image_path=OUT_FILE_PATH_XAI_GRADCAMRAW_TIFF,
+            artifact_subdir="xai/gradcamraw"
+        )
 
         # =====================================================================
         # Gather embeddings for clustering
@@ -697,7 +754,7 @@ def parrallel_save_upload_overlay_tiff_single_cluster(WSI_LEVEL_TO_MATCH_OUTPUTS
                     # save overlay as tiff
         _slide_pbar.write(f"Saving single cluster overlay for cluster {cluster_idx} for slide {slide_name} at level {WSI_LEVEL_TO_MATCH_OUTPUTS_TO} dimensions {level_extent_x}x{level_extent_y}")
         save_image_xopat_compatible( 
-                        cluster_soft_assignments_memmap[:, :, cluster_idx]*255.0, 
+                        np.power(cluster_soft_assignments_memmap[:, :, cluster_idx], 1./3.).clip(0., 1.)*255.0, 
                         single_cluster_overlay_numpy_file, 
                         target_extent_x=level_extent_x, 
                         target_extent_y=level_extent_y,
