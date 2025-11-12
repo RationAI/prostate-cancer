@@ -344,7 +344,7 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
                     },
                     output_array=xai_gradcam_assembled_wsi
                 )
-                xai_gradcam_assembled_wsi = expit(xai_gradcam_assembled_wsi)  # apply sigmoid to normalize between 0 and 1
+                xai_gradcam_assembled_wsi[:] = expit(xai_gradcam_assembled_wsi)  # apply sigmoid to normalize between 0 and 1
                 xai_gradcam_assembled_wsi *= 255.0
                 xai_gradcam_assembled_wsi.flush()
                 _slide_pbar.write(f"Saved Grad-CAM to {OUT_FILE_PATH_XAI_GRADCAM} with shape {xai_gradcam_assembled_wsi.shape}")
@@ -403,7 +403,7 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
                     },
                     output_array=xai_layercam_assembled_wsi
                 )
-                xai_layercam_assembled_wsi = expit(xai_layercam_assembled_wsi)  # apply sigmoid to normalize between 0 and 1
+                xai_layercam_assembled_wsi[:] = expit(xai_layercam_assembled_wsi)  # apply sigmoid to normalize between 0 and 1
                 xai_layercam_assembled_wsi *= 255.0
                 _slide_pbar.write(f"Saved Layer-CAM to {OUT_FILE_PATH_XAI_LAYERCAM} with shape {xai_layercam_assembled_wsi.shape}")
         if not artifact_exists(
@@ -460,7 +460,7 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
                     },
                     output_array=xai_gradcamraw_assembled_wsi
                 )
-                xai_gradcamraw_assembled_wsi = expit(xai_gradcamraw_assembled_wsi)  # apply sigmoid to normalize between 0 and 1
+                xai_gradcamraw_assembled_wsi[:] = expit(xai_gradcamraw_assembled_wsi)  # apply sigmoid to normalize between 0 and 1
                 xai_gradcamraw_assembled_wsi *= 255.0
                 _slide_pbar.write(f"Saved Raw Grad-CAM to {OUT_FILE_PATH_XAI_GRADCAMRAW} with shape {xai_gradcamraw_assembled_wsi.shape}")
         if not artifact_exists(
