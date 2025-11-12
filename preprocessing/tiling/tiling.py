@@ -1,6 +1,5 @@
 """Script for creating slides and tiles datasets for prostate cancer binary prediction."""
 
-from collections.abc import Iterable
 from dataclasses import asdict, dataclass
 from pathlib import Path
 
@@ -8,16 +7,15 @@ import hydra
 import mlflow
 import pandas as pd
 import ray
-from lightning.pytorch.loggers import Logger
 from mlflow.artifacts import download_artifacts
 from omegaconf import DictConfig
 from rationai.mlkit import autolog
+from rationai.mlkit.lightning.loggers import MLFlowLogger
 from rationai.tiling import tiling
 from rationai.tiling.modules.tile_sources import OpenSlideTileSource
 from rationai.tiling.modules.tile_sources.openslide_tile_source import OpenSlideMetadata
-from rationai.tiling.typing import SlideMetadata, TiledSlideMetadata, TileMetadata
+from rationai.tiling.typing import TiledSlideMetadata
 from rationai.tiling.writers import save_mlflow_dataset
-from ray._private.worker import RemoteFunction0
 
 from preprocessing.tiling.tiling_masks import (
     AnotherPathologyMask,
@@ -36,6 +34,7 @@ class CarcinomaOpenSlideMetadata(OpenSlideMetadata):
     carcinoma: bool | None
 
 
+@ray.remote  # type: ignore[arg-type]
 def process_slide(
     slide_path: Path,
     source: OpenSlideTileSource,
@@ -49,7 +48,7 @@ def process_slide(
     tissue_masks_path: Path | None,
     qc_masks_path: Path | None,
     annotation_masks_path: Path | None,
-    slide_label: bool | None,
+    slide_labels: pd.DataFrame,
 ) -> TiledSlideMetadata:
     slide_metadata, tiles = source(slide_path)
 
@@ -98,7 +97,14 @@ def process_slide(
         if mask_path is not None and mask_path.exists():
             tiles = mask(mask_path, slide_metadata.extent, tiles)
 
-    # if slide_label is None, this will result in undefined value in the carcinoma column
+    if (
+        str(slide_path) in slide_labels["slide_path"]
+        and "carcinoma" in slide_labels.columns
+    ):
+        slide_label = slide_labels.loc[str(slide_path), "carcinoma"]
+    else:
+        slide_label = None
+
     slide_metadata = CarcinomaOpenSlideMetadata(
         **asdict(slide_metadata),
         carcinoma=slide_label,
@@ -107,57 +113,11 @@ def process_slide(
     return slide_metadata, tiles
 
 
-def make_remote_process_slide(
-    source: OpenSlideTileSource,
-    blur_mask: BlurMask,
-    folding_mask: FoldingMask,
-    residual_mask: ResidualMask,
-    tissue_mask: TissueMask,
-    carcinoma_mask: CarcinomaMask,
-    exclude_mask: ExcludeMask,
-    another_path_mask: AnotherPathologyMask,
-    tissue_masks_path: Path | None,
-    qc_masks_path: Path | None,
-    annotation_masks_path: Path | None,
-    slide_labels: pd.DataFrame,
-) -> RemoteFunction0[tuple[SlideMetadata, Iterable[TileMetadata]] | None, Path]:
-    @ray.remote
-    def remote_process_slide(
-        slide_path: Path,
-    ) -> tuple[SlideMetadata, Iterable[TileMetadata]] | None:
-        try:
-            label = (
-                slide_labels.loc[str(slide_path), "carcinoma"]
-                if str(slide_path) in slide_labels.index
-                else None
-            )
-            return process_slide(
-                slide_path,
-                source,
-                blur_mask,
-                folding_mask,
-                residual_mask,
-                tissue_mask,
-                carcinoma_mask,
-                exclude_mask,
-                another_path_mask,
-                tissue_masks_path,
-                qc_masks_path,
-                annotation_masks_path,
-                label,
-            )
-        except Exception as e:
-            print(f"Error processing slide {slide_path}: {e}")
-            return None
-
-    return remote_process_slide
-
-
 @hydra.main(
-    config_path="../../configs", config_name="preprocessing_base", version_base=None
+    config_path="../../configs", config_name="preprocessing/tiling", version_base=None
 )
 @autolog
-def main(config: DictConfig, logger: Logger | None = None) -> None:
+def main(config: DictConfig, logger: MLFlowLogger) -> None:
     tissue_masks_path = (
         None
         if config.tissue_masks_uri is None
@@ -230,24 +190,26 @@ def main(config: DictConfig, logger: Logger | None = None) -> None:
     slides_path = mlflow.artifacts.download_artifacts(config.slides_df_uri)
     slide_labels = pd.read_csv(slides_path).set_index("slide_path", drop=False)
 
-    remote_process_slide = make_remote_process_slide(
-        source,
-        blur_mask,
-        folding_mask,
-        residual_mask,
-        tissue_mask,
-        carcinoma_mask,
-        exclude_mask,
-        another_path_mask,
-        tissue_masks_path,
-        qc_masks_path,
-        annotation_masks_path,
-        slide_labels,
-    )
-
     slides = [Path(slide["slide_path"]) for _, slide in slide_labels.iterrows()]
 
-    slides_df, tiles_df = tiling(slides=slides, handler=remote_process_slide)
+    slides_df, tiles_df = tiling(
+        slides=slides,
+        handler=process_slide,  # type: ignore[arg-type]
+        fn_kwargs={
+            "source": source,
+            "blur_mask": blur_mask,
+            "folding_mask": folding_mask,
+            "residual_mask": residual_mask,
+            "tissue_mask": tissue_mask,
+            "carcinoma_mask": carcinoma_mask,
+            "exclude_mask": exclude_mask,
+            "another_path_mask": another_path_mask,
+            "tissue_masks_path": tissue_masks_path,
+            "qc_masks_path": qc_masks_path,
+            "annotation_masks_path": annotation_masks_path,
+            "slide_labels": slide_labels,
+        },
+    )
 
     save_mlflow_dataset(
         slides=slides_df,

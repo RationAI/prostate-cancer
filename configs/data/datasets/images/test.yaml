@@ -1,10 +1,9 @@
 defaults:
-  - /data/datasets/dataset_base@thresholds
   - /data/transforms@transforms: normalize
 
 _target_: prostate_cancer.data.datasets.LabeledTilesDataset
 uris:
-  - ${test_512_tiles_uri}
-
+  - "mlflow-artifacts:/65/0157ba4a0db349b8b86e4a24592d9230/artifacts/Prostate - test"
+thresholds: ${thresholds}
 stratified_filter: true
-carcinoma_roi_t: ${carcinoma_roi_t}
+carcinoma_roi_t: ${thresholds.carcinoma_roi_t}

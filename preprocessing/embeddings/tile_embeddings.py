@@ -6,7 +6,6 @@ import albumentations as A
 import hydra
 import timm
 import torch
-from lightning.pytorch.loggers import Logger
 from omegaconf import DictConfig
 from rationai.mlkit import autolog
 from rationai.mlkit.lightning.loggers import MLFlowLogger
@@ -51,12 +50,12 @@ def save_embeddings(
 
 
 @hydra.main(
-    config_path="../../configs", config_name="preprocessing_base", version_base=None
+    config_path="../../configs",
+    config_name="preprocessing/tile_embeddings",
+    version_base=None,
 )
 @autolog
-def main(config: DictConfig, logger: Logger | None = None) -> None:
-    assert logger is not None, "Need logger"
-    logger = cast("MLFlowLogger", logger)
+def main(config: DictConfig, logger: MLFlowLogger) -> None:
     dest = Path(config.output_path)
 
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -64,9 +63,13 @@ def main(config: DictConfig, logger: Logger | None = None) -> None:
 
     with torch.no_grad():
         for uri in config.uris:
-            dataset = load_dataset(config.thresholds, (uri,))
+            # one-tuple is used to easily store embedding files per uri in a single directory
+            dataset = load_dataset(
+                config.thresholds,
+                (uri,),
+            )
 
-            partition = uri.split(" - ")[-1]
+            partition = uri.split("/")[-1]
 
             for slide_dataset in tqdm(
                 dataset.generate_datasets(), desc=f"Slides partition: {partition}"
@@ -97,12 +100,7 @@ def main(config: DictConfig, logger: Logger | None = None) -> None:
                 except Exception as e:
                     print(f"{e} occured during processing {slide_name}")
 
-    logger.experiment.log_param(logger.run_id, "model", "prov-gigapath")
-    logger.experiment.log_param(logger.run_id, "save_destination", config.output_path)
-
-    logger.log_artifacts(
-        local_dir=config.output_path,
-    )
+    logger.log_artifacts(local_dir=config.output_path)
 
 
 if __name__ == "__main__":

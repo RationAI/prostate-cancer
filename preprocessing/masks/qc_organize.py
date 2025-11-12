@@ -5,9 +5,9 @@ from pathlib import Path
 
 import hydra
 import mlflow
-from lightning.pytorch.loggers import Logger
 from omegaconf import DictConfig
 from rationai.mlkit import autolog
+from rationai.mlkit.lightning.loggers import MLFlowLogger
 
 
 def create_directory_structure(qc_path: Path, file_prefix: str) -> None:
@@ -36,10 +36,10 @@ def log_qc_masks_directory(prefix_dir: Path, artifact_path: str) -> None:
 
 
 @hydra.main(
-    config_path="../../configs", config_name="preprocessing_base", version_base=None
+    config_path="../../configs", config_name="preprocessing/qc_masks", version_base=None
 )
 @autolog
-def main(config: DictConfig, logger: Logger | None = None) -> None:
+def main(config: DictConfig, logger: MLFlowLogger) -> None:
     prefixes = [
         "FoldingFunction_folding_test",
         "Piqe_focus_score_piqe_median",

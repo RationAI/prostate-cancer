@@ -1,10 +1,8 @@
 from pathlib import Path
-from typing import cast
 
 import hydra
 import mlflow
 import pandas as pd
-from lightning.pytorch.loggers import Logger
 from omegaconf import DictConfig
 from rationai.mlkit import autolog
 from rationai.mlkit.lightning.loggers import MLFlowLogger
@@ -93,26 +91,23 @@ def stratified_group_split(
 
 
 @hydra.main(
-    config_path="../configs", config_name="preprocessing_base", version_base=None
+    config_path="../configs", config_name="preprocessing/data_split", version_base=None
 )
 @autolog
-def main(config: DictConfig, logger: Logger | None = None) -> None:
-    assert logger is not None, "Need logger"
-    logger = cast("MLFlowLogger", logger)
-
+def main(config: DictConfig, logger: MLFlowLogger) -> None:
     slides_df_path = mlflow.artifacts.download_artifacts(config.slides_df_uri)
     slides_df = pd.read_csv(slides_df_path)
 
     train_slides, val_slides = stratified_group_split(
         original_data=slides_df,
-        labels=slides_df["carcinoma"],
+        labels=slides_df[config.target_column],
         groups=slides_df["case_id"],
         test_size=config.test_size,
         random_state=42,
     )
 
-    print("Train slides:", train_slides["carcinoma"].value_counts())
-    print("Validation slides:", val_slides["carcinoma"].value_counts())
+    print("Train slides:", train_slides[config.target_column].value_counts())
+    print("Validation slides:", val_slides[config.target_column].value_counts())
 
     train_out = Path("train_slides.csv")
     train_slides.to_csv(str(train_out), index=False)

@@ -1,0 +1,13 @@
+defaults:
+  - /default
+  - /experiment: ???
+  - _self_
+
+
+# Mean and std for normalization
+mean: [228.5544, 178.8584, 219.8793]
+std: [27.8285, 51.4639, 26.4458]
+
+
+seed: ${random_seed:}
+mode: ???

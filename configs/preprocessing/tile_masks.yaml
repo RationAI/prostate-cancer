@@ -1,10 +1,12 @@
 # @package _global_
+defaults:
+  - base
+  - _self_
 
-output_path: ${prostate_cancer_path}/tile_masks_${data_name}
+output_path: ${prostate_cancer_path}/tile_masks/${data_name}
 max_concurrent: 5
 tile_uris: []
 percentage_cols: []
-tissue_threshold: ${thresholds.tissue_roi_t}
 
 metadata:
   run_name: Tile Masks ${data_name}

@@ -1,0 +1,16 @@
+# @package _global_
+defaults:
+  - base
+  - _self_
+
+batch_size: 1024
+output_path: ${prostate_cancer_path}/tile_embeddings/${data_name}
+
+uris: ???
+
+metadata:
+  run_name: PGP Embeddings ${data_name}
+  description: PGP Embeddings ${data_name}
+  hyperparams:
+    model: ProvGigaPath
+    output_path: ${output_path}

@@ -1,4 +1,7 @@
 # @package _global_
+defaults:
+  - base
+  - _self_
 
 
 # dataframe with column "path" containing selected slide paths and optionally "label" containing slide label

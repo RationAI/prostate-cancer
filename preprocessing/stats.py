@@ -3,7 +3,6 @@ from typing import cast
 import hydra
 import ray
 import torch
-from lightning.pytorch.loggers import Logger
 from omegaconf import DictConfig
 from rationai.masks import process_items
 from rationai.mlkit.autolog import autolog
@@ -62,14 +61,12 @@ def process_slide(slide: SlideTiles) -> None:
 
 
 @hydra.main(
-    config_path="../configs", config_name="preprocessing_base", version_base=None
+    config_path="../configs",
+    config_name="preprocessing/mean_and_std",
+    version_base=None,
 )
 @autolog
-def main(config: DictConfig, logger: Logger | None = None) -> None:
-    assert logger is not None, "Need logger"
-    logger = cast("MLFlowLogger", logger)
-
-    # Log the dataset URIs
+def main(config: DictConfig, logger: MLFlowLogger) -> None:
     logger.experiment.log_param(logger.run_id, "dataset_uris", config.uris)
     dataset = UnlabeledTilesDataset(
         uris=config.uris,
@@ -85,7 +82,6 @@ def main(config: DictConfig, logger: Logger | None = None) -> None:
     print(f"Mean: {mean}")
     print(f"Std: {std}")
 
-    # Log the mean and std
     logger.experiment.log_param(
         logger.run_id, "mean", [round(m, 4) for m in mean.tolist()]
     )

@@ -1,4 +1,4 @@
-"""This file contains function for slide-level annotations (obtaining differs across datasets) and case identification."""
+"""This file contains function for slide-level annotations (obtaining differs across datasets) and case identification. It should be used only in the exploration phase."""
 
 import re
 from pathlib import Path
@@ -23,30 +23,49 @@ def carcinoma_bool_mmci_tl(slide_path: Path | str) -> bool:
     return slide_path.stem[-1] == "1"
 
 
-def carcinoma_bool_mmci_sl(
-    slide_path: Path | str, annotation_table: pd.DataFrame
-) -> bool:
-    """Get the slide carcinoma status from the slide name."""
+def parse_slide_name(slide_name: str) -> tuple[str, str, str] | None:
     # <year>[_-]<bioptic_request>-<slide_number>.mrxs
-    slide_name = Path(slide_path).name
     pattern = r"^(\d{4})[_-](\d+)-(\d+)\.mrxs$"
     match = re.match(pattern, slide_name)
     if not match:
-        raise ValueError(f"Invalid filename format: {slide_name}")
+        return None
 
     year, bioptic_request, slide_number = match.groups()
+    return year, bioptic_request, slide_number
+
+
+def get_record_by_slide(table: pd.DataFrame, slide_name: str) -> pd.Series | None:
+    parsed = parse_slide_name(slide_name)
+    if parsed is None:
+        return None
+
+    year, bioptic_request, _ = parsed
     r = bioptic_request.lstrip("0")
     index = f"{year[2:]}/{r}"
-    record = annotation_table.loc[annotation_table["Biopsy_No"] == index]
-    slide_number = slide_number.lstrip("0")
-
-    if len(record) != 1:
-        print("inconsistent", slide_name)
+    record = table.loc[table["Biopsy_No"] == index]
     record = record.squeeze()
+    return record
+
+
+def carcinoma_bool_mmci_sl(
+    slide_path: Path | str, annotation_table: pd.DataFrame
+) -> bool | None:
+    """Get the slide carcinoma status from the slide name."""
+    slide_name = Path(slide_path).name
+
+    parsed = parse_slide_name(slide_name)
+    if parsed is None:
+        return None
+
+    _, _, slide_number = parsed
+    record = get_record_by_slide(annotation_table, slide_name)
+    if record is None:
+        return None
 
     if record["Cancer_in_case"].lower() != "yes":
         return False
 
+    # handling various typos and edge cases in the table
     if isinstance(record["Cancer_in_slides"], float):
         cancerous_slides = str(record["Cancer_in_slides"]).split(".")
     elif isinstance(record["Cancer_in_slides"], int):
