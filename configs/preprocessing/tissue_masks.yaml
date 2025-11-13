@@ -5,7 +5,7 @@ defaults:
 
 level: 3
 max_concurrent: 100
-output_path: ${prostate_cancer_path}/tissue_masks/${data_name}
+output_path: ${prostate_cancer_artifacts}/tissue_masks/${data_name}
 
 metadata:
   run_name: Tissue Masks ${data_name}

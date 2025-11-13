@@ -4,7 +4,7 @@ defaults:
   - _self_
 
 batch_size: 1024
-output_path: ${prostate_cancer_path}/tile_embeddings/${data_name}
+output_path: ${prostate_cancer_artifacts}/tile_embeddings/${data_name}
 
 uris: ???
 

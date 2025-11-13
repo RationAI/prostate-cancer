@@ -4,6 +4,9 @@ defaults:
   - _self_
 
 
+prostate_cancer_artifacts: /mnt/projects/prostate_cancer/cancer
+prostate_data: /mnt/data/MOU/prostate
+
 thresholds:
   tissue_roi_t: 0.5
   exclude_t: 0.0

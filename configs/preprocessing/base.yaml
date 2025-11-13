@@ -4,8 +4,6 @@ defaults:
   - /default
   - _self_
 
-prostate_cancer_path: /mnt/projects/prostate_cancer/cancer
-
 # CSV containing column "slide_path" (+ "carcinoma" label, and "case_id" for some stages)
 slides_df_uri: ???
 data_name: ??? # for mlflow run and data folder names

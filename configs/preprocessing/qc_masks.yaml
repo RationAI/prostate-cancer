@@ -10,7 +10,7 @@ num_repeats: 10
 url: "http://rayservice-qc-serve-svc.rationai-jobs-ns.svc.cluster.local:8000/"
 mask_level: 3
 sample_level: 1
-output_path: ${prostate_cancer_path}/qc_masks/${data_name}
+output_path: ${prostate_cancer_artifacts}/qc_masks/${data_name}
 
 metadata:
   run_name: QC Masks ${data_name}
