@@ -54,9 +54,16 @@ def tile_operation_to_wsi(operation, tile_size: int, inputs: dict, output_array:
 @click.option('-pdd', '--precomputed-data-directory', type=click.Path(file_okay=False, dir_okay=True, path_type=Path), default=Path("/mnt/projects/explainability/XAICNNEmbeddings/"), help='Output directory for experiment results. If not provided, a default directory will be used.')
 @click.option('-cut', '--cut-edge-subtiles', type=int, default=0, help='Number of subtiles to cut from each edge to avoid border artifacts.')
 @click.option('--mlf-runid', type=str, default=None, help='MLflow run ID to associate with the experiment.')
-def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str, clustering_instance_fp: Path | None, precomputed_data_directory: Path | None, cut_edge_subtiles: int, mlf_runid: str | None):
+@click.option('--debug', is_flag=True, help='Enable debug logging.')
+def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str, clustering_instance_fp: Path | None, precomputed_data_directory: Path | None, cut_edge_subtiles: int, mlf_runid: str | None, debug: bool):
 
-    logging.basicConfig(level=logging.INFO)
+    if debug:
+        logger.setLevel(logging.DEBUG)
+        logging.basicConfig(level=logging.DEBUG)
+    else:
+        logging.basicConfig(level=logging.INFO)
+        logger.setLevel(logging.INFO)
+
 
     if precomputed_data_directory is None:
         raise ValueError("precomputed_data_directory must be provided.")
