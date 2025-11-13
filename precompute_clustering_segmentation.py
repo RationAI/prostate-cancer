@@ -303,171 +303,171 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
         # OUTPUTS: activations_assembled_wsi, activations_assembled_wsi_overlaps, gradients_assembled_wsi, gradients_assembled_wsi_overlaps
 
 
-        # # =====================================================================
-        # # Create XAI masks from activations and gradients
-        # OUT_FILE_PATH_XAI_GRADCAM = PRECOMPUTED_DATA_DIR / "xai-gradcam" / f"{slide_name}.npy"
-        # OUT_FILE_PATH_XAI_GRADCAM_TIFF = TMP_DIR / "xai-gradcam" / f"{slide_name}.tiff"
-        # if OUT_FILE_PATH_XAI_GRADCAM.exists():
-        #     _slide_pbar.write(f"Grad-CAM for slide {slide_name} exist, skipping.")
-        #     xai_gradcam_assembled_wsi = np.load(OUT_FILE_PATH_XAI_GRADCAM, mmap_mode='r')
-        #     logger.debug(f"Grad-CAM has shape: {xai_gradcam_assembled_wsi.shape}")
+        # =====================================================================
+        # Create XAI masks from activations and gradients
+        OUT_FILE_PATH_XAI_GRADCAM = PRECOMPUTED_DATA_DIR / "xai-gradcam" / f"{slide_name}.npy"
+        OUT_FILE_PATH_XAI_GRADCAM_TIFF = TMP_DIR / "xai-gradcam" / f"{slide_name}.tiff"
+        if OUT_FILE_PATH_XAI_GRADCAM.exists():
+            _slide_pbar.write(f"Grad-CAM for slide {slide_name} exist, skipping.")
+            xai_gradcam_assembled_wsi = np.load(OUT_FILE_PATH_XAI_GRADCAM, mmap_mode='r')
+            logger.debug(f"Grad-CAM has shape: {xai_gradcam_assembled_wsi.shape}")
 
-        # else:
-        #     with safe_file_op_ctxm(OUT_FILE_PATH_XAI_GRADCAM, unlink_on_exception=True, tmp_dir=TMP_DIR / "xai-gradcam") as xai_gradcam_numpy_file:
-        #         logger.debug(f"DEBUG: Shape of activations: {activations_assembled_wsi.shape}, Shape of gradients: {gradients_assembled_wsi.shape}")
-        #         xai_gradcam_assembled_wsi = open_memmap(
-        #             xai_gradcam_numpy_file,
-        #             mode='w+',
-        #             shape=activations_assembled_wsi.shape[1:3]
-        #         )
-        #         tile_operation_to_wsi(
-        #             operation=partial(grad_cam_pp_numpy, eps=1e-6),
-        #             tile_size=2048,
-        #             inputs={
-        #                 "activations": activations_assembled_wsi,
-        #                 "gradients": gradients_assembled_wsi,
-        #             },
-        #             output_array=xai_gradcam_assembled_wsi
-        #         )
-        #         _max = np.max(xai_gradcam_assembled_wsi)
-        #         logger.debug(f"Grad-CAM max value before normalization: {_max}")
-        #         xai_gradcam_assembled_wsi /= _max
-        #         np.power(xai_gradcam_assembled_wsi, 1./3., out=xai_gradcam_assembled_wsi)   # normalize between 0 and 1
-        #         xai_gradcam_assembled_wsi *= 255.0
-        #         xai_gradcam_assembled_wsi.flush()
-        #         _slide_pbar.write(f"Saved Grad-CAM to {OUT_FILE_PATH_XAI_GRADCAM} with shape {xai_gradcam_assembled_wsi.shape}")
+        else:
+            with safe_file_op_ctxm(OUT_FILE_PATH_XAI_GRADCAM, unlink_on_exception=True, tmp_dir=TMP_DIR / "xai-gradcam") as xai_gradcam_numpy_file:
+                logger.debug(f"DEBUG: Shape of activations: {activations_assembled_wsi.shape}, Shape of gradients: {gradients_assembled_wsi.shape}")
+                xai_gradcam_assembled_wsi = open_memmap(
+                    xai_gradcam_numpy_file,
+                    mode='w+',
+                    shape=activations_assembled_wsi.shape[1:3]
+                )
+                tile_operation_to_wsi(
+                    operation=partial(grad_cam_pp_numpy, eps=1e-6),
+                    tile_size=2048,
+                    inputs={
+                        "activations": activations_assembled_wsi,
+                        "gradients": gradients_assembled_wsi,
+                    },
+                    output_array=xai_gradcam_assembled_wsi
+                )
+                _max = np.max(xai_gradcam_assembled_wsi)
+                logger.debug(f"Grad-CAM max value before normalization: {_max}")
+                xai_gradcam_assembled_wsi /= _max
+                np.power(xai_gradcam_assembled_wsi, 1./3., out=xai_gradcam_assembled_wsi)   # normalize between 0 and 1
+                xai_gradcam_assembled_wsi *= 255.0
+                xai_gradcam_assembled_wsi.flush()
+                _slide_pbar.write(f"Saved Grad-CAM to {OUT_FILE_PATH_XAI_GRADCAM} with shape {xai_gradcam_assembled_wsi.shape}")
             
-        # if not artifact_exists(
-        #     client=mlflow_client,
-        #     run_id=mlflow_run_id,
-        #     artifact_path=f"xai/gradcam/{slide_name}.tiff",
-        #     file_name=OUT_FILE_PATH_XAI_GRADCAM_TIFF.name
-        # ):
-        #     # save image tiff mask
-        #     with safe_file_op_ctxm(OUT_FILE_PATH_XAI_GRADCAM_TIFF, unlink_on_exception=True) as xai_gradcam_tiff_file:
-        #         save_image_xopat_compatible(
-        #             image=xai_gradcam_assembled_wsi,
-        #             save_path=xai_gradcam_tiff_file,
-        #             target_extent_x=slide_metadata.extent_x,
-        #             target_extent_y=slide_metadata.extent_y,
-        #             microns_per_pixel_x=slide_metadata.mpp_x,
-        #             microns_per_pixel_y=slide_metadata.mpp_y,
-        #         )
-        # # upload to mlflow
-        # upload_image_if_missing(
-        #     client=mlflow_client,
-        #     run_id=mlflow_run_id,
-        #     local_image_path=OUT_FILE_PATH_XAI_GRADCAM_TIFF,
-        #     artifact_subdir="xai/gradcam"
-        # )
-        # _slide_pbar.write(f"Ensured Grad-CAM TIFF is uploaded to MLflow.")
+        if not artifact_exists(
+            client=mlflow_client,
+            run_id=mlflow_run_id,
+            artifact_path=f"xai/gradcam/{slide_name}.tiff",
+            file_name=OUT_FILE_PATH_XAI_GRADCAM_TIFF.name
+        ):
+            # save image tiff mask
+            with safe_file_op_ctxm(OUT_FILE_PATH_XAI_GRADCAM_TIFF, unlink_on_exception=True) as xai_gradcam_tiff_file:
+                save_image_xopat_compatible(
+                    image=xai_gradcam_assembled_wsi,
+                    save_path=xai_gradcam_tiff_file,
+                    target_extent_x=slide_metadata.extent_x,
+                    target_extent_y=slide_metadata.extent_y,
+                    microns_per_pixel_x=slide_metadata.mpp_x,
+                    microns_per_pixel_y=slide_metadata.mpp_y,
+                )
+        # upload to mlflow
+        upload_image_if_missing(
+            client=mlflow_client,
+            run_id=mlflow_run_id,
+            local_image_path=OUT_FILE_PATH_XAI_GRADCAM_TIFF,
+            artifact_subdir="xai/gradcam"
+        )
+        _slide_pbar.write(f"Ensured Grad-CAM TIFF is uploaded to MLflow.")
         
-        # OUT_FILE_PATH_XAI_LAYERCAM = PRECOMPUTED_DATA_DIR / "xai-layercam" / f"{slide_name}.npy"
-        # OUT_FILE_PATH_XAI_LAYERCAM_TIFF = TMP_DIR / "xai-layercam" / f"{slide_name}.tiff"
-        # if OUT_FILE_PATH_XAI_LAYERCAM.exists():
-        #     _slide_pbar.write(f"Layer-CAM for slide {slide_name} exist, skipping.")
-        #     xai_layercam_assembled_wsi = np.load(OUT_FILE_PATH_XAI_LAYERCAM, mmap_mode='r')
-        #     _slide_pbar.write(f"Layer-CAM has shape: {xai_layercam_assembled_wsi.shape}")
-        # else:
-        #     _slide_pbar.write(f"Computing Layer-CAM for slide {slide_name}...")
-        #     with safe_file_op_ctxm(OUT_FILE_PATH_XAI_LAYERCAM, unlink_on_exception=True, tmp_dir=TMP_DIR / "xai-layercam") as xai_layercam_numpy_file:
-        #         xai_layercam_assembled_wsi = open_memmap(
-        #             xai_layercam_numpy_file,
-        #             mode='w+',
-        #             shape=activations_assembled_wsi.shape[1:3]
-        #         )
-        #         tile_operation_to_wsi(
-        #             operation=layer_cam_numpy,
-        #             tile_size=2048,
-        #             inputs={
-        #                 "activations": activations_assembled_wsi,
-        #                 "gradients": gradients_assembled_wsi,
-        #             },
-        #             output_array=xai_layercam_assembled_wsi
-        #         )
-        #         _max = np.max(xai_layercam_assembled_wsi)
-        #         logger.debug(f"Layer-CAM max value before normalization: {_max}")
-        #         xai_layercam_assembled_wsi /= _max
-        #         np.power(xai_layercam_assembled_wsi, 1./3., out=xai_layercam_assembled_wsi)   # normalize between 0 and 1
-        #         xai_layercam_assembled_wsi *= 255.0
-        #         _slide_pbar.write(f"Saved Layer-CAM to {OUT_FILE_PATH_XAI_LAYERCAM} with shape {xai_layercam_assembled_wsi.shape}")
-        # if not artifact_exists(
-        #     client=mlflow_client,   
-        #     run_id=mlflow_run_id,
-        #     artifact_path=f"xai/layercam/{slide_name}.tiff",
-        #     file_name=OUT_FILE_PATH_XAI_LAYERCAM_TIFF.name
-        # ):
-        #     # save image tiff mask
-        #     with safe_file_op_ctxm(OUT_FILE_PATH_XAI_LAYERCAM_TIFF, unlink_on_exception=True) as xai_layercam_tiff_file:
-        #         save_image_xopat_compatible(
-        #             image=xai_layercam_assembled_wsi,
-        #             save_path=xai_layercam_tiff_file,
-        #             target_extent_x=slide_metadata.extent_x,
-        #             target_extent_y=slide_metadata.extent_y,
-        #             microns_per_pixel_x=slide_metadata.mpp_x,
-        #             microns_per_pixel_y=slide_metadata.mpp_y,
-        #         )
-        # # upload to mlflow
-        # upload_image_if_missing(
-        #     client=mlflow_client,
-        #     run_id=mlflow_run_id,
-        #     local_image_path=OUT_FILE_PATH_XAI_LAYERCAM_TIFF,
-        #     artifact_subdir="xai/layercam"
-        # )
-        # _slide_pbar.write(f"Ensured Layer-CAM TIFF is uploaded to MLflow.")
+        OUT_FILE_PATH_XAI_LAYERCAM = PRECOMPUTED_DATA_DIR / "xai-layercam" / f"{slide_name}.npy"
+        OUT_FILE_PATH_XAI_LAYERCAM_TIFF = TMP_DIR / "xai-layercam" / f"{slide_name}.tiff"
+        if OUT_FILE_PATH_XAI_LAYERCAM.exists():
+            _slide_pbar.write(f"Layer-CAM for slide {slide_name} exist, skipping.")
+            xai_layercam_assembled_wsi = np.load(OUT_FILE_PATH_XAI_LAYERCAM, mmap_mode='r')
+            _slide_pbar.write(f"Layer-CAM has shape: {xai_layercam_assembled_wsi.shape}")
+        else:
+            _slide_pbar.write(f"Computing Layer-CAM for slide {slide_name}...")
+            with safe_file_op_ctxm(OUT_FILE_PATH_XAI_LAYERCAM, unlink_on_exception=True, tmp_dir=TMP_DIR / "xai-layercam") as xai_layercam_numpy_file:
+                xai_layercam_assembled_wsi = open_memmap(
+                    xai_layercam_numpy_file,
+                    mode='w+',
+                    shape=activations_assembled_wsi.shape[1:3]
+                )
+                tile_operation_to_wsi(
+                    operation=layer_cam_numpy,
+                    tile_size=2048,
+                    inputs={
+                        "activations": activations_assembled_wsi,
+                        "gradients": gradients_assembled_wsi,
+                    },
+                    output_array=xai_layercam_assembled_wsi
+                )
+                _max = np.max(xai_layercam_assembled_wsi)
+                logger.debug(f"Layer-CAM max value before normalization: {_max}")
+                xai_layercam_assembled_wsi /= _max
+                np.power(xai_layercam_assembled_wsi, 1./3., out=xai_layercam_assembled_wsi)   # normalize between 0 and 1
+                xai_layercam_assembled_wsi *= 255.0
+                _slide_pbar.write(f"Saved Layer-CAM to {OUT_FILE_PATH_XAI_LAYERCAM} with shape {xai_layercam_assembled_wsi.shape}")
+        if not artifact_exists(
+            client=mlflow_client,   
+            run_id=mlflow_run_id,
+            artifact_path=f"xai/layercam/{slide_name}.tiff",
+            file_name=OUT_FILE_PATH_XAI_LAYERCAM_TIFF.name
+        ):
+            # save image tiff mask
+            with safe_file_op_ctxm(OUT_FILE_PATH_XAI_LAYERCAM_TIFF, unlink_on_exception=True) as xai_layercam_tiff_file:
+                save_image_xopat_compatible(
+                    image=xai_layercam_assembled_wsi,
+                    save_path=xai_layercam_tiff_file,
+                    target_extent_x=slide_metadata.extent_x,
+                    target_extent_y=slide_metadata.extent_y,
+                    microns_per_pixel_x=slide_metadata.mpp_x,
+                    microns_per_pixel_y=slide_metadata.mpp_y,
+                )
+        # upload to mlflow
+        upload_image_if_missing(
+            client=mlflow_client,
+            run_id=mlflow_run_id,
+            local_image_path=OUT_FILE_PATH_XAI_LAYERCAM_TIFF,
+            artifact_subdir="xai/layercam"
+        )
+        _slide_pbar.write(f"Ensured Layer-CAM TIFF is uploaded to MLflow.")
 
-        # OUT_FILE_PATH_XAI_GRADCAMRAW = PRECOMPUTED_DATA_DIR / "xai-gradcamraw" / f"{slide_name}.npy"
-        # OUT_FILE_PATH_XAI_GRADCAMRAW_TIFF = TMP_DIR / "xai-gradcamraw" / f"{slide_name}.tiff"
-        # if OUT_FILE_PATH_XAI_GRADCAMRAW.exists():
-        #     _slide_pbar.write(f"Raw Grad-CAM for slide {slide_name} exist, skipping.")
-        #     xai_gradcamraw_assembled_wsi = np.load(OUT_FILE_PATH_XAI_GRADCAMRAW, mmap_mode='r')
-        #     _slide_pbar.write(f"Raw Grad-CAM has shape: {xai_gradcamraw_assembled_wsi.shape}")
-        # else:
-        #     with safe_file_op_ctxm(OUT_FILE_PATH_XAI_GRADCAMRAW, unlink_on_exception=True, tmp_dir=TMP_DIR / "xai-gradcamraw") as xai_gradcamraw_numpy_file:
-        #         xai_gradcamraw_assembled_wsi = open_memmap(
-        #             xai_gradcamraw_numpy_file,
-        #             mode='w+',
-        #             shape=activations_assembled_wsi.shape[1:3]
-        #         )
-        #         print("DEBUG: Computing Raw Grad-CAM...", flush=True)
-        #         tile_operation_to_wsi(
-        #             operation=grad_cam_raw_numpy,
-        #             tile_size=2048,
-        #             inputs={
-        #                 "activations": activations_assembled_wsi,
-        #                 "gradients": gradients_assembled_wsi,
-        #             },
-        #             output_array=xai_gradcamraw_assembled_wsi
-        #         )
-        #         _max = np.max(xai_gradcamraw_assembled_wsi)
-        #         logger.debug(f"Raw Grad-CAM max value before normalization: {_max}")
-        #         xai_gradcamraw_assembled_wsi /= _max
-        #         np.power(xai_gradcamraw_assembled_wsi, 1./3., out=xai_gradcamraw_assembled_wsi)
-        #         xai_gradcamraw_assembled_wsi *= 255.0
-        #         _slide_pbar.write(f"Saved Raw Grad-CAM to {OUT_FILE_PATH_XAI_GRADCAMRAW} with shape {xai_gradcamraw_assembled_wsi.shape}")
-        # if not artifact_exists(
-        #     client=mlflow_client,
-        #     run_id=mlflow_run_id,
-        #     artifact_path=f"xai/gradcamraw/{slide_name}.tiff",
-        #     file_name=OUT_FILE_PATH_XAI_GRADCAMRAW_TIFF.name
-        # ):
-        #     # save image tiff mask
-        #     with safe_file_op_ctxm(OUT_FILE_PATH_XAI_GRADCAMRAW_TIFF, unlink_on_exception=True) as xai_gradcamraw_tiff_file:
-        #         save_image_xopat_compatible(
-        #             image=xai_gradcamraw_assembled_wsi,
-        #             save_path=xai_gradcamraw_tiff_file,
-        #             target_extent_x=slide_metadata.extent_x,
-        #             target_extent_y=slide_metadata.extent_y,
-        #             microns_per_pixel_x=slide_metadata.mpp_x,
-        #             microns_per_pixel_y=slide_metadata.mpp_y,
-        #         )
-        # # upload to mlflow
-        # upload_image_if_missing(
-        #     client=mlflow_client,
-        #     run_id=mlflow_run_id,
-        #     local_image_path=OUT_FILE_PATH_XAI_GRADCAMRAW_TIFF,
-        #     artifact_subdir="xai/gradcamraw"
-        # )
+        OUT_FILE_PATH_XAI_GRADCAMRAW = PRECOMPUTED_DATA_DIR / "xai-gradcamraw" / f"{slide_name}.npy"
+        OUT_FILE_PATH_XAI_GRADCAMRAW_TIFF = TMP_DIR / "xai-gradcamraw" / f"{slide_name}.tiff"
+        if OUT_FILE_PATH_XAI_GRADCAMRAW.exists():
+            _slide_pbar.write(f"Raw Grad-CAM for slide {slide_name} exist, skipping.")
+            xai_gradcamraw_assembled_wsi = np.load(OUT_FILE_PATH_XAI_GRADCAMRAW, mmap_mode='r')
+            _slide_pbar.write(f"Raw Grad-CAM has shape: {xai_gradcamraw_assembled_wsi.shape}")
+        else:
+            with safe_file_op_ctxm(OUT_FILE_PATH_XAI_GRADCAMRAW, unlink_on_exception=True, tmp_dir=TMP_DIR / "xai-gradcamraw") as xai_gradcamraw_numpy_file:
+                xai_gradcamraw_assembled_wsi = open_memmap(
+                    xai_gradcamraw_numpy_file,
+                    mode='w+',
+                    shape=activations_assembled_wsi.shape[1:3]
+                )
+                print("DEBUG: Computing Raw Grad-CAM...", flush=True)
+                tile_operation_to_wsi(
+                    operation=grad_cam_raw_numpy,
+                    tile_size=2048,
+                    inputs={
+                        "activations": activations_assembled_wsi,
+                        "gradients": gradients_assembled_wsi,
+                    },
+                    output_array=xai_gradcamraw_assembled_wsi
+                )
+                _max = np.max(xai_gradcamraw_assembled_wsi)
+                logger.debug(f"Raw Grad-CAM max value before normalization: {_max}")
+                xai_gradcamraw_assembled_wsi /= _max
+                np.power(xai_gradcamraw_assembled_wsi, 1./3., out=xai_gradcamraw_assembled_wsi)
+                xai_gradcamraw_assembled_wsi *= 255.0
+                _slide_pbar.write(f"Saved Raw Grad-CAM to {OUT_FILE_PATH_XAI_GRADCAMRAW} with shape {xai_gradcamraw_assembled_wsi.shape}")
+        if not artifact_exists(
+            client=mlflow_client,
+            run_id=mlflow_run_id,
+            artifact_path=f"xai/gradcamraw/{slide_name}.tiff",
+            file_name=OUT_FILE_PATH_XAI_GRADCAMRAW_TIFF.name
+        ):
+            # save image tiff mask
+            with safe_file_op_ctxm(OUT_FILE_PATH_XAI_GRADCAMRAW_TIFF, unlink_on_exception=True) as xai_gradcamraw_tiff_file:
+                save_image_xopat_compatible(
+                    image=xai_gradcamraw_assembled_wsi,
+                    save_path=xai_gradcamraw_tiff_file,
+                    target_extent_x=slide_metadata.extent_x,
+                    target_extent_y=slide_metadata.extent_y,
+                    microns_per_pixel_x=slide_metadata.mpp_x,
+                    microns_per_pixel_y=slide_metadata.mpp_y,
+                )
+        # upload to mlflow
+        upload_image_if_missing(
+            client=mlflow_client,
+            run_id=mlflow_run_id,
+            local_image_path=OUT_FILE_PATH_XAI_GRADCAMRAW_TIFF,
+            artifact_subdir="xai/gradcamraw"
+        )
 
         # =====================================================================
         # Gather embeddings for clustering
