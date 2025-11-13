@@ -195,4 +195,4 @@ lightning_logs/
 
 evaluations/
 
-figures/
+figures/*/*.png
