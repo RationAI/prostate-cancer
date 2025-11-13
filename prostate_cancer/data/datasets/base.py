@@ -29,7 +29,6 @@ class FilterableDataset(MetaTiledSlides[T]):
         self.thresholds = thresholds
         super().__init__(uris=uris)
 
-
     def filter_tiles_by_thresholds(self, tiles: pd.DataFrame) -> pd.DataFrame:
         for percentage in [
             "tissue_roi_percentage",
@@ -41,7 +40,9 @@ class FilterableDataset(MetaTiledSlides[T]):
         ]:
             if percentage in tiles.columns:
                 t = percentage.replace("percentage", "t")
-                assert t in self.thresholds, f"Missing threshold! Use \"{t}\" for {percentage}"
+                assert t in self.thresholds, (
+                    f'Missing threshold! Use "{t}" for {percentage}'
+                )
                 mask = (
                     tiles[percentage] > self.thresholds[t]
                     if "tissue" in percentage

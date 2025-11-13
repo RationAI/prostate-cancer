@@ -289,7 +289,7 @@ class InMemoryHeatmapAssembler(ImageAssembler):
         # set accumulator tile size to compressed size if enabled
         if self.compress_accumulator_array:
             self.accumulator_tile_size = self.overlap_counter_tile_size
-        self.level_coord_multiplier = 2 ** sample_level
+        self.level_coord_multiplier = 2**sample_level
 
         # Calculate sizes for accumulator and overlap counter
         w, h, c = self.image_size
