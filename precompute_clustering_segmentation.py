@@ -285,12 +285,12 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
                         loss.backward()
                         G = hooked_model.get_gradients(target_layer)
                         gradient_assembler.update_batch_torch(G.cpu().numpy(), X.cpu().numpy(), Y.cpu().numpy())
-                        del G
+                        del G, loss
                     if not _bool_acts_exists:
                         A = hooked_model.get_activations(target_layer)
                         heatmap_assembler.update_batch_torch(A.cpu().numpy(), X.cpu().numpy(), Y.cpu().numpy())
                         del A
-                    del inputs, outputs_, loss
+                    del inputs, outputs_
 
                 if not _bool_acts_exists:
                     activations_assembled_wsi, activations_assembled_wsi_overlaps = heatmap_assembler.finalize()
