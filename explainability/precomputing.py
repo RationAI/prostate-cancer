@@ -3,6 +3,8 @@ import contextlib
 import math
 import numpy as np
 import logging
+import shutil
+import os
 
 from numpy.lib.format import open_memmap
 import matplotlib.pyplot as plt
@@ -14,15 +16,20 @@ logger = logging.getLogger(__name__)
 
 
 @contextlib.contextmanager
-def safe_file_op_ctxm(target_file: Path, unlink_on_exception: bool = True):
+def safe_file_op_ctxm(target_file: Path, unlink_on_exception: bool = True, tmp_dir: Path | None = None):
     """A context manager which provides you with a temporary filepath to write to, and then renames it to the target file on successful completion of the block. If an exception occurs, the temp file is deleted and the target file is left unchanged."""
     suffix = target_file.suffix
     temp_file_path = target_file.with_suffix(f".tmp{suffix}")
+    if tmp_dir is not None:
+        temp_file_path = tmp_dir / temp_file_path.name
     temp_file_path.parent.mkdir(parents=True, exist_ok=True)
     temp_file_path.unlink(missing_ok=True)  # Ensure temp file does not exist
     try:
         yield temp_file_path
         if temp_file_path.exists():
+            if tmp_dir is not None:
+                target_file.parent.mkdir(parents=True, exist_ok=True)
+                shutil.move(temp_file_path.as_posix(), (target_file.parent / temp_file_path.name).as_posix())
             temp_file_path.rename(target_file)
     except Exception as e:
         if unlink_on_exception:
