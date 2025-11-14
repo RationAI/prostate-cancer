@@ -687,9 +687,9 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
         _slide_pbar.write(f"Finished processing slide {slide_name} ({i})")
 
 def normalize_highlight_heatmap(xai_layercam_assembled_wsi):
+    np.power(xai_layercam_assembled_wsi, 1./3., out=xai_layercam_assembled_wsi)   # normalize between 0 and 1
     _max = np.max(np.abs(xai_layercam_assembled_wsi))
     logger.debug(f"Heatmap min/max before normalization: {xai_layercam_assembled_wsi.min()}/{xai_layercam_assembled_wsi.max()}")
-    np.power(xai_layercam_assembled_wsi, 1./3., out=xai_layercam_assembled_wsi)   # normalize between 0 and 1
     xai_layercam_assembled_wsi /= (_max * 2.0)
     xai_layercam_assembled_wsi += 0.5
     xai_layercam_assembled_wsi = np.clip(xai_layercam_assembled_wsi, 0.0, 1.0)
