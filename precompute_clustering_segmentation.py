@@ -54,7 +54,7 @@ def tile_operation_to_wsi(operation, tile_size: int, inputs: dict, output_array:
 @click.option('-pdd', '--precomputed-data-directory', type=click.Path(file_okay=False, dir_okay=True, path_type=Path), default=Path("/mnt/projects/explainability/XAICNNEmbeddings/"), help='Output directory for experiment results. If not provided, a default directory will be used.')
 @click.option('-cut', '--cut-edge-subtiles', type=int, default=0, help='Number of subtiles to cut from each edge to avoid border artifacts.')
 @click.option('-sid', '--slide-id-to-process', type=str, default=None, multiple=True, help='ID of the slide to process. If not provided, all slides will be processed.')
-@click.option('--mlf-runid', type=str, default=None, help='MLflow run ID to associate with the experiment.')
+@click.option('--mlf-runid', type=str, default=None, help='MLflow run ID to continue experiment run.')
 @click.option('--debug', is_flag=True, help='Enable debug logging.')
 def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str, clustering_instance_fp: Path | None, precomputed_data_directory: Path | None, cut_edge_subtiles: int, slide_id_to_process: list[str] | None, mlf_runid: str | None, debug: bool):
 
@@ -177,11 +177,14 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
         slide_path = slide_metadata.path.replace("/mnt/data/Projects/prostate_cancer/cancer/test_data/", "/mnt/data/MOU/prostate/tile_level_annotations_test/")  # TODO: fix hardcoding
         slide_name = Path(slide_path).stem
         logger.info(f"Slides to process: {slide_id_to_process if slide_id_to_process is not None else 'All slides'}")
+        _shall_be_processed = True
         if slide_id_to_process is not None:
             for sid in slide_id_to_process:
                 if sid not in slide_name:
                     logger.info(f"Skipping slide {slide_name} as it does not match the specified slide IDs to process.")
-                    continue
+                    _shall_be_processed = False
+        if not _shall_be_processed:
+            continue
         _slide_pbar.set_description(f"Started processing slide {slide_name} ({i})")
 
         # =====================================================================
