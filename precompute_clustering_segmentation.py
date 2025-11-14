@@ -7,6 +7,7 @@ from scipy.special import expit
 
 import hydra
 import mlflow
+from mlflow.utils.mlflow_tags import MLFLOW_USER, MLFLOW_RUN_NAME
 import openslide  #IMPORT BEFORE TORCH
 import pyvips  #IMPORT BEFORE TORCH
 
@@ -149,6 +150,9 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
     mlflow_experiment_name = "Testing"
     mlflow_client, mlflow_exp_id, mlflow_run_id = ensure_mlflow_run(mlflow_experiment_name, mlf_runid)
     logger.info(f"MLflow run ID: {mlflow_run_id}")
+    # set run name
+    mlflow_client.set_tag(mlflow_run_id, MLFLOW_RUN_NAME, f"ClusterSeg {clustering_algorithm} {NUM_CLUSTERS} clusters{' - pre-clustered' if clustering_instance_fp is not None else ''}")
+   
 
  
 
