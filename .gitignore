@@ -194,5 +194,3 @@ lightning_logs/
 /data
 
 evaluations/
-
-figures/*/*.png
