@@ -339,11 +339,7 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
                     },
                     output_array=xai_gradcam_assembled_wsi
                 )
-                _max = np.max(xai_gradcam_assembled_wsi)
-                logger.debug(f"Grad-CAM max value before normalization: {_max}")
-                xai_gradcam_assembled_wsi /= _max
-                np.power(xai_gradcam_assembled_wsi, 1./3., out=xai_gradcam_assembled_wsi)   # normalize between 0 and 1
-                xai_gradcam_assembled_wsi *= 255.0
+                xai_gradcam_assembled_wsi = normalize_highlight_heatmap(xai_gradcam_assembled_wsi)
                 xai_gradcam_assembled_wsi.flush()
                 _slide_pbar.write(f"Saved Grad-CAM to {OUT_FILE_PATH_XAI_GRADCAM} with shape {xai_gradcam_assembled_wsi.shape}")
             
@@ -395,11 +391,8 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
                     },
                     output_array=xai_layercam_assembled_wsi
                 )
-                _max = np.max(xai_layercam_assembled_wsi)
-                logger.debug(f"Layer-CAM max value before normalization: {_max}")
-                xai_layercam_assembled_wsi /= _max
-                np.power(xai_layercam_assembled_wsi, 1./3., out=xai_layercam_assembled_wsi)   # normalize between 0 and 1
-                xai_layercam_assembled_wsi *= 255.0
+                xai_layercam_assembled_wsi = normalize_highlight_heatmap(xai_layercam_assembled_wsi)
+                xai_layercam_assembled_wsi.flush()
                 _slide_pbar.write(f"Saved Layer-CAM to {OUT_FILE_PATH_XAI_LAYERCAM} with shape {xai_layercam_assembled_wsi.shape}")
         if not artifact_exists(
             client=mlflow_client,   
@@ -449,11 +442,8 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
                     },
                     output_array=xai_gradcamraw_assembled_wsi
                 )
-                _max = np.max(xai_gradcamraw_assembled_wsi)
-                logger.debug(f"Raw Grad-CAM max value before normalization: {_max}")
-                xai_gradcamraw_assembled_wsi /= _max
-                np.power(xai_gradcamraw_assembled_wsi, 1./3., out=xai_gradcamraw_assembled_wsi)
-                xai_gradcamraw_assembled_wsi *= 255.0
+                xai_gradcamraw_assembled_wsi = normalize_highlight_heatmap(xai_gradcamraw_assembled_wsi)
+                xai_gradcamraw_assembled_wsi.flush()
                 _slide_pbar.write(f"Saved Raw Grad-CAM to {OUT_FILE_PATH_XAI_GRADCAMRAW} with shape {xai_gradcamraw_assembled_wsi.shape}")
         if not artifact_exists(
             client=mlflow_client,
@@ -685,6 +675,15 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
                     cluster_idx, 
                     OUT_FILE_PATH_SINGLE_CLUSTER_OVERLAY)
         _slide_pbar.write(f"Finished processing slide {slide_name} ({i})")
+
+def normalize_highlight_heatmap(xai_layercam_assembled_wsi):
+    _max = np.max(np.abs(xai_layercam_assembled_wsi))
+    logger.debug(f"Layer-CAM max value before normalization: {_max}")
+    np.power(xai_layercam_assembled_wsi, 1./3., out=xai_layercam_assembled_wsi)   # normalize between 0 and 1
+    xai_layercam_assembled_wsi /= (_max * 2.0)
+    xai_layercam_assembled_wsi += 0.5
+    xai_layercam_assembled_wsi *= 255.0
+    return xai_layercam_assembled_wsi
 
 def parrallel_save_upload_overlay_tiff_single_cluster(WSI_LEVEL_TO_MATCH_OUTPUTS_TO, mlflow_client, mlflow_run_id, _slide_pbar, slide_metadata, slide_name, cluster_soft_assignments_memmap, level_extent_x, level_extent_y, cluster_idx, OUT_FILE_PATH_SINGLE_CLUSTER_OVERLAY):
     with safe_file_op_ctxm(OUT_FILE_PATH_SINGLE_CLUSTER_OVERLAY, unlink_on_exception=True) as single_cluster_overlay_numpy_file:
