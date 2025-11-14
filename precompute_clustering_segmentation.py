@@ -329,7 +329,7 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
             logger.debug(f"Grad-CAM has shape: {xai_gradcam_assembled_wsi.shape}")
 
         else:
-            with safe_file_op_ctxm(OUT_FILE_PATH_XAI_GRADCAM, unlink_on_exception=True, tmp_dir=TMP_DIR / "xai-gradcam") as xai_gradcam_numpy_file:
+            with safe_file_op_ctxm(OUT_FILE_PATH_XAI_GRADCAM, unlink_on_exception=True) as xai_gradcam_numpy_file:
                 logger.debug(f"DEBUG: Shape of activations: {activations_assembled_wsi.shape}, Shape of gradients: {gradients_assembled_wsi.shape}")
                 xai_gradcam_assembled_wsi = open_memmap(
                     xai_gradcam_numpy_file,
@@ -382,7 +382,7 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
             _slide_pbar.write(f"Layer-CAM has shape: {xai_layercam_assembled_wsi.shape}")
         else:
             _slide_pbar.write(f"Computing Layer-CAM for slide {slide_name}...")
-            with safe_file_op_ctxm(OUT_FILE_PATH_XAI_LAYERCAM, unlink_on_exception=True, tmp_dir=TMP_DIR / "xai-layercam") as xai_layercam_numpy_file:
+            with safe_file_op_ctxm(OUT_FILE_PATH_XAI_LAYERCAM, unlink_on_exception=True) as xai_layercam_numpy_file:
                 xai_layercam_assembled_wsi = open_memmap(
                     xai_layercam_numpy_file,
                     mode='w+',
@@ -432,7 +432,7 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
             xai_gradcamraw_assembled_wsi = np.load(OUT_FILE_PATH_XAI_GRADCAMRAW, mmap_mode='r')
             _slide_pbar.write(f"Raw Grad-CAM has shape: {xai_gradcamraw_assembled_wsi.shape}")
         else:
-            with safe_file_op_ctxm(OUT_FILE_PATH_XAI_GRADCAMRAW, unlink_on_exception=True, tmp_dir=TMP_DIR / "xai-gradcamraw") as xai_gradcamraw_numpy_file:
+            with safe_file_op_ctxm(OUT_FILE_PATH_XAI_GRADCAMRAW, unlink_on_exception=True) as xai_gradcamraw_numpy_file:
                 xai_gradcamraw_assembled_wsi = open_memmap(
                     xai_gradcamraw_numpy_file,
                     mode='w+',
