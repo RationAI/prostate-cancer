@@ -39,9 +39,9 @@ logger = logging.getLogger(__name__)
 
 def tile_operation_to_wsi(operation, tile_size: int, inputs: dict, output_array: np.memmap):
     HEIGHT, WIDTH = output_array.shape
-    for y_start in tqdm(range(0, HEIGHT, tile_size), desc="Grad-CAM++ Y Tiles"):
+    for y_start in tqdm(range(0, HEIGHT, tile_size), desc="Tiled operation Y Tiles"):
         y_end = min(y_start + tile_size, HEIGHT)
-        for x_start in tqdm(range(0, WIDTH, tile_size), desc="Grad-CAM++ X Tiles", leave=False):
+        for x_start in tqdm(range(0, WIDTH, tile_size), desc="Tiled operation X Tiles", leave=False):
             x_end = min(x_start + tile_size, WIDTH)
             tile_inputs = {k: v[:, y_start:y_end, x_start:x_end] for k, v in inputs.items()}
             output_array[y_start:y_end, x_start:x_end] = operation(**tile_inputs)
