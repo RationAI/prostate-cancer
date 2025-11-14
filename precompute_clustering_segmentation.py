@@ -692,7 +692,7 @@ def normalize_highlight_heatmap(xai_layercam_assembled_wsi):
     logger.debug(f"Heatmap min/max before normalization: {xai_layercam_assembled_wsi.min()}/{xai_layercam_assembled_wsi.max()}")
     xai_layercam_assembled_wsi /= (_max * 2.0)
     xai_layercam_assembled_wsi += 0.5
-    xai_layercam_assembled_wsi = np.clip(xai_layercam_assembled_wsi, 0.0, 1.0)
+    np.clip(xai_layercam_assembled_wsi, 0.0, 1.0, out=xai_layercam_assembled_wsi)
     logger.debug(f"Heatmap min/max after normalization: {xai_layercam_assembled_wsi.min()}/{xai_layercam_assembled_wsi.max()}")
     xai_layercam_assembled_wsi *= 255.0
     return xai_layercam_assembled_wsi
