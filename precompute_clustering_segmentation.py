@@ -176,7 +176,7 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
        
         slide_path = slide_metadata.path.replace("/mnt/data/Projects/prostate_cancer/cancer/test_data/", "/mnt/data/MOU/prostate/tile_level_annotations_test/")  # TODO: fix hardcoding
         slide_name = Path(slide_path).stem
-
+        logger.info(f"Slides to process: {slide_id_to_process if slide_id_to_process is not None else 'All slides'}")
         if slide_id_to_process is not None:
             for sid in slide_id_to_process:
                 if sid not in slide_name:
