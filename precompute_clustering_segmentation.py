@@ -322,7 +322,7 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
 
         # =====================================================================
         # Create XAI masks from activations and gradients
-        OUT_FILE_PATH_XAI_GRADCAM = PRECOMPUTED_DATA_DIR / "xai-gradcam" / f"{slide_name}.npy"
+        OUT_FILE_PATH_XAI_GRADCAM = TMP_DIR / "xai-gradcam" / f"{slide_name}.npy"
         OUT_FILE_PATH_XAI_GRADCAM_TIFF = TMP_DIR / "xai-gradcam" / f"{slide_name}.tiff"
         if OUT_FILE_PATH_XAI_GRADCAM.exists():
             _slide_pbar.write(f"Grad-CAM for slide {slide_name} exist, skipping.")
