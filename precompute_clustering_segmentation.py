@@ -375,8 +375,6 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
         )
         _slide_pbar.write(f"Ensured Grad-CAM TIFF is uploaded to MLflow.")
     
-        # skip rest of the pipeline for now
-        continue
         
         # OUT_FILE_PATH_XAI_LAYERCAM = PRECOMPUTED_DATA_DIR / "xai-layercam" / f"{slide_name}.npy"
         # OUT_FILE_PATH_XAI_LAYERCAM_TIFF = TMP_DIR / "xai-layercam" / f"{slide_name}.tiff"
@@ -685,6 +683,9 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm: str
                     cluster_idx, 
                     OUT_FILE_PATH_SINGLE_CLUSTER_OVERLAY)
         _slide_pbar.write(f"Finished processing slide {slide_name} ({i})")
+
+    # finish the mlflow run
+    mlflow_client.set_terminated(mlflow_run_id)
 
 def normalize_highlight_heatmap(xai_layercam_assembled_wsi):
     np.power(xai_layercam_assembled_wsi, 1./3., out=xai_layercam_assembled_wsi)   # normalize between 0 and 1
