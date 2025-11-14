@@ -1,5 +1,6 @@
 import torch
 from jaxtyping import Float
+import numpy as np
 
 
 # class GradCAMBatchHook(AbstractCAMHook):
@@ -34,4 +35,22 @@ def grad_cam(
     weights = gradients.mean(dim=(2, 3), keepdim=True)  # [B,C,1,1]
     cams = (weights * activations).sum(dim=1)  # [B,H,W]
     cams = torch.relu(cams)
+    return cams
+
+
+def grad_cam_numpy(
+    activations: Float[np.ndarray, "C H W"],
+    gradients: Float[np.ndarray, "C H W"],
+) -> Float[np.ndarray, "H W"]:
+    """Compute Grad-CAM maps given activations and gradients (numpy version).
+
+    Args:
+        activations: Activation maps from the target layer, shape [C, H, W].
+        gradients: Gradients w.r.t. the activations, shape [C, H, W].
+    Returns:
+        cams: Grad-CAM maps, shape [H, W].
+    """
+    weights = gradients.mean(axis=(1, 2))  # [C]
+    cams = (weights[:, np.newaxis, np.newaxis] * activations).sum(axis=0)  # [H, W]
+    cams = np.maximum(cams, 0)
     return cams
