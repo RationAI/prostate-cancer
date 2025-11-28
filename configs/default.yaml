@@ -17,7 +17,6 @@ thresholds:
 
   carcinoma_roi_t: 0.5
 
-
 metadata:
   experiment_name: Prostate
   run_name: ???

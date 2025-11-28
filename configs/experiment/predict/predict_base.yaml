@@ -1,6 +1,6 @@
 # @package _global_
 defaults:
-  - /aggregator/mean_pool_max@aggregator
+  - /aggregator/max@aggregator
   - _self_
 
 checkpoint: ???
