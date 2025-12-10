@@ -312,8 +312,11 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm_name
                     if not _bool_grads_exists:
                         logger.debug("Computing gradients.")
                         loss = loss_fn(outputs_, labels.to("cuda:0").float())
+                        logging.debug("Loss computed.")
                         loss.backward()
+                        logging.debug("Backward pass completed.")
                         G = hooked_model.get_gradients(target_layer)
+                        logging.debug("Gradients obtained from hooked model.")
                         # gradient_assembler.update_batch_torch(G.cpu().numpy(), X.cpu().numpy(), Y.cpu().numpy())
                         gradient_assembler.update_batch(data_batch=G.cpu().numpy(), coords_batch=(Y.cpu().numpy(), X.cpu().numpy()))
                         logger.debug("Gradients updated in assembler.")
