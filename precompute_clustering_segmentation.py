@@ -199,7 +199,7 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm_name
             _shall_be_processed = False
             for sid in slide_id_to_process:
                 if sid in slide_name:
-                    logger.info(f"Skipping slide {slide_name} as it does not match the specified slide IDs to process.")
+                    logger.info(f"Processing slide {slide_name} as it matches {sid}.")
                     _shall_be_processed = True
                     break
         if not _shall_be_processed:
