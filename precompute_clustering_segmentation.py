@@ -304,20 +304,26 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm_name
                     # print(metadata)  # slide, x, y
                     X = (metadata['x'] * slide_to_heatmap_ratio_x).to(torch.int64)
                     Y = (metadata['y'] * slide_to_heatmap_ratio_y).to(torch.int64)
-                    
+                    logger.debug(f"Computed heatmap coordinates X and Y with shapes {X.shape}, {Y.shape}")
                     inputs = inputs.to("cuda:0")
+                    logger.debug("Inputs moved to CUDA.")
                     outputs_ = hooked_model(inputs)
+                    logger.debug("Forward pass completed.")
                     if not _bool_grads_exists:
+                        logger.debug("Computing gradients.")
                         loss = loss_fn(outputs_, labels.to("cuda:0").float())
                         loss.backward()
                         G = hooked_model.get_gradients(target_layer)
                         # gradient_assembler.update_batch_torch(G.cpu().numpy(), X.cpu().numpy(), Y.cpu().numpy())
                         gradient_assembler.update_batch(data_batch=G.cpu().numpy(), coords_batch=(Y.cpu().numpy(), X.cpu().numpy()))
+                        logger.debug("Gradients updated in assembler.")
                         del G, loss
                     if not _bool_acts_exists:
+                        logger.debug("Collecting activations.")
                         A = hooked_model.get_activations(target_layer)
                         # heatmap_assembler.update_batch_torch(A.cpu().numpy(), X.cpu().numpy(), Y.cpu().numpy())
                         heatmap_assembler.update_batch(data_batch=A.cpu().numpy(), coords_batch=(Y.cpu().numpy(), X.cpu().numpy()))
+                        logger.debug("Activations updated in assembler.")
                         del A
                     del inputs, outputs_
 
