@@ -312,12 +312,12 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm_name
                         loss.backward()
                         G = hooked_model.get_gradients(target_layer)
                         # gradient_assembler.update_batch_torch(G.cpu().numpy(), X.cpu().numpy(), Y.cpu().numpy())
-                        gradient_assembler.update_batch(data_batch=G.cpu(), coords_batch=(Y.cpu().numpy(), X.cpu().numpy()))
+                        gradient_assembler.update_batch(data_batch=G.cpu().numpy(), coords_batch=(Y.cpu().numpy(), X.cpu().numpy()))
                         del G, loss
                     if not _bool_acts_exists:
                         A = hooked_model.get_activations(target_layer)
                         # heatmap_assembler.update_batch_torch(A.cpu().numpy(), X.cpu().numpy(), Y.cpu().numpy())
-                        heatmap_assembler.update_batch(data_batch=A.cpu(), coords_batch=(Y.cpu().numpy(), X.cpu().numpy()))
+                        heatmap_assembler.update_batch(data_batch=A.cpu().numpy(), coords_batch=(Y.cpu().numpy(), X.cpu().numpy()))
                         del A
                     del inputs, outputs_
 
