@@ -31,7 +31,7 @@ from prostate_cancer.prostate_cancer_model import ProstateCancerModel
 from rationai.explainability.embedding_decomposition.clustering import ClusteringManager
 from rationai.masks.mask_builders import AveragingClippingNumpyMemMapMaskBuilder 
 from rationai.explainability.precomputing import safe_file_op_ctxm
-from explainability.clustering.tensor_shaping import reshape_for_clustering_universal
+from rationai.explainability.embedding_decomposition.clustering import reshape_for_clustering_universal
 from rationai.explainability.visualizations.clusters import get_overlay_from_clustering_numpy, plot_cluster_distance_matrix
 from rationai.explainability.visualizations.image_transforms import save_image_xopat_compatible
 from rationai.explainability.visualizations.color_palettes import COLOR_PALETTE_ADAM, ColorPalette
@@ -498,7 +498,7 @@ def main(num_clusters: int, experiment_directory: str, clustering_algorithm_name
             _slide_pbar.write(f"Embeddings have shape: {embeddings.shape}")
         else:
             overlaps_nzi = activations_assembled_wsi_overlaps > 0
-            embeddings = reshape_for_clustering_universal(activations_assembled_wsi[:, overlaps_nzi], channel_dim_index=0)
+            embeddings = reshape_for_clustering_universal(embeddings=activations_assembled_wsi[:, overlaps_nzi], channel_dim_index=0)
             _slide_pbar.write(f"Clustering-reshaped embeddings shape: {embeddings.shape}")
             with safe_file_op_ctxm(OUT_FILE_PATH_EMBEDDINGS, unlink_on_exception=True) as emb_numpy_file:
                 np.save(emb_numpy_file, embeddings)
