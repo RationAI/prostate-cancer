@@ -7,7 +7,7 @@ from numpy import memmap
 import numpy as np
 from tqdm.auto import tqdm
 
-from explainability.precomputing import append_data_to_a_memmap_npy_file, safe_file_op_ctxm
+from rationai.explainability.precomputing import append_data_to_a_memmap_npy_file, safe_file_op_ctxm
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
