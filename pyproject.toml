@@ -22,7 +22,7 @@ dependencies = [
     "rationai-masks @ git+https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/masks.git",
     "rationai-mlkit @ git+https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/mlkit.git",
     "rationai-tiling @ git+https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/tiling.git",
-    "rationai-staining @ git+https://@gitlab.ics.muni.cz/rationai/digital-pathology/libraries/staining.git@4b0bd3c20f83259deca85f03746c6f8a3f6ce1a8",
+    "rationai-staining @ git+https://@gitlab.ics.muni.cz/rationai/digital-pathology/libraries/staining.git",
     "numpy==2.2.5",
     "timm==1.0.15",
     "matplotlib==3.10.1",

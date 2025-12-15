@@ -1,4 +1,5 @@
 from prostate_cancer.callbacks.aggregator_callback import AggregatorCallback
+from prostate_cancer.callbacks.cam_callback import CAMExplainer
 from prostate_cancer.callbacks.curves_callback import CurvesCallback
 from prostate_cancer.callbacks.heatmap_callback import HeatmapCallback
 from prostate_cancer.callbacks.kernel_estimation_callback import (
@@ -11,6 +12,7 @@ from prostate_cancer.callbacks.tile_histograms_callback import TileHistogramsCal
 
 __all__ = [
     "AggregatorCallback",
+    "CAMExplainer",
     "CurvesCallback",
     "HeatmapCallback",
     "KernelEstimationCallback",

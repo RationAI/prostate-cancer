@@ -1,0 +1,11 @@
+# @package _global_
+
+defaults:
+  - /experiment/test/images/cam/vgg16_cam_base
+  - _self_
+
+data_name: "MMCI TL Test"
+
+data:
+  test:
+    uris: ["mlflow-artifacts:/65/c47cd842fbf14bf399cd4aca43af3127/artifacts/MMCI TL Test 512"]

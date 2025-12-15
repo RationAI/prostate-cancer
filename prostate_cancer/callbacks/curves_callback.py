@@ -5,9 +5,9 @@ import numpy as np
 import torch
 from lightning import Callback, LightningModule, Trainer
 from numpy.typing import NDArray
-from postprocessing.slide_roc import _plot_curve
 from sklearn.metrics import auc, precision_recall_curve, roc_curve
 
+from postprocessing.slide_curves import _plot_curve
 from prostate_cancer.typing import LabeledSampleBatch
 
 
