@@ -1,13 +1,14 @@
 import os
 from pathlib import Path
+
+import git
 from mlflow.tracking import MlflowClient
 from mlflow.utils.mlflow_tags import (
-    MLFLOW_USER,
-    MLFLOW_SOURCE_NAME,
     MLFLOW_GIT_COMMIT,
     MLFLOW_GIT_REPO_URL,
+    MLFLOW_SOURCE_NAME,
+    MLFLOW_USER,
 )
-import git
 
 
 def ensure_mlflow_run(experiment_name: str, run_id: str | None = None):

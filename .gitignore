@@ -194,3 +194,9 @@ lightning_logs/
 /data
 
 evaluations/
+explainability/outputs
+output_subdir
+report_out
+
+# numpy files
+*.npy
