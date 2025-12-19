@@ -1,0 +1,18 @@
+# @package _global_
+defaults:
+  - base
+  - _self_
+
+
+# dataframe with column "path" containing selected slide paths and optionally "label" containing slide label
+mpp: 0.46
+tile_extent: 512
+stride: 256
+qc_masks_uri: ???
+tissue_masks_uri: ???
+annotation_masks_uri: ???
+
+
+metadata:
+  run_name: Tiling ${data_name}
+  description: Tiling ${data_name}

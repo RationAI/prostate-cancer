@@ -1,0 +1,10 @@
+# @package _global_
+defaults:
+  - base
+  - _self_
+
+kernel_sizes: ???
+
+metadata:
+  run_name: ${model_name} Kernel Est. ${data_name}
+  description: ${model_name} Kernel Est. ${data_name}

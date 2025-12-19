@@ -6,9 +6,10 @@ from typing import cast
 from xml.etree import ElementTree as ET
 
 import hydra
+import mlflow
+import pandas as pd
 import pyvips
 import ray
-from lightning.pytorch.loggers import Logger
 from omegaconf import DictConfig
 from openslide import OpenSlide
 from PIL.ImageDraw import _Ink
@@ -17,7 +18,6 @@ from rationai.masks.annotations import XMLPolygonMask
 from rationai.masks.processing import process_items
 from rationai.mlkit import autolog
 from rationai.mlkit.lightning.loggers import MLFlowLogger
-from ray._private.worker import RemoteFunction0
 
 
 class AnnotationMask(XMLPolygonMask):
@@ -63,6 +63,7 @@ class AnnotationMask(XMLPolygonMask):
         return self._annotation_mpp_y
 
 
+@ray.remote
 def process_slide(slide_path: Path, level: int, output_path: Path) -> None:
     ground_truth: str | int = slide_path.stem[-1]
     assert ground_truth in ("0", "1"), (
@@ -114,50 +115,32 @@ def process_slide(slide_path: Path, level: int, output_path: Path) -> None:
         )
 
 
-def make_remote_process_slide(
-    level: int, output_path: Path
-) -> RemoteFunction0[None, Path]:
-    @ray.remote
-    def remote_process_slide(slide_path: Path) -> None:
-        try:
-            process_slide(slide_path, level, output_path)
-        except Exception as e:
-            print(f"Error processing slide {slide_path}: {e}")
-
-    return remote_process_slide
-
-
-@hydra.main(config_path="../../configs", config_name="preprocessing", version_base=None)
+@hydra.main(
+    config_path="../../configs",
+    config_name="preprocessing/annot_masks",
+    version_base=None,
+)
 @autolog
-def main(config: DictConfig, logger: Logger | None = None) -> None:
+def main(config: DictConfig, logger: MLFlowLogger) -> None:
     assert logger is not None, "Need logger"
-    logger = cast("MLFlowLogger", logger)
 
-    level = config.annotation_masks.level
-    output_path = Path(config.annotation_masks.output_path)
+    output_path = Path(config.output_path)
     output_path.mkdir(exist_ok=True, parents=True)
 
-    remote_process_slide = make_remote_process_slide(level, output_path)
-
-    slides_path = Path(config.data_path).rglob("*.mrxs")
-    test_slides_path = Path(config.test_data_path).rglob("*.mrxs")
+    df = pd.read_csv(mlflow.artifacts.download_artifacts(config.slides_df_uri))
+    slides_path = [Path(path) for path in df["slide_path"]]
 
     process_items(
         slides_path,
-        process_item=remote_process_slide,
-        max_concurrent=config.annotation_masks.max_concurrent,
-    )
-    process_items(
-        test_slides_path,
-        process_item=remote_process_slide,
-        max_concurrent=config.annotation_masks.max_concurrent,
+        process_item=process_slide,
+        fn_kwargs={
+            "level": config.level,
+            "output_path": output_path,
+        },
+        max_concurrent=config.max_concurrent,
     )
 
-    logger.experiment.log_artifacts(
-        run_id=logger.run_id,
-        local_dir=str(output_path),
-        artifact_path="annotation_masks",
-    )
+    logger.log_artifacts(local_dir=str(output_path), artifact_path="annotation_masks")
 
 
 if __name__ == "__main__":

@@ -1,7 +1,4 @@
-defaults:
-  - /data/datasets/dataset_base@thresholds
-
 _target_: prostate_cancer.data.datasets.UnlabeledEmbeddingsDataset
-uris:
-  - ${predict_224_tiles_uri}
-embeddings_uri: ${predict_224_features_uri}
+uris: ???
+thresholds: ${thresholds}
+embeddings_uri: ???
