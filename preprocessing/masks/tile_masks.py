@@ -1,7 +1,7 @@
 """Script for creating outlines of the tiles and also masks based on tiling percentages."""
 
 from pathlib import Path
-from typing import Any, cast
+from typing import Any
 
 import hydra
 import mlflow
@@ -10,13 +10,11 @@ import pandas as pd
 import pyvips
 import ray
 import torch
-from lightning.pytorch.loggers import Logger
 from omegaconf import DictConfig
 from rationai.masks import process_items, tile_mask, write_big_tiff
 from rationai.masks.mask_builders import ScalarMaskBuilder
 from rationai.mlkit import autolog
 from rationai.mlkit.lightning.loggers import MLFlowLogger
-from ray._private.worker import RemoteFunction0
 
 
 # This is used to create a filtered carcinoma mask for carcinoma threshold estimate by the pathologist
@@ -24,6 +22,7 @@ def filter_by_tissue(tiles: pd.DataFrame, threshold: float) -> pd.DataFrame:
     return tiles[tiles["tissue_roi_percentage"] > threshold]
 
 
+@ray.remote
 def process_slide(
     slide: Any,
     percentage_cols: list[str],
@@ -86,62 +85,41 @@ def process_slide(
     # ---
 
 
-def make_remote_process_slide(
-    percentage_cols: list[str],
-    output_path: Path,
-    tissue_threshold: float,
-    tiles_ref: Any,
-) -> RemoteFunction0[None, Path]:
-    @ray.remote
-    def remote_process_slide(slide_meta: Any) -> None:
-        try:
-            process_slide(
-                slide_meta, percentage_cols, output_path, tissue_threshold, tiles_ref
-            )
-        except Exception as e:
-            print(f"Error processing slide {slide_meta}: {e}")
-
-    return remote_process_slide
-
-
-@hydra.main(config_path="../../configs", config_name="preprocessing", version_base=None)
+@hydra.main(
+    config_path="../../configs",
+    config_name="preprocessing/tile_masks",
+    version_base=None,
+)
 @autolog
-def main(config: DictConfig, logger: Logger | None = None) -> None:
-    assert logger is not None, "Need logger"
-    logger = cast("MLFlowLogger", logger)
-
-    paths = [
-        mlflow.artifacts.download_artifacts(uri) for uri in config.tile_masks.tile_uris
-    ]
+def main(config: DictConfig, logger: MLFlowLogger) -> None:
+    paths = [mlflow.artifacts.download_artifacts(uri) for uri in config.tile_uris]
     slides = pd.read_parquet([Path(path) / "slides.parquet" for path in paths])
     tiles = pd.read_parquet([Path(path) / "tiles.parquet" for path in paths])
     tiles_ref = ray.put(tiles)
 
-    output_path = Path(config.tile_masks.output_path)
+    output_path = Path(config.output_path)
 
     # Create subdirs for each tile mask type
     for percentage_col in [
-        *config.tile_masks.percentage_cols,
+        *config.percentage_cols,
         "outlines",
         "carcinoma_filtered",
     ]:
         (output_path / percentage_col).mkdir(parents=True, exist_ok=True)
 
-    remote_process_slide = make_remote_process_slide(
-        config.tile_masks.percentage_cols,
-        output_path,
-        config.tile_masks.tissue_threshold,
-        tiles_ref,
-    )
     process_items(
         slides.itertuples(),
-        remote_process_slide,
-        max_concurrent=config.tile_masks.max_concurrent,
+        process_slide,
+        fn_kwargs={
+            "percentage_cols": config.percentage_cols,
+            "output_path": output_path,
+            "tissue_threshold": config.thresholds.tissue_threshold,
+            "tiles_ref": tiles_ref,
+        },
+        max_concurrent=config.max_concurrent,
     )
 
-    logger.experiment.log_artifacts(
-        run_id=logger.run_id, local_dir=str(output_path), artifact_path="tile_masks"
-    )
+    logger.log_artifacts(local_dir=str(output_path), artifact_path="tile_masks")
 
 
 if __name__ == "__main__":

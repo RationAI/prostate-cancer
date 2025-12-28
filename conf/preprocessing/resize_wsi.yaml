@@ -1,0 +1,12 @@
+# @package _global_
+defaults:
+  - base
+  - _self_
+
+output_path: ${prostate_cancer_artifacts}/${data_name}_rescaled/${desired_mpp}
+desired_mpp: 0.5
+max_concurrent: 5
+
+metadata:
+  run_name: WSI resize ${data_name}
+  description: WSI resize ${data_name}

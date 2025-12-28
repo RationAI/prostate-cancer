@@ -1,0 +1,12 @@
+# @package _global_
+
+defaults:
+  - /default
+  - _self_
+
+annot_table_path: "${prostate_data}/slide_level_annotations/Prostaty2023-tabulka-final-corrections.xlsx"
+data_dir: "${prostate_data}/slide_level_annotations"
+
+metadata:
+  run_name: MMCI 2k data
+  description: MMCI 2k data

@@ -1,0 +1,19 @@
+# @package _global_
+
+defaults:
+  - /experiment/test/images/vgg16_stain
+  - _self_
+
+tile_threshold: 0 # not used
+
+trainer:
+  callbacks:
+    - _target_: prostate_cancer.callbacks.CAMExplainer
+      resize_shape: [512, 512]
+data:
+  test:
+    stratified_filter: false # use also negative tiles in positive slides
+
+metadata:
+  run_name: CAM VGG-16 Stain ${data_name}
+  description: CAM VGG-16 Stain on MMCI Tile-Level Annotated Data ${data_name}

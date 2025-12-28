@@ -1,18 +1,16 @@
-import json
 from pathlib import Path
-from typing import cast
 
 import hydra
 import matplotlib.pyplot as plt
-import mlflow
 import numpy as np
 import pandas as pd
-from lightning.pytorch.loggers import Logger
 from numpy.typing import NDArray
 from omegaconf import DictConfig
 from rationai.mlkit import autolog
 from rationai.mlkit.lightning.loggers import MLFlowLogger
 from sklearn.metrics import auc, precision_recall_curve, roc_curve
+
+from postprocessing.read_table import read_json_table
 
 
 def _plot_curve(
@@ -52,8 +50,8 @@ def _plot_curve(
     plt.close()
 
 
-def perform_roc(table: pd.DataFrame) -> tuple[str, np.float32]:
-    fpr, tpr, thresholds = roc_curve(table["target"], table["prediction"])
+def perform_roc(table: pd.DataFrame, pred_column: str) -> tuple[str, np.float32]:
+    fpr, tpr, thresholds = roc_curve(table["target"], table[pred_column])
 
     roc_auc = auc(fpr, tpr)
     idx = np.where(tpr == 1)[0]
@@ -79,9 +77,9 @@ def perform_roc(table: pd.DataFrame) -> tuple[str, np.float32]:
     return plot_path, best_threshold
 
 
-def perform_pr(table: pd.DataFrame) -> tuple[str, np.float32]:
+def perform_pr(table: pd.DataFrame, pred_column: str) -> tuple[str, np.float32]:
     precision, recall, thresholds = precision_recall_curve(
-        table["target"], table["prediction"]
+        table["target"], table[pred_column]
     )
 
     # threshold maximizing F1 score
@@ -111,34 +109,19 @@ def perform_pr(table: pd.DataFrame) -> tuple[str, np.float32]:
     return plot_path, best_threshold
 
 
-@hydra.main(config_path="../configs", config_name="postprocessing", version_base=None)
+@hydra.main(
+    config_path="../configs",
+    config_name="postprocessing/slide_level_curves",
+    version_base=None,
+)
 @autolog
-def main(config: DictConfig, logger: Logger | None = None) -> None:
-    assert logger is not None, "Need logger"
-    logger = cast("MLFlowLogger", logger)
-
-    table_path = mlflow.artifacts.download_artifacts(config.preds_uri)
-    with open(table_path) as file:
-        json_data = json.load(file)
-
-    df = pd.DataFrame(json_data["data"], columns=json_data["columns"])
-    roc_path, roc_t = perform_roc(df)
-
-    logger.experiment.log_artifact(
-        run_id=logger.run_id,
-        local_path=roc_path,
-        artifact_path="plots",
-    )
-    logger.experiment.log_param(logger.run_id, "roc_threshold", roc_t)
-
-    pr_path, pr_t = perform_pr(df)
-
-    logger.experiment.log_artifact(
-        run_id=logger.run_id,
-        local_path=pr_path,
-        artifact_path="plots",
-    )
-    logger.experiment.log_param(logger.run_id, "pr_threshold", pr_t)
+def main(config: DictConfig, logger: MLFlowLogger) -> None:
+    df = read_json_table(config.preds_uri)
+    roc_path, roc_t = perform_roc(df, config.pred_column)
+    pr_path, pr_t = perform_pr(df, config.pred_column)
+    logger.log_artifact(local_path=roc_path, artifact_path="plots")
+    logger.log_artifact(local_path=pr_path, artifact_path="plots")
+    logger.log_hyperparams({"roc_threshold": roc_t, "pr_threshold": pr_t})
 
     for plt_path in [roc_path, pr_path]:
         Path(plt_path).unlink()

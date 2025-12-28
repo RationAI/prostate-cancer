@@ -2,13 +2,8 @@
 
 tile_threshold: ???
 
-trainer:
-  callbacks:
-    - _target_: prostate_cancer.callbacks.CurvesCallback
-      threshold: ${tile_threshold}
-
 data:
-  batch_size: 74 # Fits into A40 GPU
+  batch_size: 64
   num_workers: 8
 
 model:
@@ -21,4 +16,4 @@ metadata:
   hyperparams:
     batch_size: ${data.batch_size}
     num_workers: ${data.num_workers}
-    carcinoma_t: ${carcinoma_roi_t}
+    carcinoma_t: ${thresholds.carcinoma_roi_t}

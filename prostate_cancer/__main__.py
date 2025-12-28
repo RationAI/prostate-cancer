@@ -4,7 +4,6 @@ from random import randint
 import hydra
 import torch
 from lightning import seed_everything
-from lightning.pytorch.loggers import Logger
 from omegaconf import DictConfig, OmegaConf
 from rationai.mlkit import Trainer, autolog
 from rationai.mlkit.lightning.loggers.mlflow import MLFlowLogger
@@ -22,9 +21,9 @@ logging.basicConfig(
 )
 
 
-@hydra.main(config_path="../configs", config_name="default", version_base=None)
+@hydra.main(config_path="../configs", config_name="prostate_cancer", version_base=None)
 @autolog
-def main(config: DictConfig, logger: Logger | None) -> None:
+def main(config: DictConfig, logger: MLFlowLogger) -> None:
     seed_everything(config.seed, workers=True)
 
     torch.set_float32_matmul_precision(precision="medium")
