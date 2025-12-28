@@ -21,7 +21,7 @@ logging.basicConfig(
 )
 
 
-@hydra.main(config_path="../configs", config_name="prostate_cancer", version_base=None)
+@hydra.main(config_path="../conf", config_name="prostate_cancer", version_base=None)
 @autolog
 def main(config: DictConfig, logger: MLFlowLogger) -> None:
     seed_everything(config.seed, workers=True)
