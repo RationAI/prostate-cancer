@@ -1,0 +1,136 @@
+logger:
+  _target_: rationai.mlkit.lightning.loggers.MLFlowLogger
+  experiment_name: ${metadata.experiment_name}
+  run_name: ${metadata.run_name}
+  tags:
+    mlflow.note.content: ${metadata.description}
+prostate_cancer_artifacts: /mnt/projects/prostate_cancer/cancer
+prostate_data: /mnt/data/MOU/prostate
+thresholds:
+  tissue_roi_t: 0.5
+  exclude_t: 0.0
+  another_pathology_t: 0.0
+  residual_t: 0.25
+  blur_t: 0.25
+  folding_t: 0.25
+  carcinoma_roi_t: 0.5
+metadata:
+  experiment_name: Prostate
+  run_name: CAM VGG-16 Stain ${data_name}
+  description: CAM VGG-16 Stain on MMCI Tile-Level Annotated Data ${data_name}
+  hyperparams:
+    batch_size: ${data.batch_size}
+    num_workers: ${data.num_workers}
+    carcinoma_t: ${thresholds.carcinoma_roi_t}
+tile_threshold: 0
+data:
+  batch_size: 64
+  num_workers: 8
+  train:
+    transforms:
+      _target_: albumentations.Compose
+      transforms:
+      - _target_: albumentations.RandomRotate90
+        p: 1.0
+      - _target_: albumentations.HorizontalFlip
+        p: 0.5
+      - _target_: albumentations.VerticalFlip
+        p: 0.5
+      - _target_: albumentations.RandomGamma
+        p: 0.5
+      - _target_: albumentations.RandomBrightnessContrast
+        p: 0.5
+      - _target_: albumentations.HueSaturationValue
+        p: 0.5
+      - _target_: rationai.staining.transforms.ColorTransform
+        conversion:
+          _target_: hydra.utils.get_object
+          path: rationai.staining.ColorConversion.RGB2HER_MMCI_PROSTATE
+      - _target_: albumentations.MultiplicativeNoise
+        multiplier:
+        - 0.5
+        - 1.5
+        per_channel: true
+        elementwise: false
+      - _target_: albumentations.AdditiveNoise
+        noise_type: uniform
+        noise_params:
+          ranges:
+          - - -0.005
+            - 0.005
+      - _target_: rationai.staining.transforms.ColorTransform
+        conversion:
+          _target_: hydra.utils.get_object
+          path: rationai.staining.ColorConversion.HER_MMCI_PROSTATE2RGB
+      - _target_: albumentations.Normalize
+        mean: ${mean}
+        std: ${std}
+        max_pixel_value: 1
+    _target_: prostate_cancer.data.datasets.LabeledTilesDataset
+    uris:
+    - mlflow-artifacts:/65/0157ba4a0db349b8b86e4a24592d9230/artifacts/Prostate - train
+    thresholds: ${thresholds}
+    stratified_filter: true
+    carcinoma_roi_t: ${thresholds.carcinoma_roi_t}
+  val:
+    transforms:
+      _target_: albumentations.Normalize
+      mean: ${mean}
+      std: ${std}
+      max_pixel_value: 1
+    _target_: prostate_cancer.data.datasets.LabeledTilesDataset
+    uris:
+    - mlflow-artifacts:/65/0157ba4a0db349b8b86e4a24592d9230/artifacts/Prostate - val
+    thresholds: ${thresholds}
+    stratified_filter: true
+    carcinoma_roi_t: ${thresholds.carcinoma_roi_t}
+  test:
+    transforms:
+      _target_: albumentations.Normalize
+      mean: ${mean}
+      std: ${std}
+      max_pixel_value: 1
+    _target_: prostate_cancer.data.datasets.LabeledTilesDataset
+    uris:
+    - mlflow-artifacts:/65/c47cd842fbf14bf399cd4aca43af3127/artifacts/MMCI TL Test
+      512
+    thresholds: ${thresholds}
+    stratified_filter: false
+    carcinoma_roi_t: ${thresholds.carcinoma_roi_t}
+  predict:
+    transforms:
+      _target_: albumentations.Normalize
+      mean: ${mean}
+      std: ${std}
+      max_pixel_value: 1
+    _target_: prostate_cancer.data.datasets.LabeledTilesDataset
+    uris: 
+    - mlflow-artifacts:/65/c47cd842fbf14bf399cd4aca43af3127/artifacts/MMCI TL Test
+      512
+    thresholds: ${thresholds}
+model:
+  lr: 0.0
+  decode_head:
+    _target_: prostate_cancer.modeling.decode_head.BinaryClassifier
+    in_features: 512
+  backbone:
+    _target_: prostate_cancer.modeling.backbone.vgg16
+  _target_: prostate_cancer.prostate_cancer_model.ProstateCancerModel
+checkpoint: mlflow-artifacts:/65/3d053bb91d4841e28afe2c93dfe0b273/artifacts/checkpoints/epoch=2-step=25564/checkpoint.ckpt
+trainer:
+  callbacks:
+  - _target_: prostate_cancer.callbacks.CAMExplainer
+    resize_shape:
+    - 512
+    - 512
+data_name: MMCI TL Test
+mean:
+- 228.5544
+- 178.8584
+- 219.8793
+std:
+- 27.8285
+- 51.4639
+- 26.4458
+seed: ${random_seed:}
+mode: predict
