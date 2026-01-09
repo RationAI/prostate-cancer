@@ -1,11 +1,11 @@
-from collections.abc import Iterable
+import os
 from pathlib import Path
-from typing import cast
+from typing import TYPE_CHECKING, cast
 
 import albumentations as A
 import hydra
-import timm
 import torch
+from huggingface_hub import login
 from omegaconf import DictConfig
 from rationai.mlkit import autolog
 from rationai.mlkit.lightning.loggers import MLFlowLogger
@@ -15,27 +15,8 @@ from tqdm import tqdm
 from prostate_cancer.data.datasets import UnlabeledTilesDataset
 
 
-def load_dataset(
-    thresholds: dict[str, float], uris: Iterable[str]
-) -> UnlabeledTilesDataset:
-    transforms = A.Compose([A.Normalize()])
-    return UnlabeledTilesDataset(
-        uris=uris,
-        thresholds=thresholds,
-        transforms=transforms,
-    )
-
-
-PGP_EMBEDDING_DIM = 1536
-
-
-def load_tile_encoder() -> torch.nn.Module:
-    """Function to fetch the tile encoder model from HuggingsFace.
-
-    Note:
-        For this, you need to setup HF_TOKEN=<X> env.variable.
-    """
-    return timm.create_model("hf_hub:prov-gigapath/prov-gigapath", pretrained=True)
+if TYPE_CHECKING:
+    from preprocessing.embeddings.encoders import FoundationModel
 
 
 def save_embeddings(
@@ -56,17 +37,29 @@ def save_embeddings(
 )
 @autolog
 def main(config: DictConfig, logger: MLFlowLogger) -> None:
+    login(token=os.environ["HF_TOKEN"])
     dest = Path(config.output_path)
-
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    tile_encoder = load_tile_encoder().to(device).eval()
+    tile_encoder: FoundationModel = hydra.utils.instantiate(config.tile_encoder)
+    tile_encoder = tile_encoder.to(device)
 
     with torch.no_grad():
-        for uri in config.uris:
-            # one-tuple is used to easily store embedding files per uri in a single directory
-            dataset = load_dataset(
-                config.thresholds,
-                (uri,),
+        if isinstance(config.uris, DictConfig):
+            uris = list(config.uris.values())
+        else:
+            uris = config.uris
+
+        for uri in uris:
+            dataset = UnlabeledTilesDataset(
+                uris=(uri,),
+                thresholds=config.thresholds,
+                transforms=A.Compose(
+                    [
+                        A.Normalize(
+                            mean=(0.485, 0.456, 0.406), std=(0.229, 0.224, 0.225)
+                        ),
+                    ]  # Both PGP and Wirchow2 use the same normalization. This is also a default for Albumentation.
+                ),
             )
 
             partition = uri.split("/")[-1]
@@ -82,7 +75,7 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
                         shuffle=False,
                     )
                     slide_embeddings = torch.zeros(
-                        (len(slide_dataset), PGP_EMBEDDING_DIM),
+                        (len(slide_dataset), tile_encoder.embed_dim),
                         device=device,
                         dtype=torch.float32,
                     )
@@ -90,7 +83,7 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
                         x = x.to(device)
                         embeddings = cast(
                             "torch.Tensor", tile_encoder(x)
-                        )  # (batch_size, PGP_EMBEDDING_DIM)
+                        )  # (batch_size, embed_dim)
 
                         start = i * config.batch_size
                         end = start + embeddings.size(0)

@@ -8,16 +8,16 @@ authors = [
     { name = "Michal Jakubík", email = "jakubik@mail.muni.cz" },
     { name = "Matej Gallo", email = "gallo.matej@mail.muni.cz" },
 ]
-requires-python = ">=3.11,<3.13"
+requires-python = ">=3.12,<3.14"
 readme = "README.md"
 license = { file = "LICENSE" }
 dependencies = [
-    "lightning==2.5.1.post0",
-    "albumentations==2.0.8",
-    "pandas==2.2.3",
-    "torch==2.7.0",
-    "torchvision==0.22.0",
-    "triton==3.3.0", 
+    "lightning==2.6.0",
+    "albumentations>=2.0.8",
+    "pandas>=2.2.3",
+    "torch>=2.9.1",
+    "torchvision>=0.22.0",
+    "triton>=3.3.0", 
     "tqdm==4.67.1",
     "rationai-masks @ git+https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/masks.git",
     "rationai-mlkit @ git+https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/mlkit.git",
@@ -31,6 +31,7 @@ dependencies = [
     "mlflow==2.21.3",
     "deprecated",
     "pillow==11.3.0",
+    "huggingface_hub",
 ]
 
 [tool.pdm.scripts]
