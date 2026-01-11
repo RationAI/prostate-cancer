@@ -22,6 +22,7 @@ dependencies = [
     "rationai-mlkit @ git+https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/mlkit.git@fix/bump-masks-version",
     "rationai-tiling @ git+https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/tiling.git@fix/bump-masks-version",
     "rationai-staining @ git+https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/staining.git",
+    "rationai-explainability",
     "numpy",
     "timm",
     "matplotlib",
@@ -29,18 +30,7 @@ dependencies = [
     "openpyxl",
     "mlflow",
     "deprecated",
-    "openslide-bin",
-    "ipykernel",
-    "jupyter",
-    "hydra-core",
-    "jaxtyping>=0.3.3",
-    "pyvips>=3.0.0",
-    "opencv-contrib-python>=4.11.0.86",
     "opencv-python>=4.11.0.86",
-    "report @ git+ssh://git@gitlab.ics.muni.cz/rationai/digital-pathology/pipeline/report.git",
-    "huggingface-hub>=1.0.1",
-    "pytest>=8.4.2",
-    "rationai-explainability",
 ]
 
 # # [tool.pdm.scripts]
