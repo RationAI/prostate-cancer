@@ -50,23 +50,31 @@ def _plot_curve(
     plt.close()
 
 
-def perform_roc(table: pd.DataFrame, pred_column: str) -> tuple[str, np.float32]:
+def perform_roc(
+    table: pd.DataFrame, pred_column: str
+) -> tuple[str, np.floating, np.floating]:
     fpr, tpr, thresholds = roc_curve(table["target"], table[pred_column])
 
     roc_auc = auc(fpr, tpr)
+
+    # TPR Threshold
     idx = np.where(tpr == 1)[0]
-    best_idx = idx[np.argmin(fpr[idx])]
-    best_threshold = thresholds[best_idx]
+    tpr_idx = idx[np.argmin(fpr[idx])]
+    tpr_threshold = thresholds[tpr_idx]
+
+    # J Threshold
+    j_scores = tpr - fpr
+    j_idx = np.argmax(j_scores)
+    j_threshold = thresholds[j_idx]
+
     plot_path = "slide_roc.png"
     _plot_curve(
         fpr,
         tpr,
         f"AUC = {roc_auc:.3f}",
-        [(fpr[best_idx], tpr[best_idx])],
-        [
-            f"TPR Threshold = {best_threshold:.2f}",
-        ],
-        ["red"],
+        [(fpr[tpr_idx], tpr[tpr_idx]), (fpr[j_idx], tpr[j_idx])],
+        [f"TPR Threshold = {tpr_threshold:.3f}", f"J Threshold = {j_threshold:.3f}"],
+        ["red", "green"],
         "False Positive Rate",
         "True Positive Rate",
         "Receiver Operating Characteristic",
@@ -74,7 +82,7 @@ def perform_roc(table: pd.DataFrame, pred_column: str) -> tuple[str, np.float32]
         "lower right",
     )
 
-    return plot_path, best_threshold
+    return plot_path, tpr_threshold, j_threshold
 
 
 def perform_pr(table: pd.DataFrame, pred_column: str) -> tuple[str, np.float32]:
@@ -96,7 +104,7 @@ def perform_pr(table: pd.DataFrame, pred_column: str) -> tuple[str, np.float32]:
             (recall[best_idx], precision[best_idx]),
         ],
         [
-            f"F1 Threshold = {best_threshold:.2f}",
+            f"F1 Threshold = {best_threshold:.3f}",
         ],
         ["red"],
         "Recall",
@@ -117,11 +125,13 @@ def perform_pr(table: pd.DataFrame, pred_column: str) -> tuple[str, np.float32]:
 @autolog
 def main(config: DictConfig, logger: MLFlowLogger) -> None:
     df = read_json_table(config.preds_uri)
-    roc_path, roc_t = perform_roc(df, config.pred_column)
+    roc_path, roc_t, j_t = perform_roc(df, config.pred_column)
     pr_path, pr_t = perform_pr(df, config.pred_column)
     logger.log_artifact(local_path=roc_path, artifact_path="plots")
     logger.log_artifact(local_path=pr_path, artifact_path="plots")
-    logger.log_hyperparams({"roc_threshold": roc_t, "pr_threshold": pr_t})
+    logger.log_hyperparams(
+        {"roc_threshold": roc_t, "pr_threshold": pr_t, "j_threshold": j_t}
+    )
 
     for plt_path in [roc_path, pr_path]:
         Path(plt_path).unlink()
