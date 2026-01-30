@@ -15,17 +15,17 @@ thresholds:
   folding_t: 0.25
   carcinoma_roi_t: 0.5
 metadata:
-  experiment_name: Prostate
-  run_name: CAM VGG-16 Stain ${data_name}
-  description: CAM VGG-16 Stain on MMCI Tile-Level Annotated Data ${data_name}
+  experiment_name: Testing
+  run_name: VGG16 XAI Callback
+  description: A test run designed to test out the ongoing implementation of the XAI Callback setup. Runs on ${data_name}
   hyperparams:
     batch_size: ${data.batch_size}
     num_workers: ${data.num_workers}
     carcinoma_t: ${thresholds.carcinoma_roi_t}
 tile_threshold: 0
 data:
-  batch_size: 64
-  num_workers: 8
+  batch_size: 4
+  num_workers: 4
   train:
     transforms:
       _target_: albumentations.Compose
@@ -118,11 +118,27 @@ model:
   _target_: prostate_cancer.prostate_cancer_model.ProstateCancerModel
 checkpoint: mlflow-artifacts:/65/3d053bb91d4841e28afe2c93dfe0b273/artifacts/checkpoints/epoch=2-step=25564/checkpoint.ckpt
 trainer:
+  inference_mode: false
   callbacks:
-  - _target_: prostate_cancer.callbacks.CAMExplainer
-    resize_shape:
-    - 512
-    - 512
+  - _target_: rationai.explainability.callbacks.xai_callback.CAMCallback
+    target_layer: "backbone.29"
+    store_numpy_activations: false,
+    store_numpy_gradients: false,
+    store_numpy_overlaps: false,
+    store_numpy_cams: false,
+    slide_id_to_process: ["TP-2019_2941-01-1"]
+    cam_method: "grad_cam_bipolar_numpy"
+    cam_highlighting_strategy: 
+      _target_: rationai.explainability.visualizations.image_transforms.RootHighlightingStrategy
+      root: 4.0
+  # - _target_: rationai.explainability.callbacks.xai_callback.ActivationClusteringCallback
+  #   target_layer: "backbone.29"
+  #   slide_id_to_process: ["TP-2019_2941-01-1"]
+  #   clustering_instance_path: "/mnt/projects/explainability/XAICNNEmbeddings/PRECOMPUTED/VGG16_Prostate_EdgeClipped/global_clustering_instances/clustering_instance_test_global_nmf_6clusters.npy"
+  #   clustering_algorithm_name: NMF
+  #   num_clusters: 6
+  #   clip_tile_edges: 2
+
 data_name: MMCI TL Test
 mean:
 - 228.5544

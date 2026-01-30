@@ -16,12 +16,9 @@ reporter:
     artifact_path: report.html
     metadata:
         experiment_name: Testing
-        run_name: "📊 NMF clustering - 8 Clusters - Global - EdgeClip 2"
+        run_name: "📊 XAI Callback Report Test"
         description: |
-            This is a report containing image segmentation using clustering of embedding from a VGG16 Prostate binary classifier mapped back to input image.
-            Activation values were first assembled, overlaps resolved using averaging, then reshaped into clusterable embedding along the channel dimension.
-            Overlays are present for multiple number of clusters. The clustering algorithm used is NMF (implementation from sklearn.decompose) and argmaxing the clustering result for each embedding.
-            The clustering was precomuped on a sample of activation value vectors from multiple slides.
+            This is a report containing test masks for select slides and store_numpy_gradients
         user: adambajger
   background:
     _target_: report.masks.ParquetSlideDatasetMLFlowMaskRetriever
@@ -119,62 +116,62 @@ reporter:
     #     params: 
     #       connect: true
     # ================================================
-    - _target_: report.masks.RunIDMlflowMaskRetriever
-      layer_name: "0 - Clusters NMF 8"
-      run_id: b96369edaff0463d9821a37c498a639c
-      dir_name: 'clustering_single_cluster_overlays/0'
-      shader_conf:
-        type: heatmap
-        color:  '#1f77b4'
-    - _target_: report.masks.RunIDMlflowMaskRetriever
-      layer_name: "1 - Clusters NMF 8"
-      run_id: b96369edaff0463d9821a37c498a639c
-      dir_name: 'clustering_single_cluster_overlays/1'
-      shader_conf:
-        type: heatmap
-        color:   '#ff7f0e'
-    - _target_: report.masks.RunIDMlflowMaskRetriever
-      layer_name: "2 - Clusters NMF 8"
-      run_id: b96369edaff0463d9821a37c498a639c
-      dir_name: 'clustering_single_cluster_overlays/2'
-      shader_conf:
-        type: heatmap
-        color:   '#2ca02c'
-    - _target_: report.masks.RunIDMlflowMaskRetriever
-      layer_name: "3 - Clusters NMF 8"
-      run_id: b96369edaff0463d9821a37c498a639c
-      dir_name: 'clustering_single_cluster_overlays/3'
-      shader_conf:
-        type: heatmap
-        color:  '#d62728'
-    - _target_: report.masks.RunIDMlflowMaskRetriever
-      layer_name: "4 - Clusters NMF 8"
-      run_id: b96369edaff0463d9821a37c498a639c
-      dir_name: 'clustering_single_cluster_overlays/4'
-      shader_conf:
-        type: heatmap
-        color:  '#9467bd'
-    - _target_: report.masks.RunIDMlflowMaskRetriever
-      layer_name: "5 - Clusters NMF 8"
-      run_id: b96369edaff0463d9821a37c498a639c
-      dir_name: 'clustering_single_cluster_overlays/5'
-      shader_conf:
-        type: heatmap
-        color:   '#8c564b'
-    - _target_: report.masks.RunIDMlflowMaskRetriever
-      layer_name: "6 - Clusters NMF 8"
-      run_id: b96369edaff0463d9821a37c498a639c
-      dir_name: 'clustering_single_cluster_overlays/6'
-      shader_conf:
-        type: heatmap
-        color:   '#e377c2'
-    - _target_: report.masks.RunIDMlflowMaskRetriever
-      layer_name: "7 - Clusters NMF 8"
-      run_id: b96369edaff0463d9821a37c498a639c
-      dir_name: 'clustering_single_cluster_overlays/7'
-      shader_conf:
-        type: heatmap
-        color:   '#7f7f7f'
+    # - _target_: report.masks.RunIDMlflowMaskRetriever
+    #   layer_name: "0 - Clusters NMF 8"
+    #   run_id: b96369edaff0463d9821a37c498a639c
+    #   dir_name: 'clustering_single_cluster_overlays/0'
+    #   shader_conf:
+    #     type: heatmap
+    #     color:  '#1f77b4'
+    # - _target_: report.masks.RunIDMlflowMaskRetriever
+    #   layer_name: "1 - Clusters NMF 8"
+    #   run_id: b96369edaff0463d9821a37c498a639c
+    #   dir_name: 'clustering_single_cluster_overlays/1'
+    #   shader_conf:
+    #     type: heatmap
+    #     color:   '#ff7f0e'
+    # - _target_: report.masks.RunIDMlflowMaskRetriever
+    #   layer_name: "2 - Clusters NMF 8"
+    #   run_id: b96369edaff0463d9821a37c498a639c
+    #   dir_name: 'clustering_single_cluster_overlays/2'
+    #   shader_conf:
+    #     type: heatmap
+    #     color:   '#2ca02c'
+    # - _target_: report.masks.RunIDMlflowMaskRetriever
+    #   layer_name: "3 - Clusters NMF 8"
+    #   run_id: b96369edaff0463d9821a37c498a639c
+    #   dir_name: 'clustering_single_cluster_overlays/3'
+    #   shader_conf:
+    #     type: heatmap
+    #     color:  '#d62728'
+    # - _target_: report.masks.RunIDMlflowMaskRetriever
+    #   layer_name: "4 - Clusters NMF 8"
+    #   run_id: b96369edaff0463d9821a37c498a639c
+    #   dir_name: 'clustering_single_cluster_overlays/4'
+    #   shader_conf:
+    #     type: heatmap
+    #     color:  '#9467bd'
+    # - _target_: report.masks.RunIDMlflowMaskRetriever
+    #   layer_name: "5 - Clusters NMF 8"
+    #   run_id: b96369edaff0463d9821a37c498a639c
+    #   dir_name: 'clustering_single_cluster_overlays/5'
+    #   shader_conf:
+    #     type: heatmap
+    #     color:   '#8c564b'
+    # - _target_: report.masks.RunIDMlflowMaskRetriever
+    #   layer_name: "6 - Clusters NMF 8"
+    #   run_id: b96369edaff0463d9821a37c498a639c
+    #   dir_name: 'clustering_single_cluster_overlays/6'
+    #   shader_conf:
+    #     type: heatmap
+    #     color:   '#e377c2'
+    # - _target_: report.masks.RunIDMlflowMaskRetriever
+    #   layer_name: "7 - Clusters NMF 8"
+    #   run_id: b96369edaff0463d9821a37c498a639c
+    #   dir_name: 'clustering_single_cluster_overlays/7'
+    #   shader_conf:
+    #     type: heatmap
+    #     color:   '#7f7f7f'
     # =========================================
     # - _target_: report.masks.RunIDMlflowMaskRetriever
     #   layer_name: "Clusters NMF 8"
@@ -195,16 +192,16 @@ reporter:
     #     modifiable: true
     #     color: ['#000000', '#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf']
     #     # color: ["#00000", "#6B00F5", "#324B47", "#3D324B", "#754B3B", "#A39753", "#2EA32E", "#2E55A3"]  #, "#B82E75", "#01F5CC", "#F54701", "#F5F201"]
-    - _target_: report.masks.RunIDMlflowMaskRetriever
-      layer_name: "Clusters NMF 8 Segmentation"
-      run_id: b96369edaff0463d9821a37c498a639c
-      dir_name: clustering_images
-      shader_conf:
-        type: classify
-        classes: 9  # 1 for background (probably?)
-        modifiable: true
-        color: ['#000000', '#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf']
-        # color: ["#00000", "#6B00F5", "#324B47", "#3D324B", "#754B3B", "#A39753", "#2EA32E", "#2E55A3"]  #, "#B82E75", "#01F5CC", "#F54701", "#F5F201"]
+    # - _target_: report.masks.RunIDMlflowMaskRetriever
+    #   layer_name: "Clusters NMF 8 Segmentation"
+    #   run_id: b96369edaff0463d9821a37c498a639c
+    #   dir_name: clustering_images
+    #   shader_conf:
+    #     type: classify
+    #     classes: 9  # 1 for background (probably?)
+    #     modifiable: true
+    #     color: ['#000000', '#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b', '#e377c2', '#7f7f7f', '#bcbd22', '#17becf']
+    #     # color: ["#00000", "#6B00F5", "#324B47", "#3D324B", "#754B3B", "#A39753", "#2EA32E", "#2E55A3"]  #, "#B82E75", "#01F5CC", "#F54701", "#F5F201"]
     # - _target_: report.masks.RunIDMlflowMaskRetriever
     #   dir_name: test_cam
     #   run_id: 64e52667d20347be809d2b2be87ebd91
@@ -240,9 +237,9 @@ reporter:
         type: heatmap
         visible: 0
     - _target_: report.masks.RunIDMlflowMaskRetriever
-      dir_name: xai/gradcam
-      run_id: b96369edaff0463d9821a37c498a639c
-      layer_name: "GradCAM heatmap"
+      dir_name: tif_cams
+      run_id: 9fbe227016714097a6aeaaf698ac137c
+      layer_name: "Bipolar GradCAM"
       shader_conf:
         type: bipolar-heatmap
         visible: 0

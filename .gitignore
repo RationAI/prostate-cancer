@@ -200,3 +200,7 @@ report_out
 
 # numpy files
 *.npy
+
+# outputs
+output_subdir
+outputs

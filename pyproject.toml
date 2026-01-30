@@ -8,7 +8,7 @@ authors = [
     { name = "Michal Jakubík", email = "jakubik@mail.muni.cz" },
     { name = "Matej Gallo", email = "gallo.matej@mail.muni.cz" },
 ]
-requires-python = ">=3.11,<3.13"
+requires-python = ">=3.12,<3.13"
 readme = "README.md"
 license = { file = "LICENSE" }
 dependencies = [
@@ -31,25 +31,8 @@ dependencies = [
     "mlflow",
     "deprecated",
     "opencv-python>=4.11.0.86",
+    "report",
 ]
-
-# # [tool.pdm.scripts]
-# # fit = "python -m prostate_cancer mode=fit"
-# # validate = "python -m prostate_cancer mode=validate"
-# # test = "python -m prostate_cancer mode=test"
-# # predict = "python -m prostate_cancer mode=predict"
-# # l = { composite = ["lint", "format", "mypy"] }
-# # lint = "ruff check --fix"
-# # format = "ruff format"
-# # mypy = "mypy ."
-# # post_install = { composite = [
-# #     "pre-commit autoupdate",
-# #     "pre-commit install",
-# #     "pre-commit install --hook-type commit-msg",
-# # ] }
-
-# # [tool.pdm]
-# # distribution = false
 
 [dependency-groups]
 dev = [
@@ -61,3 +44,4 @@ dev = [
 
 [tool.uv.sources]
 rationai-explainability = { git = "ssh://git@gitlab.ics.muni.cz/rationai/digital-pathology/explainability/activations-clustering.git", rev = "feature/xai-library" }
+report = { git = "https://gitlab.ics.muni.cz/rationai/digital-pathology/tools/report.git" }
