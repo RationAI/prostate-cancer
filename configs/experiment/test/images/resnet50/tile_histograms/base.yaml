@@ -1,0 +1,12 @@
+# @package _global_
+
+defaults:
+  - /callbacks/tile_histograms@callbacks
+  - /experiment/test/images/resnet50/base
+  - _self_
+
+datamodule:
+  test:
+    stratified_filter: true
+
+use_case: "TL Histograms"

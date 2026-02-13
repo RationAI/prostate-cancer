@@ -1,0 +1,8 @@
+# @package _global_
+
+defaults:
+  - /callbacks/nested_metrics@callbacks
+  - /experiment/test/embeddings/virchow2/base
+  - _self_
+
+use_case: "Per-Slide Metrics"

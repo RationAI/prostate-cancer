@@ -5,7 +5,9 @@ defaults:
 
 
 prostate_cancer_artifacts: /mnt/projects/prostate_cancer/cancer
-prostate_data: /mnt/data/MOU/prostate
+prostate_data: /mnt/data/MOU/
+
+data_name: ???
 
 thresholds:
   tissue_roi_t: 0.5

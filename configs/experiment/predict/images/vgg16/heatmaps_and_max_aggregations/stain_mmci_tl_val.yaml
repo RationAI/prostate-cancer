@@ -1,0 +1,6 @@
+# @package _global_
+
+defaults:
+  - /experiment/predict/images/vgg16/heatmaps_and_max_aggregations/stain_base
+  - /data/mmci_tl_val@predict_data
+  - _self_

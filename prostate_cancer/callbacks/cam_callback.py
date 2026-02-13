@@ -17,7 +17,7 @@ from prostate_cancer.typing import LabeledSampleBatch
 
 
 if TYPE_CHECKING:
-    from prostate_cancer.data.data_module import DataModule
+    from prostate_cancer.datamodule.data_module import DataModule
     from prostate_cancer.modeling.decode_head import BinaryClassifier
 
 

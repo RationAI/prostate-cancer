@@ -1,0 +1,23 @@
+defaults:
+  - datasets@train: images/labeled
+  - datasets@val: images/labeled
+  - datasets@test: images/labeled
+  - datasets@predict: images/unlabeled
+
+  - transforms@default_transform: normalize
+  - samplers@sampler: stratified_weighted_random
+
+train:
+  transforms: ??? # specified during the training (stain / non-stain augmentations)
+  stratified_filter: true
+val:
+  transforms: ${datamodule.default_transform}
+  stratified_filter: true
+test:
+  transforms: ${datamodule.default_transform}
+  stratified_filter: false
+predict:
+  transforms: ${datamodule.default_transform}
+
+batch_size: ???
+num_workers: ???

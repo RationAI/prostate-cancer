@@ -12,7 +12,7 @@ from prostate_cancer.typing import UnlabeledSampleBatch
 
 
 if TYPE_CHECKING:
-    from prostate_cancer.data import DataModule
+    from prostate_cancer.datamodule import DataModule
 
 
 class KernelEstimationCallback(MultiloaderLifecycle):
@@ -48,12 +48,13 @@ class KernelEstimationCallback(MultiloaderLifecycle):
 
         targets = torch.zeros_like(outputs)
         for aggregator in self.aggregators:
-            aggregator.update(
-                preds=outputs,
-                targets=targets,
-                x=metadata["x"],
-                y=metadata["y"],
-            )
+            for i, (pred, target) in enumerate(zip(outputs, targets, strict=True)):
+                aggregator.update(
+                    preds=pred,
+                    targets=target,
+                    x=metadata["x"][i],
+                    y=metadata["y"][i],
+                )
 
     def on_predict_dataloader_end(
         self, trainer: pl.Trainer, pl_module: pl.LightningModule, dataloader_idx: int

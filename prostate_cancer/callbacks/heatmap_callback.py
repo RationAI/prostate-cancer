@@ -11,7 +11,7 @@ from prostate_cancer.typing import LabeledSampleBatch, UnlabeledSampleBatch
 
 
 if TYPE_CHECKING:
-    from prostate_cancer.data import DataModule
+    from prostate_cancer.datamodule import DataModule
 
 
 class HeatmapCallback(MultiloaderLifecycle):

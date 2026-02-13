@@ -1,10 +1,9 @@
 # @package _global_
 
 defaults:
-  - /experiment/train/images/train_base
+  - /experiment/train/images/base
+  - /datamodule/transforms/normalize_w_augments@transforms
   - /model/vgg16_model@model
   - _self_
 
-metadata:
-  run_name: Training VGG-16
-  description: Training VGG-16 on MMCI Tile-Level Annotated Data
+model_name: "VGG-16"

@@ -1,0 +1,11 @@
+# @package _global_
+
+defaults:
+  - /experiment/test/embeddings/base
+  - /model/virchow2_model@model
+  - /model/checkpoints/virchow2@model_data
+  - _self_
+
+datamodule:
+  test:
+    embeddings_uri: ${test_data.virchow2_embeddings_uri}

@@ -1,0 +1,3 @@
+tile_threshold: 0.81
+checkpoint: "mlflow-artifacts:/65/fb15954bd28f4294b928cd5174385d38/artifacts/checkpoints/epoch=2-step=69446/checkpoint.ckpt"
+model_name: "PGP"

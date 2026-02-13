@@ -1,0 +1,9 @@
+# @package _global_
+
+defaults:
+  - /callbacks/heatmap_and_aggregator@callbacks
+  - /aggregator/max@aggregator
+  - /experiment/predict/images/resnet50/stain_base
+  - _self_
+
+use_case: "Heatmaps & Max. Aggregation"

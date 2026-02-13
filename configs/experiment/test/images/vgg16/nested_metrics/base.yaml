@@ -1,0 +1,8 @@
+# @package _global_
+
+defaults:
+  - /callbacks/nested_metrics@callbacks
+  - /experiment/test/images/vgg16/base
+  - _self_
+
+use_case: "TL Per-Slide metrics"

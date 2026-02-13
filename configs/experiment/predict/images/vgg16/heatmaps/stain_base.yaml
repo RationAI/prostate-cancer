@@ -1,0 +1,8 @@
+# @package _global_
+
+defaults:
+  - /experiment/predict/images/vgg16/stain_base
+  - /callbacks/heatmap@callbacks
+  - _self_
+
+use_case: "Heatmaps"

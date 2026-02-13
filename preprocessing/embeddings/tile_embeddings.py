@@ -12,7 +12,7 @@ from rationai.mlkit.lightning.loggers import MLFlowLogger
 from torch.utils.data import DataLoader
 from tqdm import tqdm
 
-from prostate_cancer.data.datasets import UnlabeledTilesDataset
+from prostate_cancer.datamodule.datasets import UnlabeledTilesDataset
 
 
 if TYPE_CHECKING:

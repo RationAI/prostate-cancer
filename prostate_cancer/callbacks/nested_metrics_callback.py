@@ -19,16 +19,18 @@ from prostate_cancer.typing import LabeledSampleBatch
 class NestedMetricsCallback(Callback):
     """Calculates metrics using the `NestedMetricCollection` in the test stage."""
 
-    def __init__(self) -> None:
+    def __init__(self, threshold: float) -> None:
         # In the test mode, log metrics for each slide
         self.nested_test_metrics = NestedMetricCollection(
             metrics={
                 "AUC": AUROC("binary"),
-                "accuracy": Accuracy("binary"),
-                "precision": Precision("binary"),
-                "recall": Recall("binary"),
-                "specificity": Specificity("binary"),
-                "negative_predictive_value": NegativePredictiveValue("binary"),
+                "accuracy": Accuracy("binary", threshold),
+                "precision": Precision("binary", threshold),
+                "recall": Recall("binary", threshold),
+                "specificity": Specificity("binary", threshold),
+                "negative_predictive_value": NegativePredictiveValue(
+                    "binary", threshold
+                ),
             }
         )
 

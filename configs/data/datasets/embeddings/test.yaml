@@ -1,7 +1,0 @@
-_target_: prostate_cancer.data.datasets.LabeledEmbeddingsDataset
-uris:
-  - "mlflow-artifacts:/65/34518b4d6e324e54b64ce7d7854a568d/artifacts/Prostate - test (224)"
-thresholds: ${thresholds}
-embeddings_uri: "mlflow-artifacts:/65/2442eee3c09140889b02f0b7ae70eead/artifacts/test (224)"
-stratified_filter: false
-carcinoma_roi_t: ${thresholds.carcinoma_roi_t}

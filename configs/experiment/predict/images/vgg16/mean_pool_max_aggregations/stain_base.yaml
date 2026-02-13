@@ -1,0 +1,9 @@
+# @package _global_
+
+defaults:
+  - /callbacks/aggregator@callbacks
+  - /aggregator/mean_pool_max@aggregator
+  - /experiment/predict/images/vgg16/stain_base
+  - _self_
+
+use_case: "Mean Pool Max. Aggregation"

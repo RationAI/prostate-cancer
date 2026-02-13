@@ -1,0 +1,8 @@
+# @package _global_
+
+defaults:
+  - /callbacks/nested_metrics@callbacks
+  - /experiment/test/embeddings/pgp/base
+  - _self_
+
+use_case: Tile-Level Per-Slide Metrics

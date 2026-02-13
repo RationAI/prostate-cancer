@@ -1,0 +1,6 @@
+defaults:
+  - curves
+  - nested_metrics
+  - tile_histograms
+  - heatmap
+  - _self_

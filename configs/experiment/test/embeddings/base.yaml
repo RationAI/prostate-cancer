@@ -1,0 +1,14 @@
+# @package _global_
+
+defaults:
+  - /experiment/test/base
+  - /datamodule/embeddings_datamodule@datamodule
+  - _self_
+
+datamodule:
+  batch_size: 1024
+  num_workers: 8
+
+  test:
+    uris:
+      - ${test_data.tiles_uri_224}

@@ -1,0 +1,9 @@
+# @package _global_
+
+defaults:
+  - /callbacks/heatmap_and_aggregator@callbacks
+  - /aggregator/max@aggregator
+  - /experiment/predict/embeddings/pgp/base
+  - _self_
+
+use_case: "Heatmaps & Max. Aggregation"

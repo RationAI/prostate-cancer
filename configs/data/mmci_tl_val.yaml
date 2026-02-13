@@ -1,0 +1,9 @@
+tiles_uri_512: "mlflow-artifacts:/65/a43da470f89848abb3a32e59c504ee1a/artifacts/MMCI TL Val 512"
+tiles_uri_224: "mlflow-artifacts:/65/2b313f9f1db04ba5803e9093677bb404/artifacts/MMCI TL Val 224"
+
+pgp_embeddings_uri: "mlflow-artifacts:/65/2442eee3c09140889b02f0b7ae70eead/artifacts/val (224)"
+virchow2_embeddings_uri: "mlflow-artifacts:/65/0279038fa2e54c33a5c326cbd147851f/artifacts/MMCI TL Val 224"
+
+metadata_table: "mlflow-artifacts:/65/fc8b5da06d644e8ab0535f71f798a0e8/artifacts/mmci_tl_val.csv"
+
+data_name: "MMCI TL Val"

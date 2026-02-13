@@ -8,8 +8,8 @@ from rationai.masks import process_items
 from rationai.mlkit.autolog import autolog
 from rationai.mlkit.lightning.loggers import MLFlowLogger
 
-from prostate_cancer.data.datasets import UnlabeledTilesDataset
-from prostate_cancer.data.datasets.tile_dataset import SlideTiles
+from prostate_cancer.datamodule.datasets import UnlabeledTilesDataset
+from prostate_cancer.datamodule.datasets.tile_dataset import SlideTiles
 
 
 @ray.remote

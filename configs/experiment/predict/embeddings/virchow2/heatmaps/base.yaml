@@ -1,0 +1,8 @@
+# @package _global_
+
+defaults:
+  - /callbacks/heatmap@callbacks
+  - /experiment/predict/embeddings/virchow2/base
+  - _self_
+
+use_case: "Heatmaps"

@@ -1,0 +1,12 @@
+# @package _global_
+
+defaults:
+  - /callbacks/kernel_estimation@callbacks
+  - /experiment/predict/embeddings/pgp/pgp_base
+  - /data/mmci_sl_group_1@predict_data
+  - _self_
+
+
+extent_tile: 224
+stride: 112
+use_case: "Kernel Size Estimation"

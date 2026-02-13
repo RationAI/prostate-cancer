@@ -1,0 +1,3 @@
+tile_threshold: 0.76
+checkpoint: "mlflow-artifacts:/65/0d6af27cf5d848279c891eb3039b11c8/artifacts/checkpoints/epoch=0-step=6972/checkpoint.ckpt"
+model_name: "ResNet50 Stain"

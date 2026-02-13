@@ -1,0 +1,6 @@
+# @package _global_
+
+defaults:
+  - /experiment/predict/images/vgg16/heatmaps_and_max_aggregations/base
+  - /data/mmci_sl_group_1@predict_data
+  - _self_

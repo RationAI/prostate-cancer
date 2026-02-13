@@ -1,0 +1,23 @@
+defaults:
+  - /default
+  - _self_
+  - /experiment: ???
+
+
+# Mean and std for normalization
+mean: [228.5544, 178.8584, 219.8793]
+std: [27.8285, 51.4639, 26.4458]
+
+seed: ${random_seed:}
+mode: ???
+
+trainer:
+  callbacks: ${callbacks}
+
+metadata:
+  run_name: ${model_name} ${use_case} ${data_name}
+  description: ${model_name} ${use_case} ${data_name}
+  hyperparams:
+    batch_size: ${datamodule.batch_size}
+    num_workers: ${datamodule.num_workers}
+    carcinoma_t: ${thresholds.carcinoma_roi_t}

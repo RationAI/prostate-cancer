@@ -1,0 +1,26 @@
+# @package _global_
+defaults:
+  - /callbacks/train@callbacks
+  - /data/mmci_tl_train@train_data
+  - /data/mmci_tl_val@val_data
+  - _self_
+
+trainer:
+  enable_checkpointing: True
+  max_epochs: 20
+  log_every_n_steps: 5
+  val_check_interval: 0.25
+
+checkpoint: null
+
+model_name: ???
+data_name: ${train_data.data_name}
+
+datamodule:
+  batch_size: ???
+  num_workers: ???
+
+model:
+  lr: 1e-4
+
+use_case: "Training"

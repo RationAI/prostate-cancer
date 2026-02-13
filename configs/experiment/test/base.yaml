@@ -1,0 +1,12 @@
+# @package _global_
+
+use_case: ???
+
+model:
+  lr: 0.0
+
+tile_threshold: ${model_data.tile_threshold}
+checkpoint: ${model_data.checkpoint}
+model_name: ${model_data.model_name}
+
+data_name: ${test_data.data_name}

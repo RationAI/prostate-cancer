@@ -1,0 +1,3 @@
+_partial_: true
+_target_: prostate_cancer.datamodule.samplers.StratifiedWeightedRandomSampler
+replacement: true

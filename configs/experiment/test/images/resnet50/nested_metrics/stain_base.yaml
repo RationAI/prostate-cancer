@@ -1,0 +1,8 @@
+# @package _global_
+
+defaults:
+  - /callbacks/nested_metrics@callbacks
+  - /experiment/test/images/resnet50/stain_base
+  - _self_
+
+use_case: "Per-Slide Metrics"

@@ -1,0 +1,3 @@
+tile_threshold: 0.94
+checkpoint: "mlflow-artifacts:/65/7b52930515c14710855962f8882fb4d3/artifacts/checkpoints/epoch=0-step=9296/checkpoint.ckpt"
+model_name: "VGG-16"

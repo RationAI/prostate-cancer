@@ -8,7 +8,7 @@ from omegaconf import DictConfig, OmegaConf
 from rationai.mlkit import Trainer, autolog
 from rationai.mlkit.lightning.loggers.mlflow import MLFlowLogger
 
-from prostate_cancer.data import DataModule
+from prostate_cancer.datamodule import DataModule
 from prostate_cancer.log_title import log_checkpoint_title
 
 
@@ -21,7 +21,7 @@ logging.basicConfig(
 )
 
 
-@hydra.main(config_path="../configs", config_name="prostate_cancer", version_base=None)
+@hydra.main(config_path="../configs", config_name="ml", version_base=None)
 @autolog
 def main(config: DictConfig, logger: MLFlowLogger) -> None:
     seed_everything(config.seed, workers=True)
@@ -29,7 +29,7 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
     torch.set_float32_matmul_precision(precision="medium")
 
     data = hydra.utils.instantiate(
-        config.data,
+        config.datamodule,
         _recursive_=False,  # to avoid instantiating all the datasets
         _target_=DataModule,
     )

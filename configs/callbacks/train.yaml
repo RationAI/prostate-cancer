@@ -1,0 +1,10 @@
+checkpointing:
+  _target_: lightning.pytorch.callbacks.ModelCheckpoint
+  save_top_k: 3
+  monitor: validation/AUC
+  mode: max
+early_stopping:
+  _target_: lightning.pytorch.callbacks.EarlyStopping
+  monitor: validation/AUC
+  mode: max
+  patience: 8

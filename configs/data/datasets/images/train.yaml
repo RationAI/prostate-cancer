@@ -1,9 +1,0 @@
-defaults:
-  - /data/transforms@transforms: normalize_w_stain_augments
-
-_target_: prostate_cancer.data.datasets.LabeledTilesDataset
-uris:
-  - "mlflow-artifacts:/65/0157ba4a0db349b8b86e4a24592d9230/artifacts/Prostate - train"
-thresholds: ${thresholds}
-stratified_filter: true
-carcinoma_roi_t: ${thresholds.carcinoma_roi_t}

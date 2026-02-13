@@ -1,0 +1,10 @@
+# @package _global_
+
+defaults:
+  - /experiment/test/images/vgg16/stain_base
+  - /callbacks/cam@callbacks
+  - _self_
+
+tile_threshold: 0 # not used
+
+use_case: "CAM"

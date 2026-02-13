@@ -1,0 +1,17 @@
+defaults:
+  - datasets@train: embeddings/labeled
+  - datasets@val: embeddings/labeled
+  - datasets@test: embeddings/labeled
+  - datasets@predict: embeddings/unlabeled
+
+  - samplers@sampler: stratified_weighted_random
+
+train:
+  stratified_filter: true
+val:
+  stratified_filter: true
+test:
+  stratified_filter: false # want to test all the tiles
+
+batch_size: ???
+num_workers: ???

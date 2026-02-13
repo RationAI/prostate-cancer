@@ -1,0 +1,14 @@
+# @package _global_
+
+defaults:
+  - /callbacks/tile_threshold@callbacks
+  - /experiment/test/images/resnet50/stain_base
+  - /data/mmci_tl_val@test_data
+  - _self_
+
+datamodule:
+  test:
+    stratified_filter: true # tile threshold not estimated from negative tiles in positive slides
+
+tile_threshold: 0.8 # Pathologist's estimate
+use_case: "Tile Threshold Estimation"

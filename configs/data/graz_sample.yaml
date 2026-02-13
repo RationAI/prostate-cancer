@@ -1,0 +1,5 @@
+tiles_uri_224: "mlflow-artifacts:/65/4c404ffe1213449e83f5100416a35ea1/artifacts/Graz 400 rescaled"
+pgp_embeddings_uri: "mlflow-artifacts:/65/6ad16220ac4f434aa25780eabc94b4c2/artifacts/Graz 400 rescaled"
+metadata_table: "mlflow-artifacts:/65/c2f388e875964c778f6b1431210d93d9/artifacts/graz_400_data.csv"
+
+data_name: "Graz Sample"

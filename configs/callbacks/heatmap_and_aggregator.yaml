@@ -1,0 +1,4 @@
+defaults:
+  - heatmap
+  - aggregator
+  - _self_

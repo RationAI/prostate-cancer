@@ -1,0 +1,3 @@
+aggregator_callback:
+  _target_: prostate_cancer.callbacks.AggregatorCallback
+  aggregator: ${aggregator}

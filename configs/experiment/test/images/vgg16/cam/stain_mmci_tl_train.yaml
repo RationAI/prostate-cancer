@@ -1,0 +1,6 @@
+# @package _global_
+
+defaults:
+  - /experiment/test/images/vgg16/cam/stain_base
+  - /datamodule/data/mmci_tl_train@test_data
+  - _self_

@@ -1,0 +1,18 @@
+# @package _global_
+
+defaults:
+  - /experiment/train/base
+  - /datamodule/images_datamodule@datamodule
+  - _self_
+
+datamodule:
+  batch_size: 64
+  num_workers: 8
+
+  train:
+    transforms: ${transforms}
+    uris:
+      - ${train_data.tiles_uri_512}
+  val:
+    uris:
+      - ${val_data.tiles_uri_512}

@@ -12,13 +12,15 @@ from prostate_cancer.typing import LabeledSampleBatch
 
 
 class CurvesCallback(Callback):
-    def __init__(self, threshold: float) -> None:
+    def __init__(self, threshold: float, optimal_seek: bool = True) -> None:
         """This callback creates tile-level ROC curve and Precision-Recall curve and marks selected + optimized thresholds used for metric computation.
 
         Args:
             threshold (float): pathologist selected threshold
+            optimal_seek (bool): whether we are looking for optimal thresholds or just want to plot the curves
         """
         super().__init__()
+        self.optimal_seek = optimal_seek
         self.threshold = threshold
         self.preds: list[torch.Tensor] = []
         self.targets: list[torch.Tensor] = []
@@ -42,30 +44,36 @@ class CurvesCallback(Callback):
         fpr, tpr, roc_thresholds = roc_curve(y_true, y_pred)
         roc_auc = auc(fpr, tpr)
 
-        # Find the point closest to the pathologist selected threshold
+        # Find the point closest to the pre-selected threshold
         closest_idx = (np.abs(roc_thresholds - self.threshold)).argmin()
-        pato_threshold = roc_thresholds[closest_idx]
-        pato_fpr = fpr[closest_idx]
-        pato_tpr = tpr[closest_idx]
+        pre_threshold = roc_thresholds[closest_idx]
+        pre_fpr = fpr[closest_idx]
+        pre_tpr = tpr[closest_idx]
 
-        # J statistic to estimate threshold (maximize  TPR - FPR)
-        j = tpr - fpr
-        optimal_idx = j.argmax()
-        j_threshold = roc_thresholds[optimal_idx]
-        j_fpr = fpr[optimal_idx]
-        j_tpr = tpr[optimal_idx]
+        to_pinpoint = [(pre_fpr, pre_tpr)]
+        labels = [f"Pre-selected Threshold = {pre_threshold:.2f}"]
+        colors = ["red"]
+
+        if self.optimal_seek:
+            # J statistic to estimate threshold (maximize  TPR - FPR)
+            j = tpr - fpr
+            optimal_idx = j.argmax()
+            j_threshold = roc_thresholds[optimal_idx]
+            j_fpr = fpr[optimal_idx]
+            j_tpr = tpr[optimal_idx]
+
+            to_pinpoint.append((j_fpr, j_tpr))
+            labels.append(f"J Threshold = {j_threshold:.2f}")
+            colors.append("green")
 
         plot_path = "tile_roc.png"
         _plot_curve(
             fpr,
             tpr,
             f"AUC = {roc_auc:.3f}",
-            [(pato_fpr, pato_tpr), (j_fpr, j_tpr)],
-            [
-                f"Pathologist Threshold = {pato_threshold:.2f}",
-                f"J Threshold = {j_threshold:.2f}",
-            ],
-            ["red", "green"],
+            to_pinpoint,
+            labels,
+            colors,
             "False Positive Rate",
             "True Positive Rate",
             "Receiver Operating Characteristic",
@@ -79,29 +87,31 @@ class CurvesCallback(Callback):
     ) -> None:
         precision, recall, thresholds = precision_recall_curve(y_true, y_pred)
 
-        # threshold maximizing F1 score
-        f1 = 2 * (precision * recall) / (precision + recall + 1e-8)
-        best_idx = np.argmax(f1)
-        best_threshold = thresholds[best_idx]
-
-        # Find the point closest to the pathologist selected threshold
+        # Find the point closest to the pre-selected threshold
         closest_idx = (np.abs(thresholds - self.threshold)).argmin()
-        pato_threshold = thresholds[closest_idx]
+        pre_threshold = thresholds[closest_idx]
+        to_pinpoint = [(recall[closest_idx], precision[closest_idx])]
+        labels = [f"Pre-selected Threshold = {pre_threshold:.2f}"]
+        colors = ["red"]
+
+        if self.optimal_seek:
+            # threshold maximizing F1 score
+            f1 = 2 * (precision * recall) / (precision + recall + 1e-8)
+            best_idx = np.argmax(f1)
+            best_threshold = thresholds[best_idx]
+
+            to_pinpoint.append((recall[best_idx], precision[best_idx]))
+            labels.append(f"F1 Threshold = {best_threshold:.2f}")
+            colors.append("green")
 
         plot_path = "tile_precision_recall.png"
         _plot_curve(
             recall,
             precision,
             None,
-            [
-                (recall[closest_idx], precision[closest_idx]),
-                (recall[best_idx], precision[best_idx]),
-            ],
-            [
-                f"Pathologist Threshold = {pato_threshold:.2f}",
-                f"F1 Threshold = {best_threshold:.2f}",
-            ],
-            ["red", "green"],
+            to_pinpoint,
+            labels,
+            colors,
             "Recall",
             "Precision",
             "Precision-Recall Curve",

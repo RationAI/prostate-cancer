@@ -1,0 +1,14 @@
+# @package _global_
+
+defaults:
+  - /experiment/train/embeddings/base
+  - /model/virchow2_model@model
+  - _self_
+
+datamodule:
+  train:
+    embeddings_uri: ${train_data.virchow2_embeddings_uri}
+  val:
+    embeddings_uri: ${val_data.virchow2_embeddings_uri}
+
+model_name: "Virchow2"

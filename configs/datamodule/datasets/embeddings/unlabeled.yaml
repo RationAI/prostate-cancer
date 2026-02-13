@@ -1,0 +1,4 @@
+_target_: prostate_cancer.datamodule.datasets.UnlabeledEmbeddingsDataset
+uris: ???
+thresholds: ${thresholds}
+embeddings_uri: ???

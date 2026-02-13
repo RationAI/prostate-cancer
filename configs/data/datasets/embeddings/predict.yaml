@@ -1,4 +1,0 @@
-_target_: prostate_cancer.data.datasets.UnlabeledEmbeddingsDataset
-uris: ???
-thresholds: ${thresholds}
-embeddings_uri: ???

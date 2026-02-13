@@ -1,0 +1,3 @@
+nested_metrics_callback:
+  _target_: prostate_cancer.callbacks.NestedMetricsCallback
+  threshold: ${tile_threshold}

@@ -1,6 +1,0 @@
-# @package _global_
-
-defaults:
-  - /experiment/test/test_base
-  - /data/images_datamodule@data
-  - _self_

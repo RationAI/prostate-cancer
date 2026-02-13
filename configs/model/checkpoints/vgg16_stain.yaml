@@ -1,0 +1,3 @@
+tile_threshold: 0.73
+checkpoint: "mlflow-artifacts:/65/3d053bb91d4841e28afe2c93dfe0b273/artifacts/checkpoints/epoch=2-step=25564/checkpoint.ckpt"
+model_name: "VGG-16 Stain"
