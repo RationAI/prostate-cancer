@@ -1,13 +1,11 @@
 # @package _global_
 
-defaults:
-  - base
-  - _self_
-
 level: 5
 max_concurrent: 100
-output_path: ${prostate_cancer_artifacts}/annot_masks/${data_name}
+output_path: ${prostate_cancer_artifacts}/annot_masks/${data.data_name}
 
 metadata:
-  run_name: Annotation Masks ${data_name}
-  description: Annotation Masks ${data_name}
+  run_name: Annotation Masks ${data.data_name}
+  description: Annotation Masks ${data.data_name}
+  hyperparams:
+    level: ${level}

@@ -1,11 +1,10 @@
 # @package _global_
-defaults:
-  - base
-  - _self_
 
 test_size: 0.1
 target_column: "carcinoma"
 
 metadata:
-  run_name: Data Split ${data_name}
-  description: Data Split ${data_name}
+  run_name: Data Split ${data.data_name}
+  description: Data Split ${data.data_name}
+  hyperparams:
+    test_size: ${test_size}

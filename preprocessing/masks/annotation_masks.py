@@ -16,7 +16,7 @@ from PIL.ImageDraw import _Ink
 from rationai.masks import slide_resolution, write_big_tiff
 from rationai.masks.annotations import XMLPolygonMask
 from rationai.masks.processing import process_items
-from rationai.mlkit import autolog
+from rationai.mlkit import autolog, with_cli_args
 from rationai.mlkit.lightning.loggers import MLFlowLogger
 
 
@@ -115,11 +115,8 @@ def process_slide(slide_path: Path, level: int, output_path: Path) -> None:
         )
 
 
-@hydra.main(
-    config_path="../../configs",
-    config_name="preprocessing/annot_masks",
-    version_base=None,
-)
+@with_cli_args(["+preprocessing=annot_masks"])
+@hydra.main(config_path="../configs", config_name="preprocessing", version_base=None)
 @autolog
 def main(config: DictConfig, logger: MLFlowLogger) -> None:
     assert logger is not None, "Need logger"

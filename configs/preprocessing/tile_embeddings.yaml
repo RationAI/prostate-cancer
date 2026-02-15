@@ -1,10 +1,7 @@
 # @package _global_
-defaults:
-  - base
-  - _self_
 
 batch_size: 1024
-output_path: ${prostate_cancer_artifacts}/tile_embeddings/${tile_encoder.name}/${data_name}
+output_path: ${prostate_cancer_artifacts}/tile_embeddings/${tile_encoder.name}/${data.data_name}
 
 tile_encoder:
   _target_: ???
@@ -13,8 +10,8 @@ tile_encoder:
 uris: ???
 
 metadata:
-  run_name: ${tile_encoder.name} Tile Embeddings ${data_name}
-  description: ${tile_encoder.name} Tile Embeddings ${data_name}
+  run_name: ${tile_encoder.name} Tile Embeddings ${data.data_name}
+  description: ${tile_encoder.name} Tile Embeddings ${data.data_name}
   hyperparams:
     model: ${tile_encoder.name}
-    output_path: ${output_path}
+    batch_size: ${batch_size}

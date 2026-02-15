@@ -7,6 +7,8 @@ defaults:
 prostate_cancer_artifacts: /mnt/projects/prostate_cancer/cancer
 prostate_data: /mnt/data/MOU/
 
+mmci_mpp: 0.23
+
 data_name: ???
 
 thresholds:

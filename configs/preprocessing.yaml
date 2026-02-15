@@ -6,5 +6,3 @@ defaults:
 
 # CSV containing column "slide_path" (+ "carcinoma" label, and "case_id" for some stages)
 slides_df_uri: ???
-data_name: ??? # for mlflow run and data folder names
-mmci_mpp: 0.23

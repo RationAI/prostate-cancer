@@ -13,7 +13,7 @@ from omegaconf import DictConfig
 from openslide import OpenSlide
 from rationai.masks import slide_resolution, write_big_tiff
 from rationai.masks.processing import process_items
-from rationai.mlkit import autolog
+from rationai.mlkit import autolog, with_cli_args
 from rationai.mlkit.lightning.loggers import MLFlowLogger
 
 
@@ -33,9 +33,8 @@ def process_slide(slide_path: Path, output_path: Path, desired_mpp: float) -> No
     print(f"Processed slide {slide_path.name}")
 
 
-@hydra.main(
-    config_path="../configs", config_name="preprocessing/resize_wsi", version_base=None
-)
+@with_cli_args(["+preprocessing=resize_wsi"])
+@hydra.main(config_path="../configs", config_name="preprocessing", version_base=None)
 @autolog
 def main(config: DictConfig, logger: MLFlowLogger) -> None:
     output_path = Path(config.output_path)

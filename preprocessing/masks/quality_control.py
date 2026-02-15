@@ -8,7 +8,7 @@ import mlflow
 import pandas as pd
 from aiohttp import ClientSession, ClientTimeout
 from omegaconf import DictConfig
-from rationai.mlkit.autolog import autolog
+from rationai.mlkit import autolog, with_cli_args
 from rationai.mlkit.lightning.loggers import MLFlowLogger
 
 from preprocessing.masks.qc_organize import (
@@ -159,9 +159,8 @@ async def qc_main(
         logger.log_artifacts(local_dir=report_path)
 
 
-@hydra.main(
-    config_path="../../configs", config_name="preprocessing/qc_masks", version_base=None
-)
+@with_cli_args(["+preprocessing=qc_masks"])
+@hydra.main(config_path="../configs", config_name="preprocessing", version_base=None)
 @autolog
 def main(config: DictConfig, logger: MLFlowLogger) -> None:
     output_path = Path(config.output_path)

@@ -9,7 +9,7 @@ import pandas as pd
 import ray
 from mlflow.artifacts import download_artifacts
 from omegaconf import DictConfig
-from rationai.mlkit import autolog
+from rationai.mlkit import autolog, with_cli_args
 from rationai.mlkit.lightning.loggers import MLFlowLogger
 from rationai.tiling import tiling
 from rationai.tiling.modules.tile_sources import OpenSlideTileSource
@@ -113,9 +113,8 @@ def process_slide(
     return slide_metadata, tiles
 
 
-@hydra.main(
-    config_path="../../configs", config_name="preprocessing/tiling", version_base=None
-)
+@with_cli_args(["+preprocessing=tiling"])
+@hydra.main(config_path="../configs", config_name="preprocessing", version_base=None)
 @autolog
 def main(config: DictConfig, logger: MLFlowLogger) -> None:
     tissue_masks_path = (
