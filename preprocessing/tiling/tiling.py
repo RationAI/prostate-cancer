@@ -213,7 +213,7 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
     save_mlflow_dataset(
         slides=slides_df,
         tiles=tiles_df,
-        dataset_name=config.data_name,
+        dataset_name=config.data.data_name,
     )
 
 
