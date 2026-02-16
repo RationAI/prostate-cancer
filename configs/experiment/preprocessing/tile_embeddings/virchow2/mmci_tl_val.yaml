@@ -1,9 +1,0 @@
-# @package _global_
-
-defaults:
-  - /experiment/preprocessing/tile_embeddings/virchow2/base
-  - /data/mmci_tl_val@data
-  - _self_
-
-uris:
- - ${data.tiles_uri_224}

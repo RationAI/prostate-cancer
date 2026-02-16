@@ -1,0 +1,11 @@
+# @package _global_
+
+defaults:
+  - /experiment/preprocessing/tile_embeddings/virchow2/base
+  - /data/mmci_sl_group_1@data_group_1
+  - /data/mmci_sl_group_2@data_group_2
+  - _self_
+
+uris:
+ - ${data_group_1.tiles_uri_224}
+ - ${data_group_2.tiles_uri_224}

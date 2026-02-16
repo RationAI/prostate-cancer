@@ -1,0 +1,13 @@
+# @package _global_
+
+defaults:
+  - /experiment/preprocessing/tile_embeddings/pgp/base
+  - /data/mmci_tl_train@data_train
+  - /data/mmci_tl_val@data_val
+  - /data/mmci_tl_test@data_test
+  - _self_
+
+uris:
+ - ${data_train.tiles_uri_224}
+ - ${data_val.tiles_uri_224}
+ - ${data_test.tiles_uri_224}
