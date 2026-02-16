@@ -6,6 +6,6 @@ output_path: ${prostate_cancer_artifacts}/tissue_masks/${data.data_name}
 
 metadata:
   run_name: Tissue Masks ${data.data_name}
-  description: Annotation Masks ${data.data_name}
+  description: Tissue Masks ${data.data_name}
   hyperparams:
     level: ${level}
