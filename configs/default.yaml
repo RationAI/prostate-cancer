@@ -9,8 +9,6 @@ prostate_data: /mnt/data/MOU/
 
 mmci_mpp: 0.23
 
-data_name: ???
-
 thresholds:
   tissue_roi_t: 0.5
   exclude_t: 0.0

@@ -4,5 +4,4 @@ defaults:
   - /default
   - _self_
 
-# CSV containing column "slide_path" (+ "carcinoma" label, and "case_id" for some stages)
-slides_df_uri: ???
+data: ???
