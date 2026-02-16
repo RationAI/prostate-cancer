@@ -5,4 +5,4 @@ defaults:
   - _self_
 
 uris:
-- ${data.tiles_uri_224}
+  - ${data.tiles_uri_224}

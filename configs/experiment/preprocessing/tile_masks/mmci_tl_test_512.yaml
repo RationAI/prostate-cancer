@@ -5,7 +5,7 @@ defaults:
   - _self_
 
 tile_uris:
-  - ${tiles_uri_512}
+  - ${data.tiles_uri_512}
 
 percentage_cols:
   - "tissue_roi_percentage"
