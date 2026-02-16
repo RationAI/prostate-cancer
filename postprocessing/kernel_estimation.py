@@ -1,7 +1,7 @@
 import hydra
 import pandas as pd
 from omegaconf import DictConfig
-from rationai.mlkit import autolog
+from rationai.mlkit import autolog, with_cli_args
 from rationai.mlkit.lightning.loggers import MLFlowLogger
 from sklearn.metrics import auc, roc_curve
 
@@ -17,11 +17,8 @@ def get_auc(table: pd.DataFrame, kernel_sizes: list[int]) -> dict[str, float]:
     return aucs
 
 
-@hydra.main(
-    config_path="../configs",
-    config_name="postprocessing/kernel_estimation",
-    version_base=None,
-)
+@with_cli_args(["+postprocessing=kernel_estimation"])
+@hydra.main(config_path="../configs", config_name="postprocessing", version_base=None)
 @autolog
 def main(config: DictConfig, logger: MLFlowLogger) -> None:
     df = read_json_table(config.preds_uri)

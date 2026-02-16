@@ -6,7 +6,7 @@ import numpy as np
 import pandas as pd
 from numpy.typing import NDArray
 from omegaconf import DictConfig
-from rationai.mlkit import autolog
+from rationai.mlkit import autolog, with_cli_args
 from rationai.mlkit.lightning.loggers import MLFlowLogger
 from sklearn.metrics import auc, precision_recall_curve, roc_curve
 
@@ -117,11 +117,8 @@ def perform_pr(table: pd.DataFrame, pred_column: str) -> tuple[str, np.float32]:
     return plot_path, best_threshold
 
 
-@hydra.main(
-    config_path="../configs",
-    config_name="postprocessing/slide_level_curves",
-    version_base=None,
-)
+@with_cli_args(["+postprocessing=slide_level_curves"])
+@hydra.main(config_path="../configs", config_name="postprocessing", version_base=None)
 @autolog
 def main(config: DictConfig, logger: MLFlowLogger) -> None:
     df = read_json_table(config.preds_uri)

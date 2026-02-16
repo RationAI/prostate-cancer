@@ -8,7 +8,7 @@ import pandas as pd
 import torch
 from numpy.typing import NDArray
 from omegaconf import DictConfig
-from rationai.mlkit import autolog
+from rationai.mlkit import autolog, with_cli_args
 from rationai.mlkit.lightning.loggers import MLFlowLogger
 from torchmetrics import (
     AUROC,
@@ -73,11 +73,8 @@ def plot_and_save_confusion_matrix(cm: NDArray[np.floating], path: str) -> None:
     plt.close()
 
 
-@hydra.main(
-    config_path="../configs",
-    config_name="postprocessing/slide_level_eval",
-    version_base=None,
-)
+@with_cli_args(["+postprocessing=slide_level_eval"])
+@hydra.main(config_path="../configs", config_name="postprocessing", version_base=None)
 @autolog
 def main(config: DictConfig, logger: MLFlowLogger) -> None:
     df = read_json_table(config.preds_uri)

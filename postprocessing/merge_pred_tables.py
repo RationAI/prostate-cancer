@@ -5,15 +5,12 @@ import hydra
 import mlflow
 import pandas as pd
 from omegaconf import DictConfig
-from rationai.mlkit import autolog
+from rationai.mlkit import autolog, with_cli_args
 from rationai.mlkit.lightning.loggers import MLFlowLogger
 
 
-@hydra.main(
-    config_path="../configs",
-    config_name="postprocessing/slide_predictions_table_merge",
-    version_base=None,
-)
+@with_cli_args(["+postprocessing=slide_predictions_table_merge"])
+@hydra.main(config_path="../configs", config_name="postprocessing", version_base=None)
 @autolog
 def main(config: DictConfig, logger: MLFlowLogger) -> None:
     df = None

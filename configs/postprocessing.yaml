@@ -1,0 +1,14 @@
+# @package _global_
+
+defaults:
+  - /default
+  - _self_
+
+data: ???
+use_case: ???
+model_name: ???
+preds_uri: ??? # each script requires prediction table
+
+metadata:
+  run_name: ${use_case} ${model_name} ${data.data_name}
+  description: ${use_case} ${model_name} ${data.data_name}
