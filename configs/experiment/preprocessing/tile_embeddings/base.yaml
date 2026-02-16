@@ -1,0 +1,10 @@
+# @package _global_
+
+# override the default filtering thresholds so that the embeddings are created for all the tiles
+thresholds:
+  tissue_roi_t: 0.0
+  residual_t: 1.0
+  blur_t: 1.0
+  folding_t: 1.0
+  exclude_t: 1.0
+  another_pathology_t: 1.0
