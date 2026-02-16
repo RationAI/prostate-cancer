@@ -11,3 +11,6 @@ uris:
  - ${data_train.tiles_uri_224}
  - ${data_val.tiles_uri_224}
  - ${data_test.tiles_uri_224}
+
+data:
+  data_name: "MMCI TL" # use the common name

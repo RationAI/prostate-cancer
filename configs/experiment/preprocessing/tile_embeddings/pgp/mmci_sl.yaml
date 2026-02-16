@@ -9,3 +9,6 @@ defaults:
 uris:
  - ${data_group_1.tiles_uri_224}
  - ${data_group_2.tiles_uri_224}
+
+data:
+  data_name: "MMCI SL" # use the common name
