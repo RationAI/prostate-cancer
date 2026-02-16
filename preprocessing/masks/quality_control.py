@@ -165,7 +165,7 @@ async def qc_main(
 def main(config: DictConfig, logger: MLFlowLogger) -> None:
     output_path = Path(config.output_path)
     output_path.mkdir(exist_ok=True, parents=True)
-    prostate_cancer_path = config.prostate_cancer_path
+    prostate_cancer_path = config.prostate_cancer_artifacts
 
     df = pd.read_csv(mlflow.artifacts.download_artifacts(config.data.metadata_table))
     slides = [Path(path) for path in df["slide_path"]]
