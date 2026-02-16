@@ -31,7 +31,7 @@ def save_embeddings(
 
 
 @with_cli_args(["+preprocessing=tile_embeddings"])
-@hydra.main(config_path="../configs", config_name="preprocessing", version_base=None)
+@hydra.main(config_path="../../configs", config_name="preprocessing", version_base=None)
 @autolog
 def main(config: DictConfig, logger: MLFlowLogger) -> None:
     login(token=os.environ["HF_TOKEN"])

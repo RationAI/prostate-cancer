@@ -116,7 +116,7 @@ def process_slide(slide_path: Path, level: int, output_path: Path) -> None:
 
 
 @with_cli_args(["+preprocessing=annot_masks"])
-@hydra.main(config_path="../configs", config_name="preprocessing", version_base=None)
+@hydra.main(config_path="../../configs", config_name="preprocessing", version_base=None)
 @autolog
 def main(config: DictConfig, logger: MLFlowLogger) -> None:
     assert logger is not None, "Need logger"

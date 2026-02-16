@@ -160,7 +160,7 @@ async def qc_main(
 
 
 @with_cli_args(["+preprocessing=qc_masks"])
-@hydra.main(config_path="../configs", config_name="preprocessing", version_base=None)
+@hydra.main(config_path="../../configs", config_name="preprocessing", version_base=None)
 @autolog
 def main(config: DictConfig, logger: MLFlowLogger) -> None:
     output_path = Path(config.output_path)

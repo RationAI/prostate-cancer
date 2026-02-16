@@ -114,7 +114,7 @@ def process_slide(
 
 
 @with_cli_args(["+preprocessing=tiling"])
-@hydra.main(config_path="../configs", config_name="preprocessing", version_base=None)
+@hydra.main(config_path="../../configs", config_name="preprocessing", version_base=None)
 @autolog
 def main(config: DictConfig, logger: MLFlowLogger) -> None:
     tissue_masks_path = (
