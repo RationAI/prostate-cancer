@@ -186,7 +186,7 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
 
     # ---
 
-    slides_path = mlflow.artifacts.download_artifacts(config.slides_df_uri)
+    slides_path = mlflow.artifacts.download_artifacts(config.data.metadata_table)
     slide_labels = pd.read_csv(slides_path).set_index("slide_path", drop=False)
 
     slides = [Path(slide["slide_path"]) for _, slide in slide_labels.iterrows()]

@@ -35,7 +35,7 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
     output_path = Path(config.output_path)
     output_path.mkdir(exist_ok=True, parents=True)
 
-    df = pd.read_csv(mlflow.artifacts.download_artifacts(config.slides_df_uri))
+    df = pd.read_csv(mlflow.artifacts.download_artifacts(config.data.metadata_table))
     slides_path = [Path(path) for path in df["slide_path"]]
 
     process_items(

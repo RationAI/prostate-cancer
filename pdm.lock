@@ -2659,7 +2659,7 @@ name = "rationai-mlkit"
 version = "0.3.1"
 requires_python = ">=3.12,<3.14"
 git = "https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/mlkit.git"
-revision = "9280943371cd8dc1d5c22f2585a5e2377137cf05"
+revision = "549f5be72a162e7debf3a911ea4649f50080b1d0"
 summary = ""
 groups = ["default"]
 dependencies = [

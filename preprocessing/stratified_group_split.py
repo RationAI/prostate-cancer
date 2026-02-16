@@ -3,9 +3,8 @@ from pathlib import Path
 import hydra
 import mlflow
 import pandas as pd
-from mlkit.rationai.mlkit import with_cli_args
 from omegaconf import DictConfig
-from rationai.mlkit import autolog
+from rationai.mlkit import autolog, with_cli_args
 from rationai.mlkit.lightning.loggers import MLFlowLogger
 from sklearn.model_selection import StratifiedGroupKFold
 
@@ -95,7 +94,7 @@ def stratified_group_split(
 @hydra.main(config_path="../configs", config_name="preprocessing", version_base=None)
 @autolog
 def main(config: DictConfig, logger: MLFlowLogger) -> None:
-    slides_df_path = mlflow.artifacts.download_artifacts(config.slides_df_uri)
+    slides_df_path = mlflow.artifacts.download_artifacts(config.data.metadata_table)
     slides_df = pd.read_csv(slides_df_path)
 
     train_slides, val_slides = stratified_group_split(

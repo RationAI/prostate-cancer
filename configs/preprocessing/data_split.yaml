@@ -1,6 +1,6 @@
 # @package _global_
 
-test_size: 0.1
+test_size: ???
 target_column: "carcinoma"
 
 metadata:

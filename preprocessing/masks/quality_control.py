@@ -167,7 +167,7 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
     output_path.mkdir(exist_ok=True, parents=True)
     prostate_cancer_path = config.prostate_cancer_path
 
-    df = pd.read_csv(mlflow.artifacts.download_artifacts(config.slides_df_uri))
+    df = pd.read_csv(mlflow.artifacts.download_artifacts(config.data.metadata_table))
     slides = [Path(path) for path in df["slide_path"]]
 
     semaphore = asyncio.Semaphore(config.request_limit)
