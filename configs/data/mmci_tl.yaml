@@ -1,3 +1,7 @@
 metadata_table: "mlflow-artifacts:/65/6fa22cb78ac641c6973845eba7177340/artifacts/mmci_tl_train_data.csv"
 
+tissue_masks_uri: "mlflow-artifacts:/65/4ea7cee809a2443389855facba548959/artifacts/tissue_masks"
+qc_masks_uri: "mlflow-artifacts:/65/df5ccd31178549afb5e843b1ea0741a0/artifacts/qc_masks"
+annotation_masks_uri: "mlflow-artifacts:/65/199141b76f90457fbf6183bd70a1e488/artifacts/annotation_masks"
+
 data_name: "MMCI TL (Original Train)"

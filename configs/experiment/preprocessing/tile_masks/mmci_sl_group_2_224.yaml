@@ -1,0 +1,14 @@
+# @package _global_
+
+defaults:
+  - /data/mmci_sl_group_2@data
+  - _self_
+
+tile_uris:
+  - ${tiles_uri_224}
+
+percentage_cols:
+  - "tissue_roi_percentage"
+  - "residual_percentage"
+  - "blur_percentage"
+  - "folding_percentage"

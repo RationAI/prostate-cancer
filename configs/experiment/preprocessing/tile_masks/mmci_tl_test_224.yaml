@@ -1,0 +1,17 @@
+# @package _global_
+
+defaults:
+  - /data/mmci_tl_test@data
+  - _self_
+
+tile_uris:
+  - ${tiles_uri_224}
+
+percentage_cols:
+  - "tissue_roi_percentage"
+  - "carcinoma_roi_percentage"
+  - "residual_percentage"
+  - "blur_percentage"
+  - "folding_percentage"
+  - "another_pathology_percentage"
+  - "exclude_percentage"

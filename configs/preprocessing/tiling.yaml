@@ -4,10 +4,6 @@
 mpp: 0.46
 tile_extent: ???
 stride: ???
-qc_masks_uri: ???
-tissue_masks_uri: ???
-annotation_masks_uri: ???
-
 
 metadata:
   run_name: Tiling ${data.data_name}

@@ -1,7 +1,7 @@
 # @package _global_
 
 output_path: ${prostate_cancer_artifacts}/${data.data_name}_rescaled/${desired_mpp}
-desired_mpp: 0.5
+desired_mpp: ???
 max_concurrent: 5
 
 metadata:

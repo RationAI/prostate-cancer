@@ -1,0 +1,7 @@
+# @package _global_
+
+defaults:
+  - /data/graz_sample@data
+  - _self_
+
+desired_mpp: 0.5

@@ -119,18 +119,18 @@ def process_slide(
 def main(config: DictConfig, logger: MLFlowLogger) -> None:
     tissue_masks_path = (
         None
-        if config.tissue_masks_uri is None
-        else Path(download_artifacts(config.tissue_masks_uri))
+        if config.data.tissue_masks_uri is None
+        else Path(download_artifacts(config.data.tissue_masks_uri))
     )
     qc_masks_path = (
         None
-        if config.qc_masks_uri is None
-        else Path(download_artifacts(config.qc_masks_uri))
+        if config.data.qc_masks_uri is None
+        else Path(download_artifacts(config.data.qc_masks_uri))
     )
     annotation_masks_path = (
         None
-        if config.annotation_masks_uri is None
-        else Path(download_artifacts(config.annotation_masks_uri))
+        if config.data.annotation_masks_uri is None
+        else Path(download_artifacts(config.data.annotation_masks_uri))
     )
 
     # --- Source of raw tiles

@@ -1,6 +1,6 @@
 # @package _global_
 
-level: 3
+level: 5
 max_concurrent: 100
 output_path: ${prostate_cancer_artifacts}/tissue_masks/${data.data_name}
 
