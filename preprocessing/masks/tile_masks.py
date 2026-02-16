@@ -110,7 +110,7 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
         fn_kwargs={
             "percentage_cols": config.percentage_cols,
             "output_path": output_path,
-            "tissue_threshold": config.thresholds.tissue_roi_threshold,
+            "tissue_threshold": config.thresholds.tissue_roi_t,
             "tiles_ref": tiles_ref,
         },
         max_concurrent=config.max_concurrent,
