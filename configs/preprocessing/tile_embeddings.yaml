@@ -8,10 +8,9 @@ tile_encoder:
   name: ???
 
 uris: ???
+use_case: Tile Embeddings
 
 metadata:
-  run_name: ${tile_encoder.name} Tile Embeddings ${data.data_name}
-  description: ${tile_encoder.name} Tile Embeddings ${data.data_name}
   hyperparams:
     model: ${tile_encoder.name}
     batch_size: ${batch_size}

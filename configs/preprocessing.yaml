@@ -5,3 +5,8 @@ defaults:
   - _self_
 
 data: ???
+use_case: ???
+
+metadata:
+  run_name: ${use_case} ${data.data_name}
+  description: ${use_case} ${data.data_name}

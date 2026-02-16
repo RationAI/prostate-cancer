@@ -3,9 +3,8 @@
 output_path: ${prostate_cancer_artifacts}/${data.data_name}_rescaled/${desired_mpp}
 desired_mpp: ???
 max_concurrent: 5
+use_case: WSI resize
 
 metadata:
-  run_name: WSI resize ${data.data_name}
-  description: WSI resize ${data.data_name}
   hyperparams:
     desired_mpp: ${desired_mpp}

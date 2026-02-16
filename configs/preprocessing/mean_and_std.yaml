@@ -1,7 +1,4 @@
 # @package _global_
 
 uris: [] # URIs to tiles
-
-metadata:
-  run_name: Mean&Std. ${data.data_name}
-  description: Mean&Std. ${data.data_name}
+use_case: "Mean&Std."

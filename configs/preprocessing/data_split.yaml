@@ -2,9 +2,8 @@
 
 test_size: ???
 target_column: "carcinoma"
+use_case: Data Split
 
 metadata:
-  run_name: Data Split ${data.data_name}
-  description: Data Split ${data.data_name}
   hyperparams:
     test_size: ${test_size}

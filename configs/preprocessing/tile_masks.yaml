@@ -4,7 +4,4 @@ output_path: ${prostate_cancer_artifacts}/tile_masks/${data.data_name}
 max_concurrent: 5
 tile_uris: []
 percentage_cols: []
-
-metadata:
-  run_name: Tile Masks ${data.data_name}
-  description: Tile Masks ${data.data_name}
+use_case: Tile Masks
