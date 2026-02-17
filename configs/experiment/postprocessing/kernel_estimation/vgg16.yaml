@@ -3,5 +3,5 @@
 defaults:
   - /experiment/postprocessing/kernel_estimation/base
   - /data/mmci_sl_group_1@data
-  - /model/checkpoints/pgp@model_data
+  - /model/checkpoints/vgg16@model_data
   - _self_

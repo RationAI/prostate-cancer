@@ -1,0 +1,5 @@
+# @package _global_
+
+defaults:
+  - /experiment/postprocessing/slide_level_curves/max_aggregations/base
+  - /model/checkpoints/resnet50@model_data

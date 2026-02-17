@@ -1,5 +1,6 @@
 # @package _global_
 
+pred_column: ???
 t: ???
 
-use_case: "Slide-Level Predictions Table"
+use_case: "Enhanced Slide-Level Predictions Table"

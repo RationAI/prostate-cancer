@@ -1,6 +1,5 @@
 # @package _global_
 
-
 table_uris: ??? # Tables to Merge
 
 use_case: Slide-Level Predictions Merged Table

@@ -14,7 +14,7 @@ from postprocessing.read_table import read_json_table
 @autolog
 def main(config: DictConfig, logger: MLFlowLogger) -> None:
     df = read_json_table(config.preds_uri)
-    df["bin_prediction"] = df["prediction"] >= config.t
+    df["bin_prediction"] = df[config.pred_column] >= config.t
     df["is_fp"] = df["bin_prediction"] & ~df["target"]
     df = df.sort_values(by="prediction", ascending=False)
 
