@@ -1,5 +1,5 @@
 # @package _global_
 
 defaults:
-  - /experiment/postprocessing/slide_level_curves/max_aggregations/base
+  - /experiment/postprocessing/slide_prediction_table/max_aggregations/base
   - /model/checkpoints/vgg16_stain@model_data

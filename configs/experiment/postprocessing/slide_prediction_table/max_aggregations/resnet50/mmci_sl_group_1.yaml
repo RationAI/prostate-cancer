@@ -1,7 +1,7 @@
 # @package _global_
 
 defaults:
-  - /experiment/postprocessing/slide_level_curves/max_aggregations/resnet50/base
+  - /experiment/postprocessing/slide_prediction_table/max_aggregations/resnet50/base
   - /data/mmci_sl_group_1@data
   - _self_
 

@@ -1,7 +1,7 @@
 # @package _global_
 
 defaults:
-  - /experiment/postprocessing/slide_level_curves/max_aggregations/vgg16/base_stain
+  - /experiment/postprocessing/slide_prediction_table/max_aggregations/vgg16/base_stain
   - /data/mmci_sl_group_1@data
   - _self_
 

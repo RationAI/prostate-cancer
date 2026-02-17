@@ -9,7 +9,7 @@ from rationai.mlkit import autolog, with_cli_args
 from rationai.mlkit.lightning.loggers import MLFlowLogger
 
 
-@with_cli_args(["+postprocessing=slide_predictions_table_merge"])
+@with_cli_args(["+postprocessing=slide_prediction_table_merge"])
 @hydra.main(config_path="../configs", config_name="postprocessing", version_base=None)
 @autolog
 def main(config: DictConfig, logger: MLFlowLogger) -> None:

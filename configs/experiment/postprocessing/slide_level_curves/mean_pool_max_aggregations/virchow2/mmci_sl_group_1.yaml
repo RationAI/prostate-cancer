@@ -5,4 +5,5 @@ defaults:
   - /data/mmci_sl_group_1@data
   - _self_
 
+preds_uri: ${model_data.slide_level_prediction_uris.mean_pool_max.mmci_sl_group_1} 
 pred_column: "pred_2"
