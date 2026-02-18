@@ -1,4 +1,0 @@
-# @package _global_
-
-
-t: ${model_data.slide_mpm_threshold}

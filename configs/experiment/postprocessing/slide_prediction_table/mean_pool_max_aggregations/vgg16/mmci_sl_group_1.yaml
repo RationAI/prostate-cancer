@@ -1,8 +1,0 @@
-# @package _global_
-
-defaults:
-  - /experiment/postprocessing/slide_level_curves/max_aggregations/vgg16/base
-  - /data/mmci_sl_group_1@data
-  - _self_
-
-pred_column: "pred_1"

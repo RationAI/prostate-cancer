@@ -1,5 +1,0 @@
-# @package _global_
-
-defaults:
-  - /experiment/postprocessing/slide_prediction_table/mean_pool_max_aggregations
-  - /model/checkpoints/pgp@model_data
