@@ -1,0 +1,18 @@
+# @package _global_
+
+defaults:
+  - /callbacks/aggregator_estimation@callbacks
+  - /experiment/predict/embeddings/virchow2/base
+  - /data/uris/mmci_sl_group_1@predict_data
+  - _self_
+
+callbacks:
+  estimation_callback:
+    aggregator_cls_path: prostate_cancer.aggregators.span.SpanAggregator
+    static:
+      extent_tile: 224
+      stride_tile: 112
+    to_estimate:
+      k: [2, 3, 4, 5]
+
+use_case: "K Estimation (Span Aggregator)"
