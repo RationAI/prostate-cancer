@@ -1,6 +1,7 @@
 tile_threshold: 0.81
 slide_max_threshold: 0.997
 slide_mpm_threshold: 0.982
+slide_top_k_threshold: 0.978
 
 checkpoint: "mlflow-artifacts:/65/fb15954bd28f4294b928cd5174385d38/artifacts/checkpoints/epoch=2-step=69446/checkpoint.ckpt"
 model_name: "PGP"
@@ -9,3 +10,5 @@ slide_level_prediction_uris:
     mmci_sl_group_1: "mlflow-artifacts:/65/6e495b406c6445aeb121493efa3e5bb5/artifacts/tables/aggregated_predictions_corrected.json"
   max:
     mmci_sl_group_1: "mlflow-artifacts:/65/107c573695df44148f58f87f5ebc663b/artifacts/tables/aggregated_predictions_corrected.json"
+  top_k:
+    mmci_sl_group_1: "mlflow-artifacts:/65/8e99ad132b574e09a7fc5d27002adc68/artifacts/tables/aggregated_predictions_corrected.json"

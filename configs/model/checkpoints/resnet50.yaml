@@ -1,6 +1,7 @@
 tile_threshold: 0.44
 slide_max_threshold: 0.954
 slide_mpm_threshold: 0.324
+slide_top_k_threshold: 0.431
 
 checkpoint: "mlflow-artifacts:/65/aebc892f526047249b972f200bef4381/artifacts/checkpoints/epoch=0-step=4648/checkpoint.ckpt"
 model_name: "ResNet50"
@@ -9,3 +10,5 @@ slide_level_prediction_uris:
     mmci_sl_group_1: "mlflow-artifacts:/65/46a594a334ef4bbe9fdc7ba73250b12a/artifacts/tables/aggregated_predictions_corrected.json"
   max:
     mmci_sl_group_1: "mlflow-artifacts:/65/94561b6417ea4f888495fdcb799555e2/artifacts/tables/aggregated_predictions_corrected.json"
+  top_k:
+    mmci_sl_group_1: "mlflow-artifacts:/65/bcf0312c738c460381bde996e5cb93d8/artifacts/tables/aggregated_predictions_corrected.json"
