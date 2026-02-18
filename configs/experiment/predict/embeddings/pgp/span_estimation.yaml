@@ -3,7 +3,7 @@
 defaults:
   - /callbacks/aggregator_estimation@callbacks
   - /experiment/predict/embeddings/pgp/base
-  - /data/uris/mmci_sl_group_1@predict_data
+  - /data/mmci_sl_group_1@predict_data
   - _self_
 
 callbacks:
