@@ -1,7 +1,7 @@
 # @package _global_
 
 defaults:
-  - /experiment/postprocessing/slide_level_curves/max_aggregations/pgp/base
+  - /experiment/postprocessing/slide_level_curves/mean_pool_max_aggregations/pgp/base
   - /data/mmci_sl_group_1@data
   - _self_
 
