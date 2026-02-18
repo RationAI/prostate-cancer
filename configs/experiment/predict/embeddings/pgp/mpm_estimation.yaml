@@ -6,14 +6,13 @@ defaults:
   - /data/uris/mmci_sl_group_1@predict_data
   - _self_
 
+callbacks:
+  estimation_callback:
+    aggregator_cls_path: rationai.mlkit.metrics.MeanPoolMaxAggregator
+    static:
+      extent_tile: 224
+      stride_tile: 112
+    to_estimate:
+      kernel_size: [1, 2, 3, 4, 5, 6, 7]
 
-aggregator_cls_path: rationai.mlkit.metrics.MeanPoolMaxAggregator
-
-static:
-  extent_tile: 224
-  stride_tile: 112
-to_estimate:
-  kernel_size: [1, 2, 3, 4, 5, 6, 7]
-
-use_case: "Kernel Size Estimation"
-
+use_case: "Kernel Size Estimation (MPM Aggregator)"

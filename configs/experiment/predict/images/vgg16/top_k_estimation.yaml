@@ -2,19 +2,18 @@
 
 defaults:
   - /callbacks/aggregator_estimation@callbacks
-  - /experiment/predict/embeddings/vgg16/stain_base
+  - /experiment/predict/embeddings/vgg16/base
   - /data/uris/mmci_sl_group_1@predict_data
   - _self_
 
 callbacks:
   estimation_callback:
-    aggregator_cls_path: rationai.mlkit.metrics.MeanPoolMaxAggregator
-
+    aggregator_cls_path: rationai.mlkit.metrics.TopKAggregator
     static:
       extent_tile: 512
       stride_tile: 256
     to_estimate:
-      kernel_size: [1, 2, 3, 4, 5, 6, 7]
+      kernel_size: [1, 2, 3, 4, 5]
+      k: [2, 3, 4]
 
-use_case: "Kernel Size Estimation (MPM Aggregator)"
-
+use_case: "Kernel Size & K Estimation (Top K Aggregator)"
