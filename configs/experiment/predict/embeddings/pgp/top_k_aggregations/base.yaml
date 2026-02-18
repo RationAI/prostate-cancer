@@ -1,0 +1,15 @@
+# @package _global_
+
+defaults:
+  - /callbacks/aggregator@callbacks
+  - /aggregator/top_k@aggregator
+  - /experiment/predict/embeddings/pgp/base
+  - _self_
+
+aggregator:
+  kernel_size: 1
+  extent_tile: 224
+  stride_tile: 112
+  k: 4
+
+use_case: "Top-k Aggregation"
