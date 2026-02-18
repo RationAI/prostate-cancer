@@ -1,0 +1,6 @@
+# @package _global_
+
+# The experiment was carried out on MMCI SL group 1
+preds_uri: ${model_data.slide_level_prediction_uris.span.mmci_sl_group_1}
+to_estimate:
+  k: [2, 3, 4, 5]
