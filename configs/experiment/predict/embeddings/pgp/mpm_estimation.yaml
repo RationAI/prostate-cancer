@@ -1,0 +1,19 @@
+# @package _global_
+
+defaults:
+  - /callbacks/aggregator_estimation@callbacks
+  - /experiment/predict/embeddings/pgp/base
+  - /data/uris/mmci_sl_group_1@predict_data
+  - _self_
+
+
+aggregator_cls_path: rationai.mlkit.metrics.MeanPoolMaxAggregator
+
+static:
+  extent_tile: 224
+  stride_tile: 112
+to_estimate:
+  kernel_size: [1, 2, 3, 4, 5, 6, 7]
+
+use_case: "Kernel Size Estimation"
+
