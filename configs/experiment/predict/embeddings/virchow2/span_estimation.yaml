@@ -12,6 +12,7 @@ callbacks:
     static:
       extent_tile: 224
       stride_tile: 112
+      cell_threshold: ${model_data.tile_threshold}
     to_estimate:
       k: [2, 3, 4, 5]
 
