@@ -17,7 +17,13 @@ def get_auc(table: pd.DataFrame, to_estimate: dict[str, list[int]]) -> dict[str,
     for configuration in values_product:
         keys = [f"{param_names[i]}={configuration[i]}" for i in range(len(to_estimate))]
         key_str = "_".join(keys)
-        fpr, tpr, _ = roc_curve(table["target"], table[f"pred_{key_str}"])
+        column = f"pred_{key_str}"
+
+        # backward compatibility
+        if column not in table.columns:
+            column = f"pred_{configuration[0]}"
+
+        fpr, tpr, _ = roc_curve(table["target"], table[column])
         # mlflow does not allow "=" in metric name
         aucs[f"auc_{key_str.replace('=', '_')}"] = float(auc(fpr, tpr))
 

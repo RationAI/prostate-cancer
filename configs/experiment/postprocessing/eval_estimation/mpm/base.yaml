@@ -4,4 +4,4 @@
 preds_uri: ${model_data.slide_level_prediction_uris.mean_pool_max.mmci_sl_group_1}
 
 to_estimate:
-  kernel_sizes: [1, 2, 3, 4, 5, 6, 7] # all models were tried with these
+  kernel_size: [1, 2, 3, 4, 5, 6, 7] # all models were tried with these
