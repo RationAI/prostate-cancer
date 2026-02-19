@@ -1,0 +1,7 @@
+# @package _global_
+
+defaults:
+  - /experiment/postprocessing/slide_level_eval/pgp/base
+
+pred_column: "prediction"
+t: ${model_data.slide_max_threshold}
