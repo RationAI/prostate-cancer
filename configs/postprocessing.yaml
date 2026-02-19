@@ -9,6 +9,8 @@ use_case: ???
 model_data: ???
 preds_uri: ??? # each script requires prediction table
 
+thresholds: null # not used in these scripts
+
 metadata:
   run_name: ${use_case} ${model_data.model_name} ${data.data_name}
   description: ${use_case} ${model_data.model_name} ${data.data_name}
