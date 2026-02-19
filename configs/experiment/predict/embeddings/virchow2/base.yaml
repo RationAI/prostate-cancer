@@ -6,6 +6,6 @@ defaults:
   - /model/checkpoints/virchow2@model_data
   - _self_
 
-datmodule:
+datamodule:
   predict:
     embeddings_uri: ${predict_data.virchow2_embeddings_uri}
