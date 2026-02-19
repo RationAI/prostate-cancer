@@ -1,0 +1,8 @@
+# @package _global_
+
+defaults:
+  - /experiment/postprocessing/slide_level_eval/vgg16_stain/base
+
+aggregation_method: "Top-k"
+pred_column: "pred_kernel_size=1_k=2"
+t: ${model_data.slide_top_k_threshold}
