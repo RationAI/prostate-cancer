@@ -1,5 +1,7 @@
 # @package _global_
 
+aggregation_method: "Top-K"
+
 # The experiment was carried out on MMCI SL group 1
 preds_uri: ${model_data.slide_level_prediction_uris.top_k.mmci_sl_group_1}
 to_estimate:

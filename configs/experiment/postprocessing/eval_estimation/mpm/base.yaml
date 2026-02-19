@@ -1,5 +1,6 @@
 # @package _global_
 
+aggregation_method: "Mean Pool Max"
 # The experiment was carried out on MMCI SL group 1
 preds_uri: ${model_data.slide_level_prediction_uris.mean_pool_max.mmci_sl_group_1}
 

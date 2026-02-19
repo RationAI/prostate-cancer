@@ -2,6 +2,7 @@ tile_threshold: 0.44
 slide_max_threshold: 0.954
 slide_mpm_threshold: 0.324
 slide_top_k_threshold: 0.431
+slide_span_threshold: 0.5 # arbitrary - just for eval purposes
 
 checkpoint: "mlflow-artifacts:/65/aebc892f526047249b972f200bef4381/artifacts/checkpoints/epoch=0-step=4648/checkpoint.ckpt"
 model_name: "ResNet50"
