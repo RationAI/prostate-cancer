@@ -11,7 +11,6 @@ from omegaconf import DictConfig
 from rationai.mlkit import autolog, with_cli_args
 from rationai.mlkit.lightning.loggers import MLFlowLogger
 from torchmetrics import (
-    AUROC,
     Accuracy,
     NegativePredictiveValue,
     Precision,
@@ -23,11 +22,8 @@ from torchmetrics.functional import confusion_matrix
 from postprocessing.read_table import read_json_table
 
 
-def evaluate(
-    table: pd.DataFrame, t: float, pred_column: str
-) -> tuple[dict[str, float], NDArray[np.floating]]:
+def evaluate(table: pd.DataFrame) -> tuple[dict[str, float], NDArray[np.floating]]:
     metrics = {
-        "AUC": AUROC("binary"),
         "accuracy": Accuracy("binary"),
         "precision": Precision("binary"),
         "recall": Recall("binary"),
@@ -36,19 +32,20 @@ def evaluate(
     }
 
     target = torch.tensor(table["target"].astype(int).values)
-    pred_prob = torch.tensor(table[pred_column].astype(float).values)
-    pred_label = (pred_prob >= t).int()
+    pred_binary = torch.tensor(table["pred_binary"].astype(int).values)
 
     results = {}
     for name, metric in metrics.items():
-        if name == "AUC":
-            value = metric(pred_prob, target)
-        else:
-            value = metric(pred_label, target)
+        value = metric(pred_binary, target)
         results[name] = value.item()
 
-    cm = confusion_matrix(pred_label, target, task="binary").cpu().numpy()
+    cm = confusion_matrix(pred_binary, target, task="binary").cpu().numpy()
     return results, cm
+
+
+def store_mispredictions(table: pd.DataFrame, path: str) -> None:
+    mispreds = table[table["pred_binary"] != table["target"]]
+    mispreds.to_csv(path, index=False)
 
 
 def plot_and_save_confusion_matrix(cm: NDArray[np.floating], path: str) -> None:
@@ -78,7 +75,8 @@ def plot_and_save_confusion_matrix(cm: NDArray[np.floating], path: str) -> None:
 @autolog
 def main(config: DictConfig, logger: MLFlowLogger) -> None:
     df = read_json_table(config.preds_uri)
-    results, cm = evaluate(df, config.t, config.pred_column)
+    df["pred_binary"] = df[config.pred_column] >= config.t
+    results, cm = evaluate(df)
     logger.log_table(results, "slide_metrics.json")
     logger.log_metrics(results)
 
@@ -86,6 +84,9 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
         cm_path = os.path.join(tmpdir, "confusion_matrix.png")
         plot_and_save_confusion_matrix(cm, cm_path)
         logger.log_artifact(cm_path, artifact_path="plots")
+        mp_path = os.path.join(tmpdir, "mispredictions.csv")
+        store_mispredictions(df, mp_path)
+        logger.log_artifact(mp_path, artifact_path="tables")
 
 
 if __name__ == "__main__":
