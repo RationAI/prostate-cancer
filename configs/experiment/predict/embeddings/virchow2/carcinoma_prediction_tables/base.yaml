@@ -1,0 +1,8 @@
+# @package _global_
+
+defaults:
+  - /callbacks/carcinoma_prediction_table@callbacks
+  - /experiment/predict/embeddings/virchow2/base
+  - _self_
+
+use_case: "Carcinoma Prediction Table"

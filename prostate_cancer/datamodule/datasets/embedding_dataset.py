@@ -91,6 +91,8 @@ class EmbeddingsDataset(FilterableDataset[T]):
             ),
         )
 
+        assert len(slide_tiles) == len(slide_embeddings), "Old Way"
+
         slide_tiles = (
             self.prepare_tiles(slide_tiles)
             if self.labeled
