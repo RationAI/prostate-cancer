@@ -5,4 +5,8 @@ defaults:
   - /experiment/predict/embeddings/virchow2/base
   - _self_
 
+callbacks:
+  carcinoma_prediction_table:
+    threshold: ${model_data.tile_threshold}
+
 use_case: "Carcinoma Prediction Table"
