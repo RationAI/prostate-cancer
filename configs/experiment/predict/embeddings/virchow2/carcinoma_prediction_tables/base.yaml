@@ -6,7 +6,7 @@ defaults:
   - _self_
 
 callbacks:
-  carcinoma_prediction_table:
+  carcinoma_table_callback:
     threshold: ${model_data.tile_threshold}
 
 use_case: "Carcinoma Prediction Table"
