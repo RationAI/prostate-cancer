@@ -1,0 +1,22 @@
+# @package _global_
+
+defaults:
+  - /default
+  - _self_
+
+thresholds:
+  tissue_roi_t: 0.5
+  exclude_t: 0.0
+  another_pathology_t: 0.0
+  residual_t: 0.25
+  blur_t: 0.25
+  folding_t: 0.25
+
+  carcinoma_roi_t: 0.5
+
+data: ???
+use_case: ???
+
+metadata:
+  run_name: ${use_case} ${data.data_name}
+  description: ${use_case} ${data.data_name}

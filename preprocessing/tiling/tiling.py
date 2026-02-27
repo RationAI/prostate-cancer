@@ -9,7 +9,7 @@ import pandas as pd
 import ray
 from mlflow.artifacts import download_artifacts
 from omegaconf import DictConfig
-from rationai.mlkit import autolog
+from rationai.mlkit import autolog, with_cli_args
 from rationai.mlkit.lightning.loggers import MLFlowLogger
 from rationai.tiling import tiling
 from rationai.tiling.modules.tile_sources import OpenSlideTileSource
@@ -113,25 +113,24 @@ def process_slide(
     return slide_metadata, tiles
 
 
-@hydra.main(
-    config_path="../../configs", config_name="preprocessing/tiling", version_base=None
-)
+@with_cli_args(["+preprocessing=tiling"])
+@hydra.main(config_path="../../configs", config_name="preprocessing", version_base=None)
 @autolog
 def main(config: DictConfig, logger: MLFlowLogger) -> None:
     tissue_masks_path = (
         None
-        if config.tissue_masks_uri is None
-        else Path(download_artifacts(config.tissue_masks_uri))
+        if config.data.tissue_masks_uri is None
+        else Path(download_artifacts(config.data.tissue_masks_uri))
     )
     qc_masks_path = (
         None
-        if config.qc_masks_uri is None
-        else Path(download_artifacts(config.qc_masks_uri))
+        if config.data.qc_masks_uri is None
+        else Path(download_artifacts(config.data.qc_masks_uri))
     )
     annotation_masks_path = (
         None
-        if config.annotation_masks_uri is None
-        else Path(download_artifacts(config.annotation_masks_uri))
+        if config.data.annotation_masks_uri is None
+        else Path(download_artifacts(config.data.annotation_masks_uri))
     )
 
     # --- Source of raw tiles
@@ -187,7 +186,7 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
 
     # ---
 
-    slides_path = mlflow.artifacts.download_artifacts(config.slides_df_uri)
+    slides_path = mlflow.artifacts.download_artifacts(config.data.metadata_table)
     slide_labels = pd.read_csv(slides_path).set_index("slide_path", drop=False)
 
     slides = [Path(slide["slide_path"]) for _, slide in slide_labels.iterrows()]
@@ -214,7 +213,7 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
     save_mlflow_dataset(
         slides=slides_df,
         tiles=tiles_df,
-        dataset_name=config.data_name,
+        dataset_name=config.data.data_name,
     )
 
 

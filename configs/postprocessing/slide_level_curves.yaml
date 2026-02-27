@@ -1,10 +1,4 @@
 # @package _global_
-defaults:
-  - base
-  - _self_
 
 pred_column: ???
-
-metadata:
-  run_name: ${model_name} Slide Thresholds ${data_name}
-  description: ${model_name} Slide Thresholds ${data_name}
+use_case: "Slide Level Curves"

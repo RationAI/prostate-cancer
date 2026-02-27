@@ -1,7 +1,4 @@
 # @package _global_
-defaults:
-  - base
-  - _self_
 
 request_limit: 10
 request_timeout: 100000
@@ -10,8 +7,10 @@ num_repeats: 10
 url: "http://rayservice-qc-serve-svc.rationai-jobs-ns.svc.cluster.local:8000/"
 mask_level: 3
 sample_level: 1
-output_path: ${prostate_cancer_artifacts}/qc_masks/${data_name}
+output_path: ${prostate_cancer_artifacts}/qc_masks/${data.data_name}
+use_case: QC Masks
 
 metadata:
-  run_name: QC Masks ${data_name}
-  description: QC Masks ${data_name}
+  hyperparams:
+    mask_level: ${mask_level}
+    sample_level: ${sample_level}

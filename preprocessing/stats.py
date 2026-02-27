@@ -5,7 +5,7 @@ import ray
 import torch
 from omegaconf import DictConfig
 from rationai.masks import process_items
-from rationai.mlkit.autolog import autolog
+from rationai.mlkit import autolog, with_cli_args
 from rationai.mlkit.lightning.loggers import MLFlowLogger
 
 from prostate_cancer.datamodule.datasets import UnlabeledTilesDataset
@@ -60,11 +60,8 @@ def process_slide(slide: SlideTiles) -> None:
         stats_actor.add_stats.remote(sum_, sum_sq, count)
 
 
-@hydra.main(
-    config_path="../configs",
-    config_name="preprocessing/mean_and_std",
-    version_base=None,
-)
+@with_cli_args(["+preprocessing=mean_and_std"])
+@hydra.main(config_path="../configs", config_name="preprocessing", version_base=None)
 @autolog
 def main(config: DictConfig, logger: MLFlowLogger) -> None:
     logger.experiment.log_param(logger.run_id, "dataset_uris", config.uris)

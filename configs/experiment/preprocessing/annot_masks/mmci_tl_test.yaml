@@ -1,0 +1,5 @@
+# @package _global_
+
+defaults:
+  - /data/mmci_tl_test@data
+  - _self_
