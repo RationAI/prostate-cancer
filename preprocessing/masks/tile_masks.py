@@ -13,7 +13,7 @@ import torch
 from omegaconf import DictConfig
 from rationai.masks import process_items, tile_mask, write_big_tiff
 from rationai.masks.mask_builders import ScalarMaskBuilder
-from rationai.mlkit import autolog
+from rationai.mlkit import autolog, with_cli_args
 from rationai.mlkit.lightning.loggers import MLFlowLogger
 
 
@@ -85,11 +85,8 @@ def process_slide(
     # ---
 
 
-@hydra.main(
-    config_path="../../configs",
-    config_name="preprocessing/tile_masks",
-    version_base=None,
-)
+@with_cli_args(["+preprocessing=tile_masks"])
+@hydra.main(config_path="../../configs", config_name="preprocessing", version_base=None)
 @autolog
 def main(config: DictConfig, logger: MLFlowLogger) -> None:
     paths = [mlflow.artifacts.download_artifacts(uri) for uri in config.tile_uris]
@@ -113,7 +110,7 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
         fn_kwargs={
             "percentage_cols": config.percentage_cols,
             "output_path": output_path,
-            "tissue_threshold": config.thresholds.tissue_threshold,
+            "tissue_threshold": config.thresholds.tissue_roi_t,
             "tiles_ref": tiles_ref,
         },
         max_concurrent=config.max_concurrent,

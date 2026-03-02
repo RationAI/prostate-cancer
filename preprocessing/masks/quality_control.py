@@ -8,7 +8,7 @@ import mlflow
 import pandas as pd
 from aiohttp import ClientSession, ClientTimeout
 from omegaconf import DictConfig
-from rationai.mlkit.autolog import autolog
+from rationai.mlkit import autolog, with_cli_args
 from rationai.mlkit.lightning.loggers import MLFlowLogger
 
 from preprocessing.masks.qc_organize import (
@@ -159,16 +159,15 @@ async def qc_main(
         logger.log_artifacts(local_dir=report_path)
 
 
-@hydra.main(
-    config_path="../../configs", config_name="preprocessing/qc_masks", version_base=None
-)
+@with_cli_args(["+preprocessing=qc_masks"])
+@hydra.main(config_path="../../configs", config_name="preprocessing", version_base=None)
 @autolog
 def main(config: DictConfig, logger: MLFlowLogger) -> None:
     output_path = Path(config.output_path)
     output_path.mkdir(exist_ok=True, parents=True)
     prostate_cancer_path = config.prostate_cancer_artifacts
 
-    df = pd.read_csv(mlflow.artifacts.download_artifacts(config.slides_df_uri))
+    df = pd.read_csv(mlflow.artifacts.download_artifacts(config.data.metadata_table))
     slides = [Path(path) for path in df["slide_path"]]
 
     semaphore = asyncio.Semaphore(config.request_limit)

@@ -1,0 +1,5 @@
+# @package _global_
+
+defaults:
+  - /data/graz_sample@data
+  - _self_

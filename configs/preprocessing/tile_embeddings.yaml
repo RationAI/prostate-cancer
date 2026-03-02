@@ -1,20 +1,25 @@
 # @package _global_
-defaults:
-  - base
-  - _self_
 
 batch_size: 1024
-output_path: ${prostate_cancer_artifacts}/tile_embeddings/${tile_encoder.name}/${data_name}
+output_path: ${prostate_cancer_artifacts}/tile_embeddings/${tile_encoder.name}/${data.data_name}
+
+# create embeddings are created for all the tiles
+thresholds:
+  tissue_roi_t: 0.0
+  residual_t: 1.0
+  blur_t: 1.0
+  folding_t: 1.0
+  exclude_t: 1.0
+  another_pathology_t: 1.0
 
 tile_encoder:
   _target_: ???
   name: ???
 
 uris: ???
+use_case: Tile Embeddings
 
 metadata:
-  run_name: ${tile_encoder.name} Tile Embeddings ${data_name}
-  description: ${tile_encoder.name} Tile Embeddings ${data_name}
   hyperparams:
     model: ${tile_encoder.name}
-    output_path: ${output_path}
+    batch_size: ${batch_size}

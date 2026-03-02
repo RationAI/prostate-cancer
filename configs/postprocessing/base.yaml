@@ -1,8 +1,0 @@
-# @package _global_
-defaults:
-  - /default
-  - _self_
-
-data_name: ???
-model_name: ???
-preds_uri: ???

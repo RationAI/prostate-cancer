@@ -1,0 +1,9 @@
+# @package _global_
+
+defaults:
+  - /experiment/postprocessing/slide_level_curves/mean_pool_max_aggregations/resnet50/base
+  - /data/mmci_sl_group_1@data
+  - _self_
+
+preds_uri: ${model_data.slide_level_prediction_uris.mean_pool_max.mmci_sl_group_1}
+pred_column: "pred_5"

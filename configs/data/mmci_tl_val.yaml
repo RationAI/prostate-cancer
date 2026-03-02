@@ -6,4 +6,8 @@ virchow2_embeddings_uri: "mlflow-artifacts:/65/0279038fa2e54c33a5c326cbd147851f/
 
 metadata_table: "mlflow-artifacts:/65/fc8b5da06d644e8ab0535f71f798a0e8/artifacts/mmci_tl_val.csv"
 
+tissue_masks_uri: "mlflow-artifacts:/65/4ea7cee809a2443389855facba548959/artifacts/tissue_masks"
+qc_masks_uri: "mlflow-artifacts:/65/df5ccd31178549afb5e843b1ea0741a0/artifacts/qc_masks"
+annotation_masks_uri: "mlflow-artifacts:/65/199141b76f90457fbf6183bd70a1e488/artifacts/annotation_masks"
+
 data_name: "MMCI TL Val"

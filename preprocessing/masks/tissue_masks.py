@@ -12,7 +12,7 @@ from omegaconf import DictConfig
 from openslide import OpenSlide
 from rationai.masks import slide_resolution, tissue_mask, write_big_tiff
 from rationai.masks.processing import process_items
-from rationai.mlkit import autolog
+from rationai.mlkit import autolog, with_cli_args
 from rationai.mlkit.lightning.loggers import MLFlowLogger
 
 
@@ -28,17 +28,14 @@ def process_slide(slide_path: Path, level: int, output_path: Path) -> None:
     write_big_tiff(mask, path=mask_path, mpp_x=mpp_x, mpp_y=mpp_y)
 
 
-@hydra.main(
-    config_path="../../configs",
-    config_name="preprocessing/tissue_masks",
-    version_base=None,
-)
+@with_cli_args(["+preprocessing=tissue_masks"])
+@hydra.main(config_path="../../configs", config_name="preprocessing", version_base=None)
 @autolog
 def main(config: DictConfig, logger: MLFlowLogger) -> None:
     output_path = Path(config.output_path)
     output_path.mkdir(exist_ok=True, parents=True)
 
-    df = pd.read_csv(mlflow.artifacts.download_artifacts(config.slides_df_uri))
+    df = pd.read_csv(mlflow.artifacts.download_artifacts(config.data.metadata_table))
     slides_path = [Path(path) for path in df["slide_path"]]
 
     process_items(

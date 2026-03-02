@@ -1,11 +1,6 @@
 # @package _global_
-defaults:
-  - base
-  - _self_
 
 t: ???
 pred_column: ???
 
-metadata:
-  run_name: ${model_name} Slide-Level Metrics ${data_name}
-  description: ${model_name} Slide-Level Metrics ${data_name}
+use_case: "Slide-Level Metrics"

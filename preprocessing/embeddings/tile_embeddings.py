@@ -7,7 +7,7 @@ import hydra
 import torch
 from huggingface_hub import login
 from omegaconf import DictConfig
-from rationai.mlkit import autolog
+from rationai.mlkit import autolog, with_cli_args
 from rationai.mlkit.lightning.loggers import MLFlowLogger
 from torch.utils.data import DataLoader
 from tqdm import tqdm
@@ -30,11 +30,8 @@ def save_embeddings(
     torch.save(slide_embeddings, (folder / slide_name).with_suffix(".pt"))
 
 
-@hydra.main(
-    config_path="../../configs",
-    config_name="preprocessing/tile_embeddings",
-    version_base=None,
-)
+@with_cli_args(["+preprocessing=tile_embeddings"])
+@hydra.main(config_path="../../configs", config_name="preprocessing", version_base=None)
 @autolog
 def main(config: DictConfig, logger: MLFlowLogger) -> None:
     login(token=os.environ["HF_TOKEN"])

@@ -1,0 +1,5 @@
+# @package _global_
+
+defaults:
+  - /experiment/postprocessing/slide_prediction_table/max_aggregations/base
+  - /model/checkpoints/pgp@model_data

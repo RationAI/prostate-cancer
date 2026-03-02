@@ -1,12 +1,10 @@
 # @package _global_
-defaults:
-  - base
-  - _self_
 
-level: 3
+level: 5
 max_concurrent: 100
-output_path: ${prostate_cancer_artifacts}/tissue_masks/${data_name}
+output_path: ${prostate_cancer_artifacts}/tissue_masks/${data.data_name}
+use_case: Tissue Masks
 
 metadata:
-  run_name: Tissue Masks ${data_name}
-  description: Tissue Masks ${data_name}
+  hyperparams:
+    level: ${level}
