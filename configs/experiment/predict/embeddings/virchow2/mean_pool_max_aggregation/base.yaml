@@ -6,4 +6,9 @@ defaults:
   - /experiment/predict/embeddings/virchow2/base
   - _self_
 
+aggregator:
+  kernel_size: 2
+  extent_tile: 224
+  stride: 112
+
 use_case: "Mean Pool Max. Aggregation"

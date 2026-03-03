@@ -4,10 +4,10 @@ from prostate_cancer.callbacks.cancer_prediction_table_callback import (
     CancerPredictionTableCallback,
 )
 from prostate_cancer.callbacks.curves_callback import CurvesCallback
-from prostate_cancer.callbacks.heatmap_callback import HeatmapCallback
-from prostate_cancer.callbacks.kernel_estimation_callback import (
-    KernelEstimationCallback,
+from prostate_cancer.callbacks.estimation_callback import (
+    EstimationCallback,
 )
+from prostate_cancer.callbacks.heatmap_callback import HeatmapCallback
 from prostate_cancer.callbacks.nested_metrics_callback import NestedMetricsCallback
 from prostate_cancer.callbacks.num_positive_callback import NumPositiveCallback
 from prostate_cancer.callbacks.tile_histograms_callback import TileHistogramsCallback
@@ -18,8 +18,8 @@ __all__ = [
     "CAMExplainer",
     "CancerPredictionTableCallback",
     "CurvesCallback",
+    "EstimationCallback",
     "HeatmapCallback",
-    "KernelEstimationCallback",
     "NestedMetricsCallback",
     "NumPositiveCallback",
     "TileHistogramsCallback",

@@ -1,4 +1,4 @@
 _target_: rationai.mlkit.metrics.MeanPoolMaxAggregator
-kernel_size: 2
-extent_tile: 512
-stride: 256
+kernel_size: ???
+extent_tile: ???
+stride: ???

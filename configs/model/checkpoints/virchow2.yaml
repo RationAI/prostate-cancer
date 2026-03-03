@@ -1,6 +1,8 @@
 tile_threshold: 0.87
 slide_max_threshold: 0.999
 slide_mpm_threshold: 0.996
+slide_top_k_threshold: 0.996
+slide_span_threshold: 0.5 # arbitrary - just for eval purposes
 
 checkpoint: "mlflow-artifacts:/65/800dfeef2ff849d9b2abdd39defcb996/artifacts/checkpoints/epoch=3-step=208344/checkpoint.ckpt"
 model_name: "Virchow2"
@@ -9,3 +11,7 @@ slide_level_prediction_uris:
     mmci_sl_group_1: "mlflow-artifacts:/65/d3b4d174850247febd1581d2bbc64bcd/artifacts/tables/aggregated_predictions_corrected.json"
   max:
     mmci_sl_group_1: "mlflow-artifacts:/65/55c83a014afa4d65979b0c549cbe5397/artifacts/tables/aggregated_predictions_corrected.json"
+  top_k:
+    mmci_sl_group_1: "mlflow-artifacts:/65/3e3c944a7cb449d8b9c70a83a93a64c7/artifacts/tables/aggregated_predictions_corrected.json"
+  span:
+    mmci_sl_group_1: "mlflow-artifacts:/65/71ead3aa65b849a082d178d627b74bcb/artifacts/tables/aggregated_predictions.json"

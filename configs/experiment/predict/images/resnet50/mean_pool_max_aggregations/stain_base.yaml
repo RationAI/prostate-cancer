@@ -6,4 +6,9 @@ defaults:
   - /experiment/predict/images/resnet50/stain_base
   - _self_
 
+aggregator:
+  kernel_size: 3
+  extent_tile: 512
+  stride: 256
+
 use_case: "Mean Pool Max. Aggregation"

@@ -1,6 +1,8 @@
 tile_threshold: 0.76
 slide_max_threshold: 0.996
 slide_mpm_threshold: 0.753
+slide_top_k_threshold: 0.990
+slide_span_threshold: 0.5 # arbitrary - just for eval purposes
 
 checkpoint: "mlflow-artifacts:/65/0d6af27cf5d848279c891eb3039b11c8/artifacts/checkpoints/epoch=0-step=6972/checkpoint.ckpt"
 model_name: "ResNet50 Stain"
@@ -9,3 +11,7 @@ slide_level_prediction_uris:
     mmci_sl_group_1: "mlflow-artifacts:/65/bdbd2d8aa5fa44a581281f2396afa4a7/artifacts/tables/aggregated_predictions_corrected.json"
   max:
     mmci_sl_group_1: "mlflow-artifacts:/65/b982f0b741b442a5b7c7f16cae8fb155/artifacts/tables/aggregated_predictions_corrected.json"
+  top_k:
+    mmci_sl_group_1: "mlflow-artifacts:/65/51be8706f3fb401ab455ecf2c7b64b93/artifacts/tables/aggregated_predictions_corrected.json"
+  span:
+    mmci_sl_group_1: "mlflow-artifacts:/65/647659f90b8144989062a73882e50d1f/artifacts/tables/aggregated_predictions.json"
