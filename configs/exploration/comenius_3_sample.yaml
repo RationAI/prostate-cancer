@@ -1,0 +1,11 @@
+# @package _global_
+
+defaults:
+  - /default
+  - _self_
+
+data_dir: "/mnt/data/LF_CU/prostate/prostate_test_v2"
+
+metadata:
+  run_name: Comenius 3 data
+  description: Comenius 3 data

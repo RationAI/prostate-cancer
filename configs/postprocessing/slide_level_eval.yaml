@@ -3,4 +3,4 @@
 t: ???
 pred_column: ???
 
-use_case: Slide-Level ${aggregation_method}
+use_case: Slide-Level Metrics ${aggregation_method}

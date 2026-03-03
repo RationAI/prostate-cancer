@@ -1,7 +1,4 @@
 # @package _global_
-defaults:
-  - /experiment/preprocessing/tile_embeddings/base
-  - _self_
 
 tile_encoder:
   _target_: preprocessing.embeddings.encoders.Virchow2

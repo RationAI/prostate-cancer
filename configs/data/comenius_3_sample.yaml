@@ -1,0 +1,9 @@
+tiles_uri_224: "mlflow-artifacts:/65/191d1b69cd1d4fb1b4b375b54967b322/artifacts/Comenius 3"
+virchow2_embeddings_uri: "mlflow-artifacts:/65/81aca8f95b0748a5a490cd3f05c66842/artifacts/Comenius 3"
+metadata_table: "mlflow-artifacts:/65/da6443a0159e41cfa92fc0ea52eb4eca/artifacts/comenius_3_sample_prostate.csv"
+
+tissue_masks_uri: "mlflow-artifacts:/65/fb2d796be0844fc1b1c234c366025b8a/artifacts/tissue_masks"
+qc_masks_uri: "mlflow-artifacts:/65/0984cf620bfd44b29a060d6545e83a41/artifacts/qc_masks"
+annotation_masks_uri: null
+
+data_name: "Comenius 3 Sample"

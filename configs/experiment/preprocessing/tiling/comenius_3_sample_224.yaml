@@ -1,0 +1,8 @@
+# @package _global_
+
+defaults:
+  - /data/comenius_3_sample@data
+  - _self_
+
+tile_extent: 224
+stride: 112

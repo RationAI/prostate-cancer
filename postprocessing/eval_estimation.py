@@ -1,3 +1,5 @@
+"""Script to evaluate aggregation inference for multiple hyper-parameters."""
+
 from itertools import product
 
 import hydra
