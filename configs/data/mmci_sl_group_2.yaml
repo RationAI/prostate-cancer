@@ -1,10 +1,15 @@
-tiles_uri_512: "mlflow-artifacts:/65/a4bfeabdbb9a488290071465cce2af50/artifacts/MMCI 2k Group 2"
-tiles_uri_224: "mlflow-artifacts:/65/bed79a9ae8b34cf7a82e3b474effd6d8/artifacts/MMCI 2k Group 2 224"
+tiles_uri_512: "mlflow-artifacts:/65/a31f80e863f0461d803ae0027ffed3ae/artifacts/MMCI SL Group 2 512"
+tiles_uri_224: "mlflow-artifacts:/65/4be5807467e74794b103dfd8a2b00e1f/artifacts/MMCI SL Group 2 224"
 
 pgp_embeddings_uri: "mlflow-artifacts:/65/c7d9ccaceb5744d1b8f7778de7d61931/artifacts/MMCI 2k Group 2 224"
 virchow2_embeddings_uri: "mlflow-artifacts:/65/611adae302e94f629d46968d83d19517/artifacts/MMCI 2k Group 2 224"
 
-metadata_table: "mlflow-artifacts:/65/36774d886cf54129b9a02a269b97b56f/artifacts/mmci_2k_group_2_with_extra.csv"
+metadata_table: "mlflow-artifacts:/65/36774d886cf54129b9a02a269b97b56f/artifacts/mmci_2k_group_2_with_extra_corrected.csv"
+metadata_table_deprecated: "mlflow-artifacts:/65/36774d886cf54129b9a02a269b97b56f/artifacts/mmci_2k_group_2_with_extra.csv"
+
+tissue_masks_uri: "mlflow-artifacts:/65/7e0f909430cd48459511d0dd683e7629/artifacts/tissue_masks"
+qc_masks_uri: "mlflow-artifacts:/65/9b85af038a1b47d99f0bfb5207158a8d/artifacts/qc_masks"
+annotation_masks_uri: null
 
 
 tissue_masks_uri: "mlflow-artifacts:/65/7e0f909430cd48459511d0dd683e7629/artifacts/tissue_masks"

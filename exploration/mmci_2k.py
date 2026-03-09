@@ -21,6 +21,7 @@ def parse_slide(slide_name: str, table: pd.DataFrame) -> tuple[pd.Series, bool] 
         return None
 
     year, bioptic_request, slide_number = match.groups()
+    slide_number = slide_number.lstrip("0")
     r = bioptic_request.lstrip("0")
     index = f"{year[2:]}/{r}"
     record = table.loc[index]
