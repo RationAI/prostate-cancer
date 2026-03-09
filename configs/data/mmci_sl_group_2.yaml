@@ -5,7 +5,7 @@ pgp_embeddings_uri: "mlflow-artifacts:/65/c7d9ccaceb5744d1b8f7778de7d61931/artif
 virchow2_embeddings_uri: "mlflow-artifacts:/65/611adae302e94f629d46968d83d19517/artifacts/MMCI 2k Group 2 224"
 
 metadata_table: "mlflow-artifacts:/65/36774d886cf54129b9a02a269b97b56f/artifacts/mmci_2k_group_2_with_extra_corrected.csv"
-
+metadata_table_deprecated: "mlflow-artifacts:/65/36774d886cf54129b9a02a269b97b56f/artifacts/mmci_2k_group_2_with_extra.csv"
 
 tissue_masks_uri: "mlflow-artifacts:/65/7e0f909430cd48459511d0dd683e7629/artifacts/tissue_masks"
 qc_masks_uri: "mlflow-artifacts:/65/9b85af038a1b47d99f0bfb5207158a8d/artifacts/qc_masks"

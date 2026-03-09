@@ -1,1 +1,8 @@
-# TBD
+# @package _global_
+
+defaults:
+  - /data/mmci_sl_group_1@data
+  - _self_
+
+source_of_truth: ${data.metadata_table}
+metadata_to_correct: ${data.metadata_table_deprecated}
