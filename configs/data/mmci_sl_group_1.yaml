@@ -1,7 +1,7 @@
 tiles_uri_512: "mlflow-artifacts:/65/ba747c14ca6f4a6991b18f2fd9beda10/artifacts/MMCI SL Group 1 512"
 tiles_uri_224: "mlflow-artifacts:/65/05cbc53468d24748938a1e645bfbe0fe/artifacts/MMCI SL Group 1 224"
 
-pgp_embeddings_uri: "mlflow-artifacts:/65/b3cc8f1190e2469eb0e4a81fbfe6e8d7/artifacts/MMCI 2k (val. part) - 224"
+pgp_embeddings_uri: "mlflow-artifacts:/65/e37a7a60c3564dd691f49af6e79d1cf5/artifacts/MMCI SL Group 1 224"
 virchow2_embeddings_uri: "mlflow-artifacts:/65/611adae302e94f629d46968d83d19517/artifacts/MMCI SL Group 1 224"
 
 metadata_table: "mlflow-artifacts:/65/36774d886cf54129b9a02a269b97b56f/artifacts/mmci_2k_group_1_with_extra_corrected.csv"
