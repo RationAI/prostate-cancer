@@ -43,8 +43,6 @@ class EmbeddingsDataset(FilterableDataset[T]):
         )
 
     def generate_datasets(self) -> Iterable[Dataset[T]]:
-        self.tiles = self.filter_tiles_by_thresholds(self.tiles)
-
         new_tiles = []
         datasets = []
 
@@ -91,7 +89,9 @@ class EmbeddingsDataset(FilterableDataset[T]):
             ),
         )
 
-        assert len(slide_tiles) == len(slide_embeddings), "Old Way"
+        assert len(slide_tiles) == len(slide_embeddings), (
+            "Tile and Embedding counts do not match"
+        )
 
         slide_tiles = (
             self.prepare_tiles(slide_tiles)
