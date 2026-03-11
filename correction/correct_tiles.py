@@ -1,3 +1,10 @@
+"""Tiles Correction.
+
+We have found a bug in MMCI 2k exploration script, since this bug affects carcinoma labels,
+a new data split would differ from the current one (experimentally confirmed).
+For that reason, we add scripts to correct tiles datasets.
+"""
+
 from pathlib import Path
 
 import hydra
