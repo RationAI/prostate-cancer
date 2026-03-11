@@ -1,5 +1,8 @@
 metadata_table: "mlflow-artifacts:/65/5a159bf29b034e08a12e9a683f84e752/artifacts/mmci_2k_prostate.csv"
 
+tiles_uri_224: "mlflow-artifacts:/105/682b14944f1b416193871333574eb30a/artifacts/MMCI 2k 224"
+virchow2_embeddings_uri: "mlflow-artifacts:/65/1429184febea4cdcb26616c4038c6a71/artifacts/MMCI SL All"
+
 tissue_masks_uri: "mlflow-artifacts:/65/7e0f909430cd48459511d0dd683e7629/artifacts/tissue_masks"
 qc_masks_uri: "mlflow-artifacts:/65/9b85af038a1b47d99f0bfb5207158a8d/artifacts/qc_masks"
 annotation_masks_uri: null
