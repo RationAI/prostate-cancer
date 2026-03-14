@@ -1,7 +1,7 @@
 [project]
 name = "prostate-cancer"
 version = "0.1.0"
-description = ""
+description = "A project for prostate cancer detection in digital pathology slides."
 readme = "README.md"
 requires-python = ">=3.12,<3.14"
 license = { file = "LICENSE" }
