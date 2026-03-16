@@ -1,0 +1,11 @@
+tiles_uri_224: "mlflow-artifacts:/65/4ee2bdfbe3e74961959b5c19d7a1cef3/artifacts/MMCI Endoresections"
+tiles_uri_512: "mlflow-artifacts:/65/9bf1b392cecb4913b6d139d3276e0e2a/artifacts/MMCI Endoresections"
+
+virchow2_embeddings_uri: "mlflow-artifacts:/65/dfe6ed4287964caa8a855df7c3d28390/artifacts/MMCI Endoresections"
+metadata_table: "mlflow-artifacts:/65/4a79b110fa4a4cb8851a74097cd4a62e/artifacts/mmci_endoresection_prostate.csv"
+
+tissue_masks_uri: "mlflow-artifacts:/65/0262d0781d754a2999c8e5368b08b1a2/artifacts/tissue_masks"
+qc_masks_uri: "mlflow-artifacts:/65/8bf451d47ed74c66b1294a12229ce0bf/artifacts/qc_masks"
+annotation_masks_uri: null
+
+data_name: "MMCI Endoresections"
