@@ -35,6 +35,7 @@ dependencies = [
     "deprecated",
     "pillow==11.3.0",
     "huggingface_hub",
+    "transformers",
 ]
 
 [dependency-groups]

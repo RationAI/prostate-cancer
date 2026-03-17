@@ -7,6 +7,7 @@ from albumentations.core.composition import TransformType
 from albumentations.pytorch import ToTensorV2
 from rationai.mlkit.data.datasets import OpenSlideTilesDataset
 from torch.utils.data import Dataset
+from transformers import ViTImageProcessor
 
 from prostate_cancer.datamodule.datasets.base import (
     FilterableDataset,
@@ -68,6 +69,7 @@ class SlideTiles(Dataset[LabeledSample | UnlabeledSample]):
         tiles: pd.DataFrame,
         include_label: bool,
         transforms: TransformType | None = None,
+        processor: ViTImageProcessor | None = None,
     ) -> None:
         super().__init__()
 
@@ -81,6 +83,7 @@ class SlideTiles(Dataset[LabeledSample | UnlabeledSample]):
         self.transforms = transforms
         self.include_label = include_label
         self.to_tensor = ToTensorV2()
+        self.processor = processor
 
         if len(tiles) == 0:
             print(
@@ -102,6 +105,9 @@ class SlideTiles(Dataset[LabeledSample | UnlabeledSample]):
             image = self.transforms(image=image)["image"]
 
         tensor_image = self.to_tensor(image=image)["image"]
+
+        if self.processor is not None:
+            tensor_image = self.processor(tensor_image,return_tensors="pt")["pixel_values"].squeeze(0)
 
         if self.include_label:
             label = torch.tensor(

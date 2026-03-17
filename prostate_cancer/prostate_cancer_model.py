@@ -21,11 +21,28 @@ from prostate_cancer.typing import LabeledSampleBatch, UnlabeledSampleBatch
 
 class ProstateCancerModel(LightningModule):
     def __init__(
-        self, backbone: nn.Module | None, decode_head: nn.Module, lr: float
+        self,
+        backbone: nn.Module | None = None,
+        decode_head: nn.Module | None = None,
+        full_model: nn.Module | None = None,
+        lr: float = 1e-4,
     ) -> None:
         super().__init__()
+
+        # enforce mutually exclusive configs
+        if full_model is not None and (backbone is not None or decode_head is not None):
+            raise ValueError(
+                "Provide either `full_model` OR (`backbone` + `decode_head`), not both."
+            )
+
+        if full_model is None and decode_head is None:
+            raise ValueError(
+                "`decode_head` must be provided when using a backbone."
+            )
+
         self.backbone = backbone
         self.decode_head = decode_head
+        self.full_model = full_model
         self.lr = lr
 
         self.criterion = nn.BCEWithLogitsLoss(reduction="mean")
@@ -55,7 +72,18 @@ class ProstateCancerModel(LightningModule):
         )
 
     def forward(self, x: Tensor) -> Tensor:
+        if self.full_model is not None:
+            outputs = self.full_model(x)
+
+            # HuggingFace models return objects
+            if hasattr(outputs, "logits"):
+                return outputs.logits
+
+            return outputs
+
         features = self.backbone(x) if self.backbone else x
+
+        assert self.decode_head is not None
         logits = self.decode_head(features)
         return logits
 
