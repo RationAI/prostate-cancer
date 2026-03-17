@@ -72,6 +72,7 @@ class ProstateCancerModel(LightningModule):
         )
 
     def forward(self, x: Tensor) -> Tensor:
+        # --- full model mode
         if self.full_model is not None:
             outputs = self.full_model(x)
 
@@ -81,9 +82,11 @@ class ProstateCancerModel(LightningModule):
 
             return outputs
 
+        # --- backbone is None in case of embeddings
         features = self.backbone(x) if self.backbone else x
 
-        assert self.decode_head is not None
+        # --- if not full model, decode head must be present
+        assert self.decode_head is not None, "Decode head must be present if not full model"
         logits = self.decode_head(features)
         return logits
 

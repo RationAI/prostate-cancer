@@ -27,8 +27,10 @@ class TilesDataset(FilterableDataset[T]):
         carcinoma_roi_t: float | None = None,
         stratified_filter: bool | None = None,
         transforms: TransformType | None = None,
+        processor: ViTImageProcessor | None = None,
     ) -> None:
         self.transforms = transforms
+        self.processor = processor
         super().__init__(
             uris=uris,
             thresholds=thresholds,
@@ -50,6 +52,7 @@ class TilesDataset(FilterableDataset[T]):
                     tiles=self.filter_tiles_by_slide(slide["id"]),
                     include_label=self.labeled,
                     transforms=self.transforms,
+                    processor=self.processor,
                 ),
             )
             for _, slide in self.slides.iterrows()

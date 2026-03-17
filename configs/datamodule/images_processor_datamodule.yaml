@@ -1,0 +1,26 @@
+defaults:
+  - datasets@train: images/labeled_with_processor
+  - datasets@val: images/labeled_with_processor
+  - datasets@test: images/labeled_with_processor
+  - datasets@predict: images/unlabeled_with_processor
+
+  - samplers@sampler: stratified_weighted_random
+
+processor:
+  _target_: transformers.ViTImageProcessor.from_pretrained
+  pretrained_model_name_or_path: google/vit-base-patch16-224
+
+train:
+  processor: ${processor}
+  stratified_filter: true
+val:
+  processor: ${processor}
+  stratified_filter: true
+test:
+  processor: ${processor}
+  stratified_filter: false
+predict:
+  processor: ${processor}
+
+batch_size: ???
+num_workers: ???

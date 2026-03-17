@@ -1,0 +1,6 @@
+defaults:
+  - full_model: google_vit
+  - _self_
+
+_target_: prostate_cancer.prostate_cancer_model.ProstateCancerModel
+lr: ???
