@@ -11,13 +11,13 @@ from rationai.mlkit.lightning.loggers import MLFlowLogger
 from sklearn.model_selection import StratifiedGroupKFold
 
 
-def get_slide_stats(df: pd.DataFrame, target_col: str) -> dict:
+def get_slide_stats(df: pd.DataFrame, target_col: str) -> dict[str, dict[bool, int]]:
     counts = df[target_col].value_counts().sort_index()
     dist = counts / counts.sum()
     return {"counts": counts.to_dict(), "distribution": dist.to_dict()}
 
 
-def get_case_stats(df: pd.DataFrame, target_col: str) -> dict:
+def get_case_stats(df: pd.DataFrame, target_col: str) -> dict[str, dict[bool, int]]:
     case_df = df.drop_duplicates("case_id")
     counts = case_df[target_col].value_counts().sort_index()
     dist = counts / counts.sum()
