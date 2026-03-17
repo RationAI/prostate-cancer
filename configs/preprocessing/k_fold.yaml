@@ -1,0 +1,9 @@
+# @package _global_
+
+k: ???
+target_column: "carcinoma"
+use_case: K-Fold
+
+metadata:
+  hyperparams:
+    k: ${k}
