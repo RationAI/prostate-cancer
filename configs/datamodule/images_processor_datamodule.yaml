@@ -11,16 +11,16 @@ processor:
   pretrained_model_name_or_path: google/vit-base-patch16-224
 
 train:
-  processor: ${processor}
+  processor: ${datamodule.processor}
   stratified_filter: true
 val:
-  processor: ${processor}
+  processor: ${datamodule.processor}
   stratified_filter: true
 test:
-  processor: ${processor}
+  processor: ${datamodule.processor}
   stratified_filter: false
 predict:
-  processor: ${processor}
+  processor: ${datamodule.processor}
 
 batch_size: ???
 num_workers: ???
