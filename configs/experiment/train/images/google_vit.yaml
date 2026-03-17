@@ -5,4 +5,4 @@ defaults:
   - /model/google_vit_model@model
   - _self_
 
-model_name: "Goole ViT"
+model_name: "Google ViT"
