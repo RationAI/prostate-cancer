@@ -1,0 +1,18 @@
+# @package _global_
+
+defaults:
+  - /experiment/predict/base
+  - /datamodule/images_processor_datamodule@datamodule
+  - /model/google_vit_model@model
+  - /model/checkpoints/google_vit@model_data
+  - _self_
+
+
+
+datamodule:
+  batch_size: 96
+  num_workers: 8
+
+  predict:
+    uris:
+      - ${predict_data.tiles_uri_224}
