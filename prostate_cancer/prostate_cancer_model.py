@@ -153,4 +153,20 @@ class ProstateCancerModel(LightningModule):
         return self._get_predictions(logits)
 
     def configure_optimizers(self) -> Optimizer:
-        return AdamW(self.parameters(), self.lr)
+        assert self.full_model is not None, "Expected full_model to be provided"
+    
+        backbone = self.full_model.vit
+        head = self.full_model.classifier
+    
+        param_groups = [
+            {
+                "params": backbone.parameters(),
+                "lr": self.lr * 0.1,
+            },
+            {
+                "params": head.parameters(),
+                "lr": self.lr,
+            },
+        ]
+    
+        return AdamW(param_groups, weight_decay=0.01)
