@@ -152,7 +152,7 @@ class ProstateCancerModel(LightningModule):
         logits = self(inputs)
         return self._get_predictions(logits)
 
-    def configure_optimizers(self) -> Optimizer:
+    def configure_optimizers(self):
         assert self.full_model is not None, "Expected full_model to be provided"
     
         backbone = self.full_model.vit
@@ -169,4 +169,30 @@ class ProstateCancerModel(LightningModule):
             },
         ]
     
-        return AdamW(param_groups, weight_decay=0.01)
+        optimizer = AdamW(param_groups, weight_decay=0.01)
+
+        total_steps = self.trainer.estimated_stepping_batches
+        steps_per_epoch = total_steps // self.trainer.max_epochs
+        warmup_steps = steps_per_epoch // 2
+    
+        def lr_lambda(current_step: int) -> float:
+            # --- warmup phase
+            if current_step < warmup_steps:
+                return float(current_step) / float(max(1, warmup_steps))
+    
+            # --- cosine decay phase
+            progress = float(current_step - warmup_steps) / float(
+                max(1, total_steps - warmup_steps)
+            )
+            return 0.5 * (1.0 + math.cos(math.pi * progress))
+    
+        scheduler = LambdaLR(optimizer, lr_lambda)
+    
+        return {
+            "optimizer": optimizer,
+            "lr_scheduler": {
+                "scheduler": scheduler,
+                "interval": "step",  # IMPORTANT for warmup
+                "frequency": 1,
+            },
+        }
