@@ -1,9 +1,11 @@
 from copy import deepcopy
+import math
 
 import torch
 from lightning import LightningModule
 from torch import Tensor, nn
 from torch.optim import AdamW
+from torch.optim.lr_scheduler import LambdaLR
 from torch.optim.optimizer import Optimizer
 from torchmetrics import (
     AUROC,
