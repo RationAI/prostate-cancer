@@ -1,15 +1,12 @@
 defaults:
-  - datasets@train: images/labeled_with_processor
-  - datasets@val: images/labeled_with_processor
-  - datasets@test: images/labeled_with_processor
-  - datasets@predict: images/unlabeled_with_processor
+  - datasets@train: images/labeled
+  - datasets@val: images/labeled
+  - datasets@test: images/labeled
+  - datasets@predict: images/unlabeled
 
   - samplers@sampler: stratified_weighted_random
   - transforms@default_transform: augmentations
-
-processor:
-  _target_: transformers.ViTImageProcessor.from_pretrained
-  pretrained_model_name_or_path: google/vit-base-patch16-224
+  - processor: google_vit
 
 train:
   transforms: ${datamodule.default_transform}
