@@ -1,0 +1,8 @@
+# @package _global_
+
+defaults:
+  - /data/mmci_sl_group_1@data
+  - _self_
+
+source_of_truth: ${data.metadata_table}
+tiles_to_correct: ${data.tiles_uri_512}
