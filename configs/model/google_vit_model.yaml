@@ -1,5 +1,5 @@
 defaults:
-  - decode_head: binary_classifier
+  - decode_head: vit_classifier
   - backbone: google_vit
   - _self_
 

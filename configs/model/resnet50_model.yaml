@@ -1,5 +1,5 @@
 defaults:
-  - decode_head: binary_classifier
+  - decode_head: cnn_classifier
   - backbone: resnet50
   - _self_
 
