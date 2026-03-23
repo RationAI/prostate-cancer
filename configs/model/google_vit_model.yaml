@@ -6,5 +6,5 @@ defaults:
 decode_head:
   in_features: 768
 
-_target_: prostate_cancer.prostate_cancer_model.ProstateCancerModel
+_target_: prostate_cancer.vit_model.ViTProstateModel
 lr: ???
