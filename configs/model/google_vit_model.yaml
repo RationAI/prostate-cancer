@@ -1,6 +1,10 @@
 defaults:
-  - full_model: google_vit
+  - decode_head: binary_classifier
+  - backbone: google_vit
   - _self_
+
+decode_head:
+  in_features: 768
 
 _target_: prostate_cancer.prostate_cancer_model.ProstateCancerModel
 lr: ???

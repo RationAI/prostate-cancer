@@ -1,11 +1,9 @@
 from copy import deepcopy
-import math
 
 import torch
 from lightning import LightningModule
 from torch import Tensor, nn
 from torch.optim import AdamW
-from torch.optim.lr_scheduler import LambdaLR
 from torch.optim.optimizer import Optimizer
 from torchmetrics import (
     AUROC,
@@ -23,28 +21,11 @@ from prostate_cancer.typing import LabeledSampleBatch, UnlabeledSampleBatch
 
 class ProstateCancerModel(LightningModule):
     def __init__(
-        self,
-        backbone: nn.Module | None = None,
-        decode_head: nn.Module | None = None,
-        full_model: nn.Module | None = None,
-        lr: float = 1e-4,
+        self, backbone: nn.Module | None, decode_head: nn.Module, lr: float
     ) -> None:
         super().__init__()
-
-        # enforce mutually exclusive configs
-        if full_model is not None and (backbone is not None or decode_head is not None):
-            raise ValueError(
-                "Provide either `full_model` OR (`backbone` + `decode_head`), not both."
-            )
-
-        if full_model is None and decode_head is None:
-            raise ValueError(
-                "`decode_head` must be provided when using a backbone."
-            )
-
         self.backbone = backbone
         self.decode_head = decode_head
-        self.full_model = full_model
         self.lr = lr
 
         self.criterion = nn.BCEWithLogitsLoss(reduction="mean")
@@ -74,21 +55,11 @@ class ProstateCancerModel(LightningModule):
         )
 
     def forward(self, x: Tensor) -> Tensor:
-        # --- full model mode
-        if self.full_model is not None:
-            outputs = self.full_model(x)
-
-            # HuggingFace models return objects
-            if hasattr(outputs, "logits"):
-                return outputs.logits
-
-            return outputs
-
-        # --- backbone is None in case of embeddings
         features = self.backbone(x) if self.backbone else x
 
-        # --- if not full model, decode head must be present
-        assert self.decode_head is not None, "Decode head must be present if not full model"
+        if hasattr(features, "last_hidden_state"):
+            features = features.last_hidden_state
+
         logits = self.decode_head(features)
         return logits
 
@@ -154,21 +125,5 @@ class ProstateCancerModel(LightningModule):
         logits = self(inputs)
         return self._get_predictions(logits)
 
-    def configure_optimizers(self):
-        assert self.full_model is not None, "Expected full_model to be provided"
-    
-        backbone = self.full_model.vit
-        head = self.full_model.classifier
-    
-        param_groups = [
-            {
-                "params": backbone.parameters(),
-                "lr": self.lr * 0.1,
-            },
-            {
-                "params": head.parameters(),
-                "lr": self.lr,
-            },
-        ]
-
-        return AdamW(param_groups, weight_decay=0.01)
+    def configure_optimizers(self) -> Optimizer:
+        return AdamW(self.parameters(), self.lr)
