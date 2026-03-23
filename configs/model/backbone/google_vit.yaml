@@ -1,1 +1,1 @@
-_target_: prostate_cancer.modeling.full_model.google_vit
+_target_: prostate_cancer.modeling.backbone.google_vit
