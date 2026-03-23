@@ -25,12 +25,13 @@
 
 ## 🏗️ Architecture & Reproducibility 
 - **Hydra Configs (`configs/`):** Reproducibility is paramount. If a PR introduces a new module, model architecture, or preprocessing step, check if the author has updated or created the corresponding YAML configuration. Remind them if it seems missing.
-- **Experiment Tracking (MLflow):** When PRs add new loss functions, evaluation metrics, or training loops in `project_name/` (or `ml/`), ensure that these new metrics are properly logged to MLflow.
+- **Experiment Tracking (MLflow):** When PRs add new loss functions, evaluation metrics, or training loops in `prostate_cancer/`, ensure that these new metrics are properly logged to MLflow.
 - **Repository Structure:**
+  - `exploration/`: Create metadata CSV for given dataset.
+  - `correction/`: Contains correction scripts in case of some errors.
   - `preprocessing/`: Ensure data transformations (tiling, QC, tissue masks) are logically sound.
-  - `project_name/` (future `ml/`): Focus on training loops, PyTorch Lightning modules, and model definitions.
+  - `prostate_cancer/`: Focus on training loops, PyTorch Lightning modules, and model definitions.
   - `postprocessing/`: Focus on ensembling and final prediction logic.
-  - `scripts/`: These are job submission templates. Do not review them as strictly as core Python code.
 
 ## 📚 Types & Documentation
 - **Type Hinting:** We use strict `mypy`, but it is *not required* for PRs to be merged. Gently suggest type hints for complex function signatures, but do not nitpick missing `Any` types or incomplete typing.
