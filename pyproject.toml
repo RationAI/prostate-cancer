@@ -35,6 +35,8 @@ dependencies = [
     "deprecated",
     "pillow==11.3.0",
     "huggingface_hub",
+    "regex>=2026.2.28",
+    "ipykernel>=7.2.0",
 ]
 
 [dependency-groups]

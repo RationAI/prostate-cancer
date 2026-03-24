@@ -1,7 +1,9 @@
 # @package _global_
 
 k: ???
+
 target_column: "carcinoma"
+group_column: "patient_id"
 use_case: K-Fold
 
 metadata:

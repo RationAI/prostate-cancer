@@ -1,81 +1,117 @@
-import json
-from pathlib import Path
-from tempfile import TemporaryDirectory
-
 import hydra
 import mlflow
+import numpy as np
 import pandas as pd
 from omegaconf import DictConfig
 from rationai.mlkit import autolog, with_cli_args
 from rationai.mlkit.lightning.loggers import MLFlowLogger
+from rationai.tiling.writers import save_mlflow_dataset
 from sklearn.model_selection import StratifiedGroupKFold
 
 
-def get_slide_stats(df: pd.DataFrame, target_col: str) -> dict[str, dict[bool, int]]:
-    counts = df[target_col].value_counts().sort_index()
-    dist = counts / counts.sum()
-    return {"counts": counts.to_dict(), "distribution": dist.to_dict()}
+def stratified_group_k_fold_split(
+    slides_df: pd.DataFrame,
+    target_col: str,
+    group_col: str,
+    k: int,
+) -> pd.DataFrame:
+    slides_df = slides_df.copy()
+    fold_mask = np.empty(len(slides_df), dtype=int)
 
+    sgkf = StratifiedGroupKFold(n_splits=k, shuffle=True, random_state=42)
+    folds = sgkf.split(
+        slides_df,
+        slides_df[target_col],
+        slides_df[group_col],
+    )
 
-def get_case_stats(df: pd.DataFrame, target_col: str) -> dict[str, dict[bool, int]]:
-    case_df = df.drop_duplicates("case_id")
-    counts = case_df[target_col].value_counts().sort_index()
-    dist = counts / counts.sum()
-    return {"counts": counts.to_dict(), "distribution": dist.to_dict()}
+    for i, (_, fold_index) in enumerate(folds):
+        fold_mask[fold_index] = i
+
+    slides_df["fold"] = fold_mask
+    return slides_df
 
 
 @with_cli_args(["+preprocessing=k_fold"])
 @hydra.main(config_path="../configs", config_name="preprocessing", version_base=None)
 @autolog
 def main(config: DictConfig, logger: MLFlowLogger) -> None:
-    slide_metadata = pd.read_csv( mlflow.artifacts.download_artifacts(config.data.metadata_table) )
-    slide_metadata["fold"] = 0
 
-    # K-fold split
-    cv_sgkf = StratifiedGroupKFold(n_splits=config.k, shuffle=True, random_state=42)
+    # --- Load file with groups ---
+    annotations_source = pd.read_csv(
+        mlflow.artifacts.download_artifacts(config.data.metadata_table)
+    )
 
-    for fold_idx, (_, val_idx) in enumerate(
-        cv_sgkf.split(slide_metadata, slide_metadata[config.target_column], groups=slide_metadata["case_id"]), 1
-    ):
-        slide_metadata.loc[val_idx, "fold"] = fold_idx
+    # --- Load tilings ---
+    tiling_path_512 = (
+        mlflow.artifacts.download_artifacts(config.data.tiles_uri_512)
+        if config.data.tiles_uri_512
+        else None
+    )
+    tiling_path_224 = (
+        mlflow.artifacts.download_artifacts(config.data.tiles_uri_224)
+        if config.data.tiles_uri_224
+        else None
+    )
 
-    # Cross-Fold Leakage
-    for f1 in range(1, config.k + 1):
-        for f2 in range(f1 + 1, config.k + 1):
-            f1_cases = set(slide_metadata[slide_metadata["fold"] == f1]["case_id"])
-            f2_cases = set(slide_metadata[slide_metadata["fold"] == f2]["case_id"])
-            fold_overlap = f1_cases & f2_cases
-            assert not fold_overlap, (
-                f"Leakage between Fold {f1} and {f2}! Cases: {fold_overlap}"
-            )
+    assert tiling_path_512 or tiling_path_224, "At least one tiling must be present"
 
-    # Comprehensive Reporting
-    report = {
-        "summary": {
-            "total_slides": len(slide_metadata),
-            "total_cases": int(slide_metadata["case_id"].nunique()),
-            "slides": get_slide_stats(slide_metadata, config.target_column),
-            "cases": get_case_stats(slide_metadata, config.target_column),
-        },
-        "folds": {
-            f"fold_{i}": {
-                "slides": get_slide_stats(slide_metadata[slide_metadata["fold"] == i], config.target_column),
-                "cases": get_case_stats(slide_metadata[slide_metadata["fold"] == i], config.target_column),
-            }
-            for i in range(1, config.k + 1)
-        },
-    }
+    slides_df_512, tiles_df_512 = None, None
+    slides_df_224, tiles_df_224 = None, None
 
-    # Artifact Logging
-    with TemporaryDirectory() as tmp_dir:
-        tmp_path = Path(tmp_dir)
+    if tiling_path_512:
+        slides_df_512 = pd.read_parquet(f"{tiling_path_512}/slides.parquet")
+        tiles_df_512 = pd.read_parquet(f"{tiling_path_512}/tiles.parquet")
 
-        with open(tmp_path / "k_fold_report.json", "w") as f:
-            json.dump(report, f, indent=4)
+    if tiling_path_224:
+        slides_df_224 = pd.read_parquet(f"{tiling_path_224}/slides.parquet")
+        tiles_df_224 = pd.read_parquet(f"{tiling_path_224}/tiles.parquet")
 
-        slide_metadata[ ["slide_path", "case_id", "fold"] ].to_csv(tmp_path / f"{config.data.data_name}_{config.k}_folds.csv", index=False)
+    # --- Choose base slides (for fold computation) ---
+    base_slides_df = slides_df_512 if slides_df_512 is not None else slides_df_224
+    assert base_slides_df is not None
 
-        logger.log_artifacts(local_dir=str(tmp_path), artifact_path="tables")
+    # --- Join annotations ---
+    base_slides_df = base_slides_df.join(
+        annotations_source.set_index("slide_path")[config.group_column],
+        on="path",
+        how="left",
+        validate="one_to_one",
+    )
+
+    if base_slides_df[config.group_column].isna().any():
+        raise ValueError(
+            f"Missing '{config.group_column}' after joining annotations source."
+        )
+
+    # --- Compute folds ---
+    slides_with_folds = stratified_group_k_fold_split(
+        base_slides_df,
+        config.target_column,
+        config.group_column,
+        config.k,
+    )
+
+    group_to_folds = slides_with_folds.groupby("patient_id")["fold"].nunique()
+    leaking_groups = group_to_folds[group_to_folds > 1]
+    assert len(leaking_groups) == 0, "Patient leakage"
+
+    # --- Save datasets ---
+    if slides_df_512 is not None:
+        slides_df_512["fold"] = slides_with_folds["fold"]
+        save_mlflow_dataset(
+            slides=slides_df_512,
+            tiles=tiles_df_512,
+            dataset_name=f"{config.data.data_name}_512_with_folds",
+        )
+
+    if slides_df_224 is not None:
+        slides_df_224["fold"] = slides_with_folds["fold"]
+        save_mlflow_dataset(
+            slides=slides_df_224,
+            tiles=tiles_df_224,
+            dataset_name=f"{config.data.data_name}_224_with_folds",
+        )
 
 
 if __name__ == "__main__":
