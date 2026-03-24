@@ -57,4 +57,4 @@ class CarcinomaPredictionTableCallback(MultiloaderLifecycle):
         self, trainer: pl.Trainer, pl_module: pl.LightningModule, dataloader_idx: int
     ) -> None:
         table = pd.DataFrame(self.table)
-        mlflow.log_table(table, "tables/cancer_prediction_table.json")
+        mlflow.log_table(table, "tables/carcinoma_prediction_table.json")
