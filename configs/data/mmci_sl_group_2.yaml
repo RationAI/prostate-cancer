@@ -11,9 +11,4 @@ tissue_masks_uri: "mlflow-artifacts:/65/7e0f909430cd48459511d0dd683e7629/artifac
 qc_masks_uri: "mlflow-artifacts:/65/9b85af038a1b47d99f0bfb5207158a8d/artifacts/qc_masks"
 annotation_masks_uri: null
 
-
-tissue_masks_uri: "mlflow-artifacts:/65/7e0f909430cd48459511d0dd683e7629/artifacts/tissue_masks"
-qc_masks_uri: "mlflow-artifacts:/65/9b85af038a1b47d99f0bfb5207158a8d/artifacts/qc_masks"
-annotation_masks_uri: null
-
 data_name: "MMCI SL Group 2"
