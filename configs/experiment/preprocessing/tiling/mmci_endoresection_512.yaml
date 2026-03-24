@@ -1,0 +1,8 @@
+# @package _global_
+
+defaults:
+  - /data/mmci_endoresection@data
+  - _self_
+
+tile_extent: 512
+stride: 256
