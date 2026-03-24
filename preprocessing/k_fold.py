@@ -54,7 +54,8 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
         else None
     )
 
-    assert tiling_path_512 or tiling_path_224, "At least one tiling must be present"
+    if not tiling_path_512 and not tiling_path_224:
+        raise ValueError("At least one tiling must be present")
 
     slides_df_512, tiles_df_512 = None, None
     slides_df_224, tiles_df_224 = None, None
@@ -69,7 +70,8 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
 
     # --- Choose base slides (for fold computation) ---
     base_slides_df = slides_df_512 if slides_df_512 is not None else slides_df_224
-    assert base_slides_df is not None
+    if base_slides_df is None:
+        raise ValueError("At least one DF needs to be present")
 
     # --- Join annotations ---
     base_slides_df = base_slides_df.join(
@@ -92,9 +94,10 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
         config.k,
     )
 
-    group_to_folds = slides_with_folds.groupby("patient_id")["fold"].nunique()
+    group_to_folds = slides_with_folds.groupby(config.group_column)["fold"].nunique()
     leaking_groups = group_to_folds[group_to_folds > 1]
-    assert len(leaking_groups) == 0, "Patient leakage"
+    if len(leaking_groups) != 0:
+        raise ValueError("Cross-fold patient leakage")
 
     # --- Save datasets ---
     if slides_df_512 is not None:
