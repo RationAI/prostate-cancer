@@ -12,22 +12,31 @@ transforms:
     p: 0.5
   - _target_: albumentations.HueSaturationValue
     p: 0.5
-  - _target_: rationai.staining.transforms.ColorTransform
+
+  - _target_: rationai.staining.AugmentStainingTransform
+
     conversion:
-      _target_: hydra.utils.get_object
-      path: rationai.staining.ColorConversion.RGB2HER_MMCI_PROSTATE
-  - _target_: albumentations.MultiplicativeNoise
-    multiplier: [0.5, 1.5]
-    per_channel: true
-    elementwise: false
-  - _target_: albumentations.AdditiveNoise
-    noise_type: "uniform"
-    noise_params:
-      ranges: [[-0.005, 0.005]]
-  - _target_: rationai.staining.transforms.ColorTransform
-    conversion:
-      _target_: hydra.utils.get_object
-      path: rationai.staining.ColorConversion.HER_MMCI_PROSTATE2RGB
+      _target_: rationai.staining.ColorConversion.from_stain_vectors
+      stain_vector_1: [0.479, 0.823, 0.305]
+      stain_vector_2: [0.156, 0.949, 0.273]
+      stain_vector_3: [-0.189, -0.242, 0.952]
+
+    noise_transform:
+      _target_: albumentations.Compose
+      transforms:
+        - _target_: albumentations.MultiplicativeNoise
+          multiplier: [0.5, 1.5]
+          per_channel: true
+          elementwise: false
+          p: 1.0
+
+        - _target_: albumentations.AdditiveNoise
+          noise_type: uniform
+          noise_params:
+            ranges:
+              - [-0.005, 0.005]
+          p: 1.0
+
   - _target_: albumentations.Normalize
     mean: ${mean}
     std: ${std}
