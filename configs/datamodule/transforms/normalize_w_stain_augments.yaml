@@ -17,9 +17,9 @@ transforms:
 
     conversion:
       _target_: rationai.staining.ColorConversion.from_stain_vectors
-      stain_vector_1: [0.479, 0.823, 0.305]
-      stain_vector_2: [0.156, 0.949, 0.273]
-      stain_vector_3: [-0.189, -0.242, 0.952]
+      stain1: [0.479, 0.823, 0.305]
+      stain2: [0.156, 0.949, 0.273]
+      stain3: [-0.189, -0.242, 0.952]
 
     noise_transform:
       _target_: albumentations.Compose
