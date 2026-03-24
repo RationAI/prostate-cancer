@@ -93,6 +93,7 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
         config.group_column,
         config.k,
     )
+    fold_by_path = slides_with_folds.set_index("path")["fold"]
 
     group_to_folds = slides_with_folds.groupby(config.group_column)["fold"].nunique()
     leaking_groups = group_to_folds[group_to_folds > 1]
@@ -101,7 +102,12 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
 
     # --- Save datasets ---
     if slides_df_512 is not None:
-        slides_df_512["fold"] = slides_with_folds["fold"]
+        slides_df_512 = slides_df_512.join(
+            fold_by_path, on="path", how="left", validate="one_to_one"
+        )
+        if slides_df_512["fold"].isna().any():
+            raise ValueError("Missing fold assignment for some slides")
+
         save_mlflow_dataset(
             slides=slides_df_512,
             tiles=tiles_df_512,
@@ -109,7 +115,12 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
         )
 
     if slides_df_224 is not None:
-        slides_df_224["fold"] = slides_with_folds["fold"]
+        slides_df_224 = slides_df_224.join(
+            fold_by_path, on="path", how="left", validate="one_to_one"
+        )
+        if slides_df_224["fold"].isna().any():
+            raise ValueError("Missing fold assignment for some slides")
+
         save_mlflow_dataset(
             slides=slides_df_224,
             tiles=tiles_df_224,
