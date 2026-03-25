@@ -11,7 +11,7 @@ from prostate_cancer.typing import UnlabeledSampleBatch
 
 
 if TYPE_CHECKING:
-    from prostate_cancer.data import DataModule
+    from prostate_cancer.datamodule import DataModule
 
 
 class CancerPredictionTableCallback(MultiloaderLifecycle):

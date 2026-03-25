@@ -12,7 +12,6 @@ from rationai.masks.mask_builders import TileMaskBuilder
 from rationai.mlkit.lightning.callbacks import MultiloaderLifecycle
 from torchvision.transforms import Resize
 
-from prostate_cancer.prostate_cancer_model import ProstateCancerModel
 from prostate_cancer.typing import LabeledSampleBatch
 
 
@@ -83,8 +82,8 @@ class CAMExplainer(MultiloaderLifecycle):
     def on_test_start(
         self, trainer: lightning.Trainer, pl_module: lightning.LightningModule
     ) -> None:
-        if not isinstance(pl_module, ProstateCancerModel):
-            raise ValueError("Model should be of type ProstateCancerModel.")
+        if not hasattr(self.model, "decode_head"):
+            raise ValueError("Model should have decode head.")
 
         self.model = pl_module
         self.decode_head = cast("BinaryClassifier", self.model.decode_head)
