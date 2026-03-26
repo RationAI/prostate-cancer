@@ -1,0 +1,11 @@
+# @package _global_
+
+defaults:
+  - /default
+  - _self_
+
+full_metadata_csv_uri: "mlflow-artifacts:/97/5126a382303b4be39ffc3200dae7056b/artifacts/panda/slides_metadata.csv"
+
+metadata:
+  run_name: PANDA data
+  description: PANDA data
