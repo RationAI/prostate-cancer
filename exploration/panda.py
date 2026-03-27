@@ -21,6 +21,7 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
     mask = (metadata["annotation"] == True) & (metadata["is_annotation_corrupted"] == False) & (metadata["is_wsi_valid"] == True)
     metadata = metadata[ mask ]
     metadata = metadata.rename(columns={"is_carcinoma": "carcinoma"})
+    metadata = metadata.drop( ["segmentation_id", "segmentation"] )
 
     radboud_metadata = metadata[ metadata["data_provider"] == "radboud" ]
     karolinska_metadata = metadata[ metadata["data_provider"] == "karolinska" ]
