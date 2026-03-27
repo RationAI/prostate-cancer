@@ -13,7 +13,7 @@ from rationai.mlkit.lightning.callbacks import MultiloaderLifecycle
 from torchvision.transforms import Resize
 
 from prostate_cancer.typing import LabeledSampleBatch
-
+from prostate_cancer.cnn_model import CNNProstateModel
 
 if TYPE_CHECKING:
     from prostate_cancer.datamodule.data_module import DataModule
@@ -24,6 +24,16 @@ class CAMExplainer(MultiloaderLifecycle):
     def __init__(self, resize_shape: tuple[int, int]) -> None:
         super().__init__()
         self.resize = Resize(resize_shape)
+
+    def on_test_start(
+        self, trainer: lightning.Trainer, pl_module: lightning.LightningModule
+    ) -> None:
+        if not isinstance(pl_module, CNNProstateModel):
+            raise ValueError("Model must be a CNNProstateModel to generate CAMs.")
+
+        self.model = pl_module
+        self.decode_head = cast("BinaryClassifier", self.model.decode_head)
+        self.linear_in_features = self.decode_head.proj.in_features
 
     def on_test_dataloader_start(
         self, trainer: pl.Trainer, pl_module: pl.LightningModule, dataloader_idx: int
@@ -79,18 +89,7 @@ class CAMExplainer(MultiloaderLifecycle):
         data = self._explain(inputs)
         self.mask_builder.update(data=data, xs=metadata["x"], ys=metadata["y"])
 
-    def on_test_start(
-        self, trainer: lightning.Trainer, pl_module: lightning.LightningModule
-    ) -> None:
-        if not hasattr(self.model, "decode_head"):
-            raise ValueError("Model should have decode head.")
-
-        self.model = pl_module
-        self.decode_head = cast("BinaryClassifier", self.model.decode_head)
-        self.linear_in_features = self.decode_head.proj.in_features
-
     def _explain(self, inputs: torch.Tensor) -> torch.Tensor:
-        assert self.model.backbone is not None
         feature_maps = self.model.backbone(inputs)  # (B, C, H, W)
 
         _, c, _, _ = feature_maps.shape
