@@ -12,8 +12,9 @@ from rationai.masks.mask_builders import TileMaskBuilder
 from rationai.mlkit.lightning.callbacks import MultiloaderLifecycle
 from torchvision.transforms import Resize
 
-from prostate_cancer.typing import LabeledSampleBatch
 from prostate_cancer.cnn_model import CNNProstateModel
+from prostate_cancer.typing import LabeledSampleBatch
+
 
 if TYPE_CHECKING:
     from prostate_cancer.datamodule.data_module import DataModule
