@@ -1,11 +1,9 @@
-from prostate_cancer.base_model import ProstateCancerModel
+from torch import Tensor, nn
 
-from torch import Tensor
-from torch import nn
+from prostate_cancer.base_model import ProstateCancerModel
 
 
 class CNNProstateModel(ProstateCancerModel):
-
     def __init__(self, backbone: nn.Module, decode_head: nn.Module, lr: float) -> None:
         super().__init__(lr=lr)
         self.backbone = backbone

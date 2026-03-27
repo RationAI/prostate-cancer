@@ -2,6 +2,7 @@ from torch import Tensor
 
 from prostate_cancer.modeling.decode_head.binary_classifier import BinaryClassifier
 
+
 class BinaryViTClassifier(BinaryClassifier):
     def __init__(self, in_features: int, pooling: str, dropout: float = 0.5) -> None:
         super().__init__(in_features=in_features, dropout=dropout)

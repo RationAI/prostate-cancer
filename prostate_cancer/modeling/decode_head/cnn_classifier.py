@@ -2,6 +2,7 @@ from torch import Tensor, nn
 
 from prostate_cancer.modeling.decode_head.binary_classifier import BinaryClassifier
 
+
 class BinaryCNNClassifier(BinaryClassifier):
     def __init__(self, in_features: int, dropout: float = 0.5) -> None:
         super().__init__(in_features=in_features, dropout=dropout)
@@ -10,8 +11,8 @@ class BinaryCNNClassifier(BinaryClassifier):
     def forward(self, x: Tensor) -> Tensor:
         assert x.ndim == 4
 
-        x = self.global_pool(x)          # (B, C, 1, 1)
-        x = x.flatten(1)                # (B, C)
+        x = self.global_pool(x)  # (B, C, 1, 1)
+        x = x.flatten(1)  # (B, C)
         x = self.dropout(x)
         x = self.proj(x)
 

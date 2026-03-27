@@ -110,7 +110,9 @@ class SlideTiles(Dataset[LabeledSample | UnlabeledSample]):
         tensor_image = self.to_tensor(image=image)["image"]
 
         if self.processor is not None:
-            tensor_image = self.processor(tensor_image,return_tensors="pt")["pixel_values"].squeeze(0)
+            tensor_image = self.processor(tensor_image, return_tensors="pt")[
+                "pixel_values"
+            ].squeeze(0)
 
         if self.include_label:
             label = torch.tensor(

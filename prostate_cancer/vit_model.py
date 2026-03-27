@@ -1,11 +1,10 @@
-from prostate_cancer.base_model import ProstateCancerModel
-
-from torch import Tensor
-from torch import nn
+from torch import Tensor, nn
 from transformers import ViTModel
 
-class ViTProstateModel(ProstateCancerModel):
+from prostate_cancer.base_model import ProstateCancerModel
 
+
+class ViTProstateModel(ProstateCancerModel):
     def __init__(self, backbone: ViTModel, decode_head: nn.Module, lr: float) -> None:
         super().__init__(lr=lr)
         self.backbone = backbone
