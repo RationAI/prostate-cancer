@@ -18,10 +18,10 @@ from rationai.mlkit.lightning.loggers import MLFlowLogger
 def main(config: DictConfig, logger: MLFlowLogger) -> None:
     metadata = pd.read_csv(mlflow.artifacts.download_artifacts(config.full_metadata_csv_uri))
 
-    mask = (metadata["annotation"] == True) & (metadata["is_annotation_corrupted"] == False) & (metadata["is_wsi_valid"] == True)
+    mask = (metadata["has_annotation"] == True) & (metadata["has_segmentation"] == True) & (metadata["is_annotation_corrupted"] == False) & (metadata["is_wsi_valid"] == True)
     metadata = metadata[ mask ]
     metadata = metadata.rename(columns={"is_carcinoma": "carcinoma"})
-    metadata = metadata.drop( ["segmentation_id", "segmentation"] )
+    metadata = metadata.drop( ["segmentation_id", "segmentation"], axis=1 )
 
     radboud_metadata = metadata[ metadata["data_provider"] == "radboud" ]
     karolinska_metadata = metadata[ metadata["data_provider"] == "karolinska" ]
