@@ -9,7 +9,8 @@ class BinaryViTClassifier(BinaryClassifier):
         self.pooling = pooling
 
     def forward(self, x: Tensor) -> Tensor:
-        assert x.ndim == 3
+        if x.ndim != 3:
+            raise ValueError(f"Expected 3D tensor, got {x.ndim}D")
 
         if self.pooling == "cls":
             x = x[:, 0]

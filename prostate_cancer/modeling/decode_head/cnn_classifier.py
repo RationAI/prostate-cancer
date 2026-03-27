@@ -9,7 +9,8 @@ class BinaryCNNClassifier(BinaryClassifier):
         self.global_pool = nn.AdaptiveMaxPool2d(1)
 
     def forward(self, x: Tensor) -> Tensor:
-        assert x.ndim == 4
+        if x.ndim != 4:
+            raise ValueError(f"Expected 4D tensor, got {x.ndim}D")
 
         x = self.global_pool(x)  # (B, C, 1, 1)
         x = x.flatten(1)  # (B, C)

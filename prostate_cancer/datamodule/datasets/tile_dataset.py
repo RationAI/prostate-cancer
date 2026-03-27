@@ -107,10 +107,10 @@ class SlideTiles(Dataset[LabeledSample | UnlabeledSample]):
         if self.transforms is not None:
             image = self.transforms(image=image)["image"]
 
-        tensor_image = self.to_tensor(image=image)["image"]
-
-        if self.processor is not None:
-            tensor_image = self.processor(tensor_image, return_tensors="pt")[
+        if self.processor is None:
+            tensor_image = self.to_tensor(image=image)["image"]
+        else:
+            tensor_image = self.processor(image, return_tensors="pt")[
                 "pixel_values"
             ].squeeze(0)
 
