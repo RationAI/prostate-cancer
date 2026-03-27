@@ -1,0 +1,7 @@
+# @package _global_
+
+defaults:
+  - /data/radboud@data
+  - _self_
+
+test_size: 0.2
