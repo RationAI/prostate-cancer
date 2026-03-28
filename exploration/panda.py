@@ -1,3 +1,5 @@
+""" This script takes alerady pre-explored CSV for different task, and keeps only information relevant for this task. """
+
 import tempfile
 from pathlib import Path
 
@@ -20,8 +22,8 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
 
     mask = (metadata["has_annotation"] == True) & (metadata["has_segmentation"] == True) & (metadata["is_annotation_corrupted"] == False) & (metadata["is_wsi_valid"] == True)
     metadata = metadata[ mask ]
-    metadata = metadata.rename(columns={"is_carcinoma": "carcinoma"})
-    metadata = metadata.drop( ["segmentation_id", "segmentation"], axis=1 )
+    metadata = metadata.rename(columns={"is_carcinoma": "carcinoma"}) # expected by our pipelines
+    metadata = metadata.drop( ["segmentation_id", "segmentation"], axis=1 ) # not needed for this task
 
     radboud_metadata = metadata[ metadata["data_provider"] == "radboud" ]
     karolinska_metadata = metadata[ metadata["data_provider"] == "karolinska" ]
