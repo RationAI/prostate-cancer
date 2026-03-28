@@ -4,4 +4,5 @@ defaults:
   - /data/radboud@data
   - _self_
 
+target_column: gleason_score
 test_size: 0.2

@@ -22,7 +22,7 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
 
     mask = (metadata["has_annotation"] == True) & (metadata["has_segmentation"] == True) & (metadata["is_annotation_corrupted"] == False) & (metadata["is_wsi_valid"] == True)
     metadata = metadata[ mask ]
-    metadata = metadata.rename(columns={"is_carcinoma": "carcinoma"}) # expected by our pipelines
+    metadata["carcinoma"] = metadata[ "isup_grade" ] != 0
     metadata = metadata.drop( ["segmentation_id", "has_segmentation"], axis=1 ) # not needed for this task
 
     radboud_metadata = metadata[ metadata["data_provider"] == "radboud" ]
