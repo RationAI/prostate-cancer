@@ -1,4 +1,4 @@
-"""This script takes alerady pre-explored CSV for different task, and keeps only information relevant for this task."""
+"""This script takes already pre-explored CSV for different task, and keeps only information relevant for this task."""
 
 import tempfile
 from pathlib import Path
@@ -39,13 +39,11 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
 
     with tempfile.TemporaryDirectory() as temp_dir:
         radboud_target = Path(temp_dir) / "radboud_metadata.csv"
-        radboud_metadata.to_csv(Path(temp_dir) / "radboud_metadata.csv", index=False)
+        radboud_metadata.to_csv(radboud_target, index=False)
         logger.log_artifact(str(radboud_target))
 
         karolinska_target = Path(temp_dir) / "karolinska_metadata.csv"
-        karolinska_metadata.to_csv(
-            Path(temp_dir) / "karolinska_metadata.csv", index=False
-        )
+        karolinska_metadata.to_csv(karolinska_target, index=False)
         logger.log_artifact(str(karolinska_target))
 
 
