@@ -22,13 +22,7 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
         mlflow.artifacts.download_artifacts(config.full_metadata_csv_uri)
     )
 
-    mask = (
-        (metadata["has_annotation"])
-        & (metadata["has_segmentation"])
-        & ~(metadata["is_annotation_corrupted"])
-        & (metadata["is_wsi_valid"])
-    )
-    metadata = metadata[mask]
+    metadata = metadata[(metadata["has_annotation"]) & (metadata["has_segmentation"])]
     metadata["carcinoma"] = metadata["isup_grade"] != 0
     metadata = metadata.drop(
         ["segmentation_id", "has_segmentation"], axis=1
