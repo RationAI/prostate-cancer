@@ -5,7 +5,7 @@ defaults:
 
 
 prostate_cancer_artifacts: /mnt/projects/prostate_cancer/cancer
-prostate_data: /mnt/data/MOU/
+prostate_cancer_artifacts_public: /mnt/projects/prostate_cancer
 
 thresholds: ???
 
