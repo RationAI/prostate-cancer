@@ -14,7 +14,7 @@ if TYPE_CHECKING:
     from prostate_cancer.datamodule import DataModule
 
 
-class CancerPredictionTableCallback(MultiloaderLifecycle):
+class CarcinomaPredictionTableCallback(MultiloaderLifecycle):
     """A callback to save predictions for tiles as a table."""
 
     def __init__(self, threshold: float) -> None:
@@ -57,4 +57,4 @@ class CancerPredictionTableCallback(MultiloaderLifecycle):
         self, trainer: pl.Trainer, pl_module: pl.LightningModule, dataloader_idx: int
     ) -> None:
         table = pd.DataFrame(self.table)
-        mlflow.log_table(table, "tables/cancer_prediction_table.json")
+        mlflow.log_table(table, "tables/carcinoma_prediction_table.json")
