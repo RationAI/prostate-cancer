@@ -89,11 +89,14 @@ class PANDAHybridMask(PyvipsMask[TileMetadata]):
 
         # tissue is all but background
         tissue = 1 - class_overlaps.get(self.background, 0)
-        data["tissue_percentage"] = tissue
+        data["tissue_roi_percentage"] = tissue
 
         # carcinoma is any type of carcinoma (overlaps are disjoint)
-        data["carcinoma_percentage"] = (
+        data["carcinoma_roi_percentage"] = (
             class_overlaps.get(self.gleason_3, 0)
             + class_overlaps.get(self.gleason_4, 0)
             + class_overlaps.get(self.gleason_5, 0)
         )
+
+        return AugmentedTileMetadata(**data)
+
