@@ -99,4 +99,3 @@ class PANDAHybridMask(PyvipsMask[TileMetadata]):
         )
 
         return AugmentedTileMetadata(**data)
-
