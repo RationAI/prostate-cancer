@@ -1,3 +1,4 @@
-metadata_table: "mlflow-artifacts:/65/bd74556e90584a1aacf33afc2679a18b/artifacts/radboud_metadata.csv"
+# points to the public mlflow
+metadata_table: "mlflow-artifacts:/38/20ea4dcde54f42278d69e5eecbd60131/artifacts/radboud_metadata.csv"
 
 data_name: "PANDA - Radboud"

@@ -4,7 +4,8 @@ defaults:
   - /default
   - _self_
 
-full_metadata_csv_uri: "mlflow-artifacts:/97/6cb82d74735d413aa492548bbb6c20d6/artifacts/panda/slides_metadata.csv"
+# Points to the public mlflow
+full_metadata_csv_uri: "mlflow-artifacts:/37/84d6d1431d484acd98142a8c618b66a6/artifacts/panda/slides_metadata.csv"
 
 metadata:
   run_name: PANDA data
