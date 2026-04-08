@@ -3,3 +3,6 @@
 defaults:
   - /data/radboud@data
   - _self_
+
+sample_level: 0
+mask_level: 2
