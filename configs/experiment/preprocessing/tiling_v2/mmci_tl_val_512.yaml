@@ -1,0 +1,28 @@
+# @package _global_
+
+defaults:
+  - /data/mmci_tl_val@data
+  - _self_
+
+tile_extent: 512
+stride: 256
+
+overlapers:
+
+  tissue:
+    _target_: preprocessing.tiling_v2.overlapers.BinaryOverlaper
+    mask_name: tissue_roi
+    roi_corners: [128, 128, 384, 384]
+    masks_uri: ${data.tissue_masks_uri}
+
+  residuals:
+    _target_: preprocessing.tiling_v2.overlapers.BinaryOverlaper
+    mask_name: tissue_roi
+    roi_corners: [0, 0, 512, 512]
+    masks_uri: ${data.qc_masks_uri}/residual_per_pixel
+
+  carcinoma:
+    _target_: preprocessing.tiling_v2.overlapers.BinaryOverlaper
+    mask_name: tissue_roi
+    roi_corners: [0, 0, 512, 512]
+    masks_uri: ${data.annotation_masks_uri}/carinoma
