@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Any
 import hydra
 import pandas as pd
 import ray
+import mlflow
 from lightning.pytorch.loggers import Logger
 from omegaconf import DictConfig
 from rationai.mlkit import with_cli_args
@@ -109,7 +110,7 @@ def tiling(df: pd.DataFrame, config: DictConfig) -> tuple[pd.DataFrame, pd.DataF
 @hydra.main(config_path="../../configs", config_name="preprocessing", version_base=None)
 @autolog
 def main(config: DictConfig, logger: Logger | None = None) -> None:
-    df = pd.read_csv(config.data.metadata_table)
+    df = pd.read_csv(mlflow.artifacts.download_artifacts(config.data.metadata_table))
     slides, tiles = tiling(df, config)
     save_mlflow_dataset(slides, tiles, config.data.data_name)
 
