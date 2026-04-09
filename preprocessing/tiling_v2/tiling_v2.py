@@ -16,7 +16,7 @@ from ratiopath.tiling.utils import row_hash
 
 
 if TYPE_CHECKING:
-    from preprocessing.tiling_v2.overlaps import Overlaper
+    from preprocessing.tiling_v2.overlapers import Overlaper
 
 
 ray.init(runtime_env={"excludes": [".git", ".venv"]})
