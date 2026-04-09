@@ -32,7 +32,7 @@ class Overlaper(ABC):
         else:
             self.mask_storage = Path(mlflow.artifacts.download_artifacts(masks_uri))
 
-        self.roi = box(**roi_corners)
+        self.roi = box(*roi_corners)
         self.mask_name = mask_name
 
     def add_mask_path_batch(self, batch: dict[str, Any]) -> dict[str, Any]:
