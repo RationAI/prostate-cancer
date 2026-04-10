@@ -83,7 +83,7 @@ class BinaryOverlaper(Overlaper):
         self.columns_to_keep = {f"{self.mask_name}_percentage"}
 
     def extract_foreground_percentage(self, tile: dict[str, Any]) -> dict[str, Any]:
-        tile[f"{self.mask_name}_percentage"] = tile["tissue_mask_overlap"].get(
+        tile[f"{self.mask_name}_percentage"] = tile[f"{self.mask_name}_overlap"].get(
             "255", 0.0
         )
         return tile
