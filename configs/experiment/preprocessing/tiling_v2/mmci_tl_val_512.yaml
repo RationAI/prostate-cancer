@@ -10,19 +10,19 @@ stride: 256
 overlapers:
 
   tissue:
-    _target_: preprocessing.tiling_v2.overlapers.BinaryOverlapper
+    _target_: preprocessing.tiling_v2.overlappers.BinaryOverlapper
     mask_name: tissue_roi
     roi_corners: [128, 128, 384, 384]
     masks_uri: ${data.tissue_masks_uri}
 
   residuals:
-    _target_: preprocessing.tiling_v2.overlapers.BinaryOverlapper
+    _target_: preprocessing.tiling_v2.overlappers.BinaryOverlapper
     mask_name: residual
     roi_corners: [0, 0, 512, 512]
     masks_uri: ${data.qc_masks_uri}/residual_per_pixel
 
   carcinoma:
-    _target_: preprocessing.tiling_v2.overlapers.BinaryOverlapper
+    _target_: preprocessing.tiling_v2.overlappers.BinaryOverlapper
     mask_name: carcinoma_roi
     roi_corners: [128, 128, 384, 384]
     masks_uri: ${data.annotation_masks_uri}/carcinoma
