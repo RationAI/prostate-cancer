@@ -27,13 +27,17 @@ class Overlaper(ABC):
         ):
             raise ValueError("Provide exactly one source of masks")
 
-        if masks_folder is not None:
-            self.mask_storage = masks_folder
-        else:
-            self.mask_storage = Path(mlflow.artifacts.download_artifacts(masks_uri))
+        self.mask_folder = masks_folder
+        self.masks_uri = masks_uri
 
         self.roi = box(*roi_corners)
         self.mask_name = mask_name
+
+    def setup_storage(self) -> None:
+        if self.masks_folder is not None:
+            self.mask_storage = self.masks_folder
+        else:
+            self.mask_storage = Path(mlflow.artifacts.download_artifacts(self.masks_uri))
 
     def add_mask_path_batch(self, batch: dict[str, Any]) -> dict[str, Any]:
         df = pd.DataFrame(batch)
