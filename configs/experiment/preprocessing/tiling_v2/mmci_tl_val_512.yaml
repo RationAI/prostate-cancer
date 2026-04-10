@@ -25,4 +25,4 @@ overlapers:
     _target_: preprocessing.tiling_v2.overlapers.BinaryOverlaper
     mask_name: tissue_roi
     roi_corners: [0, 0, 512, 512]
-    masks_uri: ${data.annotation_masks_uri}/carinoma
+    masks_uri: ${data.annotation_masks_uri}/carcinoma

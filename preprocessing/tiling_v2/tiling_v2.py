@@ -80,9 +80,6 @@ def tiling(df: pd.DataFrame, config: DictConfig) -> tuple[pd.DataFrame, pd.DataF
         hydra.utils.instantiate(config.overlapers).values()
     )
 
-    for overlaper in overlapers:
-        overlaper.setup_storage()
-
     slides = read_slides(
         list(df["slide_path"]),
         tile_extent=config.tile_extent,
