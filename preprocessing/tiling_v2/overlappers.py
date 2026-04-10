@@ -84,8 +84,8 @@ class BinaryOverlapper(Overlapper):
         self.columns_to_keep |= {f"{self.mask_name}_percentage"}
 
     def extract_foreground_percentage(self, tile: dict[str, Any]) -> dict[str, Any]:
-        print(tile)
-        tile[f"{self.mask_name}_percentage"] = tile[f"{self.mask_name}_overlap"].get("255", 0.0)
+        val = tile[f"{self.mask_name}_overlap"].get("255", 0.0)
+        tile[f"{self.mask_name}_percentage"] = val if val is not None else 0.0
         return tile
 
     def add_percentages(self, tiles: Dataset) -> Dataset:
