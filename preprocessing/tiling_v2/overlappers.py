@@ -10,7 +10,7 @@ from ray.data.expressions import col
 from shapely.geometry import Polygon, box
 
 
-class Overlaper(ABC):
+class Overlapper(ABC):
     mask_storage: Path
     columns_to_keep: set[str]
     roi: Polygon
@@ -34,6 +34,7 @@ class Overlaper(ABC):
 
         self.roi = box(*roi_corners)
         self.mask_name = mask_name
+        self.columns_to_keep = set()
 
     def add_mask_path_batch(self, batch: dict[str, Any]) -> dict[str, Any]:
         df = pd.DataFrame(batch)
@@ -66,7 +67,7 @@ class Overlaper(ABC):
     def add_percentages(self, tiles: Dataset) -> Dataset: ...
 
 
-class BinaryOverlaper(Overlaper):
+class BinaryOverlapper(Overlapper):
     def __init__(
         self,
         roi_corners: tuple[int, int, int, int],
@@ -80,12 +81,11 @@ class BinaryOverlaper(Overlaper):
             masks_folder=masks_folder,
             masks_uri=masks_uri,
         )
-        self.columns_to_keep = {f"{self.mask_name}_percentage"}
+        self.columns_to_keep |= {f"{self.mask_name}_percentage"}
 
     def extract_foreground_percentage(self, tile: dict[str, Any]) -> dict[str, Any]:
-        tile[f"{self.mask_name}_percentage"] = tile[f"{self.mask_name}_overlap"].get(
-            "255", 0.0
-        )
+        print(tile)
+        tile[f"{self.mask_name}_percentage"] = tile[f"{self.mask_name}_overlap"].get("255", 0.0)
         return tile
 
     def add_percentages(self, tiles: Dataset) -> Dataset:

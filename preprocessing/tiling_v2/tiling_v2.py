@@ -16,7 +16,7 @@ from ratiopath.tiling.utils import row_hash
 
 
 if TYPE_CHECKING:
-    from preprocessing.tiling_v2.overlapers import Overlaper
+    from preprocessing.tiling_v2.overlappers import Overlapper
 
 
 ray.init(runtime_env={"excludes": [".git", ".venv"]})
@@ -76,7 +76,7 @@ def carcinoma(row: dict[str, Any], df: pd.DataFrame) -> dict[str, Any]:
 
 
 def tiling(df: pd.DataFrame, config: DictConfig) -> tuple[pd.DataFrame, pd.DataFrame]:
-    overlapers: list[Overlaper] = list(
+    overlapers: list[Overlapper] = list(
         hydra.utils.instantiate(config.overlapers).values()
     )
 
