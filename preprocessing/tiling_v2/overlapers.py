@@ -53,8 +53,8 @@ class Overlaper(ABC):
             tile_overlay_overlap(
                 roi=self.roi,
                 overlay_path=col(f"{self.mask_name}_path"),
-                tile_x=col("x"),
-                tile_y=col("y"),
+                tile_x=col("tile_x"),
+                tile_y=col("tile_y"),
                 mpp_x=col("mpp_x"),
                 mpp_y=col("mpp_y"),
             ),
