@@ -27,7 +27,7 @@ class Overlaper(ABC):
         ):
             raise ValueError("Provide exactly one source of masks")
 
-        self.mask_folder = masks_folder
+        self.masks_folder = masks_folder
         self.masks_uri = masks_uri
 
         self.roi = box(*roi_corners)
