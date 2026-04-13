@@ -10,6 +10,26 @@ from rationai.mlkit.lightning.loggers import MLFlowLogger
 from rationai.tiling.writers import save_mlflow_dataset
 
 
+def attach_embeddings(
+    slide_embeddings: torch.Tensor,
+    tiles: pd.DataFrame,
+    slide: pd.Series,
+    column: str,
+) -> pd.DataFrame:
+    embeds = slide_embeddings.numpy()
+    mask = tiles["slide_id"] == slide.id
+
+    if mask.sum() != len(embeds):
+        raise ValueError(
+            f"Mismatch for slide {slide.id}: {mask.sum()} tiles vs {len(embeds)} embeddings"
+        )
+
+    # to avoid pandas treating the arrays as multi-column scalars
+    idx = tiles.index[mask]
+    tiles.loc[mask, column] = pd.Series(list(embeds), index=idx)
+    return tiles
+
+
 def merge_embeddings(
     slides: pd.DataFrame, tiles: pd.DataFrame, embeddings_dir: Path, name: str
 ) -> pd.DataFrame:
@@ -18,20 +38,10 @@ def merge_embeddings(
 
     for _, slide in slides.iterrows():
         slide_name = Path(slide.path).stem
-
         embeds = torch.load(
             (embeddings_dir / slide_name).with_suffix(".pt"), map_location="cpu"
-        ).numpy()
-        mask = tiles["slide_id"] == slide.id
-
-        if mask.sum() != len(embeds):
-            raise ValueError(
-                f"Mismatch for slide {slide.id}: {mask.sum()} tiles vs {len(embeds)} embeddings"
-            )
-
-        # to avoid pandas treating the arrays as multi-column scalars
-        idx = tiles.index[mask]
-        tiles.loc[mask, col] = pd.Series(list(embeds), index=idx)
+        )
+        tiles = attach_embeddings(embeds, tiles, slide, col)
 
     return tiles
 
@@ -62,6 +72,7 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
         tiles = merge_embeddings(slides, tiles, pgp_embeds_dir, "pgp")
 
     save_mlflow_dataset(slides, tiles, config.data.data_name + "_with_embeddings")
+
 
 if __name__ == "__main__":
     main()
