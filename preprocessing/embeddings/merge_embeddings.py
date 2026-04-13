@@ -37,7 +37,7 @@ def merge_embeddings(
 
 
 @with_cli_args(["+preprocessing=merge_embeddings"])
-@hydra.main(config_path="../configs", config_name="preprocessing", version_base=None)
+@hydra.main(config_path="../../configs", config_name="preprocessing", version_base=None)
 @autolog
 def main(config: DictConfig, logger: MLFlowLogger) -> None:
     tiling_path = mlflow.artifacts.download_artifacts(config.data.tiles_uri_224)
