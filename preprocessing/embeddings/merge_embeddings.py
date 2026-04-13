@@ -16,7 +16,7 @@ def attach_embeddings(
     slide: pd.Series,
     column: str,
 ) -> pd.DataFrame:
-    embeds = slide_embeddings.numpy()
+    embeds = slide_embeddings.cpu().numpy()
     mask = tiles["slide_id"] == slide.id
 
     if mask.sum() != len(embeds):
