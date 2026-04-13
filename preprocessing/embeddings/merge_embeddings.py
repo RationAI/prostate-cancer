@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 
 import hydra
@@ -34,22 +33,19 @@ def process_and_shard_tiles(
     virchow2_embeddings_dir: Path | None,
     pgp_embeddings_dir: Path | None,
 ) -> None:
-    os.makedirs(output_dir, exist_ok=True)
-
-    # iterate over slide chunks
     for shard_idx in range(0, len(slides), slides_per_file):
         slides_chunk = slides.iloc[shard_idx : shard_idx + slides_per_file]
-        slide_ids = set(slides_chunk["id"])
 
-        tiles_chunk = tiles[tiles["slide_id"].isin(slide_ids)].copy()
-
-        if virchow2_embeddings_dir is not None:
-            tiles_chunk["virchow2_embedding"] = None
-        if pgp_embeddings_dir is not None:
-            tiles_chunk["pgp_embedding"] = None
-
+        tiles_buffer = []
         for _, slide in slides_chunk.iterrows():
             slide_name = Path(slide.path).stem
+            mask = tiles["slide_id"] == slide.id
+            tiles_chunk = tiles.loc[mask].copy()
+
+            if virchow2_embeddings_dir is not None:
+                tiles_chunk["virchow2_embedding"] = None
+            if pgp_embeddings_dir is not None:
+                tiles_chunk["pgp_embedding"] = None
 
             if virchow2_embeddings_dir is not None:
                 embeds = torch.load(
@@ -68,10 +64,12 @@ def process_and_shard_tiles(
                 )
                 tiles_chunk = attach_embeddings(embeds, tiles_chunk, "pgp_embedding")
                 del embeds
+            
+            tiles_buffer.append(tiles_chunk)
 
-        out_path = output_dir / f"tiles_{shard_idx:05d}.parquet"
-        table = pa.Table.from_pandas(tiles_chunk)
-        pq.write_table(table, out_path)
+        shard = pd.concat(tiles_buffer, ignore_index=True)
+        shard.to_parquet(str(output_dir / f"tiles_{shard_idx:05d}.parquet"), index=False)
+        tiles_buffer.clear()
 
         print(f"Saved shard {shard_idx:05d} with {len(tiles_chunk)} tiles")
         del tiles_chunk
