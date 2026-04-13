@@ -62,3 +62,6 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
         tiles = merge_embeddings(slides, tiles, pgp_embeds_dir, "pgp")
 
     save_mlflow_dataset(slides, tiles, config.data.data_name + "_with_embeddings")
+
+if __name__ == "__main__":
+    main()
