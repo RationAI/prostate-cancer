@@ -97,6 +97,7 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
     )
 
     output_dir = Path(config.output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
     slides_path = output_dir / "slides.parquet"
     slides.to_parquet(slides_path, index=False)
 
