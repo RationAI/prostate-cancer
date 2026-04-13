@@ -1,49 +1,80 @@
+import os
 from pathlib import Path
 
 import hydra
 import mlflow
 import pandas as pd
+import pyarrow as pa
+import pyarrow.parquet as pq
 import torch
 from omegaconf import DictConfig
 from rationai.mlkit import autolog, with_cli_args
 from rationai.mlkit.lightning.loggers import MLFlowLogger
-from rationai.tiling.writers import save_mlflow_dataset
 
 
 def attach_embeddings(
     slide_embeddings: torch.Tensor,
     tiles: pd.DataFrame,
-    slide: pd.Series,
     column: str,
 ) -> pd.DataFrame:
     embeds = slide_embeddings.cpu().numpy()
-    mask = tiles["slide_id"] == slide.id
 
-    if mask.sum() != len(embeds):
-        raise ValueError(
-            f"Mismatch for slide {slide.id}: {mask.sum()} tiles vs {len(embeds)} embeddings"
-        )
+    if len(tiles) != len(embeds):
+        raise ValueError(f"Mismatch: {len(tiles)} tiles vs {len(embeds)} embeddings")
 
-    # to avoid pandas treating the arrays as multi-column scalars
-    idx = tiles.index[mask]
-    tiles.loc[mask, column] = pd.Series(list(embeds), index=idx)
+    tiles[column] = list(embeds)
     return tiles
 
 
-def merge_embeddings(
-    slides: pd.DataFrame, tiles: pd.DataFrame, embeddings_dir: Path, name: str
-) -> pd.DataFrame:
-    col = f"{name}_embedding"
-    tiles[col] = None
+def process_and_shard_tiles(
+    slides: pd.DataFrame,
+    tiles: pd.DataFrame,
+    slides_per_file: int,
+    output_dir: Path,
+    virchow2_embeddings_dir: Path | None,
+    pgp_embeddings_dir: Path | None,
+) -> None:
+    os.makedirs(output_dir, exist_ok=True)
 
-    for _, slide in slides.iterrows():
-        slide_name = Path(slide.path).stem
-        embeds = torch.load(
-            (embeddings_dir / slide_name).with_suffix(".pt"), map_location="cpu"
-        )
-        tiles = attach_embeddings(embeds, tiles, slide, col)
+    # iterate over slide chunks
+    for shard_idx in range(0, len(slides), slides_per_file):
+        slides_chunk = slides.iloc[shard_idx : shard_idx + slides_per_file]
+        slide_ids = set(slides_chunk["id"])
 
-    return tiles
+        tiles_chunk = tiles[tiles["slide_id"].isin(slide_ids)].copy()
+
+        if virchow2_embeddings_dir is not None:
+            tiles_chunk["virchow2_embedding"] = None
+        if pgp_embeddings_dir is not None:
+            tiles_chunk["pgp_embedding"] = None
+
+        for _, slide in slides_chunk.iterrows():
+            slide_name = Path(slide.path).stem
+
+            if virchow2_embeddings_dir is not None:
+                embeds = torch.load(
+                    (virchow2_embeddings_dir / slide_name).with_suffix(".pt"),
+                    map_location="cpu",
+                )
+                tiles_chunk = attach_embeddings(
+                    embeds, tiles_chunk, "virchow2_embedding"
+                )
+                del embeds
+
+            if pgp_embeddings_dir is not None:
+                embeds = torch.load(
+                    (pgp_embeddings_dir / slide_name).with_suffix(".pt"),
+                    map_location="cpu",
+                )
+                tiles_chunk = attach_embeddings(embeds, tiles_chunk, "pgp_embedding")
+                del embeds
+
+        out_path = output_dir / f"tiles_{shard_idx:05d}.parquet"
+        table = pa.Table.from_pandas(tiles_chunk)
+        pq.write_table(table, out_path)
+
+        print(f"Saved shard {shard_idx:05d} with {len(tiles_chunk)} tiles")
+        del tiles_chunk
 
 
 @with_cli_args(["+preprocessing=merge_embeddings"])
@@ -51,10 +82,12 @@ def merge_embeddings(
 @autolog
 def main(config: DictConfig, logger: MLFlowLogger) -> None:
     tiling_path = mlflow.artifacts.download_artifacts(config.data.tiles_uri_224)
+    slides = pd.read_parquet(tiling_path + "/slides.parquet")
+    tiles = pd.read_parquet(tiling_path + "/tiles.parquet")
 
     virchow2_embeds_dir = (
         Path(mlflow.artifacts.download_artifacts(config.data.virchow2_embeddings_uri))
-        if config.data.pgp_embeddings_uri is not None
+        if config.data.virchow2_embeddings_uri is not None
         else None
     )
     pgp_embeds_dir = (
@@ -62,16 +95,21 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
         if config.data.pgp_embeddings_uri is not None
         else None
     )
-    slides = pd.read_parquet(tiling_path + "/slides.parquet")
-    tiles = pd.read_parquet(tiling_path + "/tiles.parquet")
 
-    if virchow2_embeds_dir is not None:
-        tiles = merge_embeddings(slides, tiles, virchow2_embeds_dir, "virchow2")
+    output_dir = Path(config.output_dir)
+    slides_path = output_dir / "slides.parquet"
+    slides.to_parquet(slides_path, index=False)
 
-    if pgp_embeds_dir is not None:
-        tiles = merge_embeddings(slides, tiles, pgp_embeds_dir, "pgp")
+    process_and_shard_tiles(
+        slides,
+        tiles,
+        config.slides_per_file,
+        output_dir,
+        virchow2_embeds_dir,
+        pgp_embeds_dir,
+    )
 
-    save_mlflow_dataset(slides, tiles, config.data.data_name + "_with_embeddings")
+    mlflow.log_artifacts(str(output_dir), config.data.data_name + "_sharded")
 
 
 if __name__ == "__main__":

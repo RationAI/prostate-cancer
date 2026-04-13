@@ -1,6 +1,8 @@
 # @package _global_
 
 batch_size: 1024
+output_dir: ${prostate_cancer_artifacts}/tile_embeddings/${tile_encoder.name}/${data.data_name}
+slides_per_file: 15
 
 # create embeddings are created for all the tiles
 thresholds:
