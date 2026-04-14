@@ -3,3 +3,4 @@ uris: ???
 thresholds: ${thresholds}
 carcinoma_roi_t: ${thresholds.carcinoma_roi_t}
 stratified_filter: ???
+processor: ???

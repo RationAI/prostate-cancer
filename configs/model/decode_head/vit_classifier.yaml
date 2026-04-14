@@ -1,0 +1,2 @@
+_target_: prostate_cancer.modeling.decode_head.BinaryViTClassifier
+in_features: ???

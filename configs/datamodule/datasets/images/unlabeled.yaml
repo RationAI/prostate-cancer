@@ -1,3 +1,4 @@
 _target_: prostate_cancer.datamodule.datasets.UnlabeledTilesDataset
 uris: ???
 thresholds: ${thresholds}
+processor: ???
