@@ -20,12 +20,8 @@ from prostate_cancer.typing import LabeledSampleBatch, UnlabeledSampleBatch
 
 
 class ProstateCancerModel(LightningModule):
-    def __init__(
-        self, backbone: nn.Module | None, decode_head: nn.Module, lr: float
-    ) -> None:
+    def __init__(self, lr: float) -> None:
         super().__init__()
-        self.backbone = backbone
-        self.decode_head = decode_head
         self.lr = lr
 
         self.criterion = nn.BCEWithLogitsLoss(reduction="mean")
@@ -55,9 +51,7 @@ class ProstateCancerModel(LightningModule):
         )
 
     def forward(self, x: Tensor) -> Tensor:
-        features = self.backbone(x) if self.backbone else x
-        logits = self.decode_head(features)
-        return logits
+        raise NotImplementedError()
 
     def _get_predictions(self, logits: Tensor) -> Tensor:
         return torch.sigmoid(logits)

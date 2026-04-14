@@ -4,24 +4,22 @@ defaults:
   - datasets@test: images/labeled
   - datasets@predict: images/unlabeled
 
-  - transforms@default_transform: normalize
   - samplers@sampler: stratified_weighted_random
+  - transforms@default_transform: augmentations
+  - processor: google_vit
 
 train:
-  transforms: ??? # specified during the training (stain / non-stain augmentations)
+  transforms: ${datamodule.default_transform}
+  processor: ${datamodule.processor}
   stratified_filter: true
-  processor: null
 val:
-  transforms: ${datamodule.default_transform}
+  processor: ${datamodule.processor}
   stratified_filter: true
-  processor: null
 test:
-  transforms: ${datamodule.default_transform}
+  processor: ${datamodule.processor}
   stratified_filter: false
-  processor: null
 predict:
-  transforms: ${datamodule.default_transform}
-  processor: null
+  processor: ${datamodule.processor}
 
 batch_size: ???
 num_workers: ???
