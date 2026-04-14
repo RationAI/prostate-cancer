@@ -1,10 +1,10 @@
 defaults:
-  - decode_head: binary_classifier
+  - decode_head: cnn_classifier
   - backbone: vgg16
   - _self_
 
 decode_head:
   in_features: 512
 
-_target_: prostate_cancer.prostate_cancer_model.ProstateCancerModel
+_target_: prostate_cancer.cnn_model.CNNProstateModel
 lr: ???

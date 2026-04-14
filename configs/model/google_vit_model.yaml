@@ -1,0 +1,11 @@
+defaults:
+  - decode_head: vit_classifier
+  - backbone: google_vit
+  - _self_
+
+decode_head:
+  in_features: 768
+  pooling: cls
+
+_target_: prostate_cancer.vit_model.ViTProstateModel
+lr: ???

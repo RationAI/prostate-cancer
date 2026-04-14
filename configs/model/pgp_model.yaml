@@ -1,6 +1,5 @@
-_target_: prostate_cancer.prostate_cancer_model.ProstateCancerModel
-backbone: null
+_target_: prostate_cancer.embedding_model.EmbeddingProstateModel
 decode_head:
-  _target_: prostate_cancer.modeling.decode_head.BinaryClassifier
+  _target_: prostate_cancer.modeling.decode_head.BinaryEmbeddingClassifier
   in_features: 1536
 lr: ???

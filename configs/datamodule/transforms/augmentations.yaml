@@ -36,8 +36,3 @@ transforms:
             ranges:
               - [-0.005, 0.005]
           p: 1.0
-
-  - _target_: albumentations.Normalize
-    mean: ${mean}
-    std: ${std}
-    max_pixel_value: 1

@@ -1,0 +1,8 @@
+# @package _global_
+
+defaults:
+  - /experiment/train/images/processor_base
+  - /model/google_vit_model@model
+  - _self_
+
+model_name: "Google ViT"
