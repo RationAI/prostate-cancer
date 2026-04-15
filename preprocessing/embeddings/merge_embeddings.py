@@ -3,8 +3,6 @@ from pathlib import Path
 import hydra
 import mlflow
 import pandas as pd
-import pyarrow as pa
-import pyarrow.parquet as pq
 import torch
 from omegaconf import DictConfig
 from rationai.mlkit import autolog, with_cli_args
@@ -64,11 +62,13 @@ def process_and_shard_tiles(
                 )
                 tiles_chunk = attach_embeddings(embeds, tiles_chunk, "pgp_embedding")
                 del embeds
-            
+
             tiles_buffer.append(tiles_chunk)
 
         shard = pd.concat(tiles_buffer, ignore_index=True)
-        shard.to_parquet(str(output_dir / f"tiles_{shard_idx:05d}.parquet"), index=False)
+        shard.to_parquet(
+            str(output_dir / f"tiles_{shard_idx:05d}.parquet"), index=False
+        )
         tiles_buffer.clear()
 
         print(f"Saved shard {shard_idx:05d} with {len(tiles_chunk)} tiles")
