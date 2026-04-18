@@ -6,7 +6,7 @@ import mlflow
 import pandas as pd
 from ratiopath.tiling import tile_overlay_overlap
 from ray.data import Dataset
-from ray.data.expressions import col
+from ray.data.expressions import col, when
 from shapely.geometry import Polygon, box
 
 
@@ -41,13 +41,15 @@ class Overlapper(ABC):
         if target_path.exists():
             return str(target_path)
 
-        return "" # not for all slides there are all masks
+        return ""  # not for all slides there are all masks
 
     def add_mask_path_batch(self, batch: dict[str, Any]) -> dict[str, Any]:
         df = pd.DataFrame(batch)
 
         # assuming same name for the mask with .tiff suffix
-        batch[f"{self.mask_name}_path"] = df["path"].map(lambda x: self._resolve_path(Path(x)))
+        batch[f"{self.mask_name}_path"] = df["path"].map(
+            lambda x: self._resolve_path(Path(x))
+        )
         return batch
 
     def add_mask_path(self, tiles: Dataset) -> Dataset:
@@ -56,13 +58,17 @@ class Overlapper(ABC):
     def add_overlaps(self, tiles: Dataset) -> Dataset:
         return tiles.with_column(
             f"{self.mask_name}_overlap",
-            tile_overlay_overlap(
-                roi=self.roi,
-                overlay_path=col(f"{self.mask_name}_path"),
-                tile_x=col("tile_x"),
-                tile_y=col("tile_y"),
-                mpp_x=col("mpp_x"),
-                mpp_y=col("mpp_y"),
+            when(col(f"{self.mask_name}_path") == "")  # no mask present
+            .then({})
+            .otherwise(
+                tile_overlay_overlap(
+                    roi=self.roi,
+                    overlay_path=col(f"{self.mask_name}_path"),
+                    tile_x=col("tile_x"),
+                    tile_y=col("tile_y"),
+                    mpp_x=col("mpp_x"),
+                    mpp_y=col("mpp_y"),
+                )
             ),
             num_cpus=1,
             memory=4 * 1024**3,
@@ -90,7 +96,9 @@ class BinaryOverlapper(Overlapper):
 
     def extract_foreground_percentage(self, tile: dict[str, Any]) -> dict[str, Any]:
         val = tile[f"{self.mask_name}_overlap"].get("255", 0.0)
-        tile[f"{self.mask_name}_percentage"] = val if val is not None else 0.0 # Can be None if not present
+        tile[f"{self.mask_name}_percentage"] = (
+            val if val is not None else 0.0
+        )  # Can be None since dict is shared across slide
         return tile
 
     def add_percentages(self, tiles: Dataset) -> Dataset:

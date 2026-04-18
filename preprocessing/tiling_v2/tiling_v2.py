@@ -2,9 +2,9 @@ from functools import partial
 from typing import TYPE_CHECKING, Any
 
 import hydra
+import mlflow
 import pandas as pd
 import ray
-import mlflow
 from lightning.pytorch.loggers import Logger
 from omegaconf import DictConfig
 from rationai.mlkit import with_cli_args
