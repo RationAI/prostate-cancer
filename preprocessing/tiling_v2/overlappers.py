@@ -36,13 +36,18 @@ class Overlapper(ABC):
         self.mask_name = mask_name
         self.columns_to_keep = set()
 
+    def _resolve_path(self, path: Path) -> str:
+        target_path = self.mask_storage / f"{path.stem}.tiff"
+        if target_path.exists():
+            return str(target_path)
+
+        return "" # not for all slides there are all masks
+
     def add_mask_path_batch(self, batch: dict[str, Any]) -> dict[str, Any]:
         df = pd.DataFrame(batch)
 
         # assuming same name for the mask with .tiff suffix
-        batch[f"{self.mask_name}_path"] = df["path"].map(
-            lambda x: str(self.mask_storage / f"{Path(x).stem}.tiff")
-        )
+        batch[f"{self.mask_name}_path"] = df["path"].map(lambda x: self._resolve_path(Path(x)))
         return batch
 
     def add_mask_path(self, tiles: Dataset) -> Dataset:
@@ -85,7 +90,7 @@ class BinaryOverlapper(Overlapper):
 
     def extract_foreground_percentage(self, tile: dict[str, Any]) -> dict[str, Any]:
         val = tile[f"{self.mask_name}_overlap"].get("255", 0.0)
-        tile[f"{self.mask_name}_percentage"] = val if val is not None else 0.0
+        tile[f"{self.mask_name}_percentage"] = val if val is not None else 0.0 # Can be None if not present
         return tile
 
     def add_percentages(self, tiles: Dataset) -> Dataset:
