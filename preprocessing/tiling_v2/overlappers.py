@@ -1,6 +1,7 @@
 from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any
+from functools import partial
 
 import mlflow
 import pandas as pd
@@ -43,17 +44,17 @@ class Overlapper(ABC):
 
         return fallback # not for all slides there are all masks, we return dummy black mask
 
-    def add_mask_path_batch(self, batch: dict[str, Any]) -> dict[str, Any]:
+    def add_mask_path_batch(self, batch: dict[str, Any], fallback: str) -> dict[str, Any]:
         df = pd.DataFrame(batch)
 
         # assuming same name for the mask with .tiff suffix
         batch[f"{self.mask_name}_path"] = df["path"].map(
-            lambda x: self._resolve_path(Path(x))
+            lambda x: self._resolve_path(Path(x), fallback)
         )
         return batch
 
-    def add_mask_path(self, tiles: Dataset) -> Dataset:
-        return tiles.map_batches(self.add_mask_path_batch)
+    def add_mask_path(self, tiles: Dataset, fallback: str) -> Dataset:
+        return tiles.map_batches(partial(self.add_mask_path_batch, fallback=fallback))
 
     def add_overlaps(self, tiles: Dataset) -> Dataset:
         return tiles.with_column(
