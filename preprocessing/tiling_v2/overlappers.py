@@ -1,11 +1,11 @@
 from abc import ABC, abstractmethod
+from functools import partial
 from pathlib import Path
 from typing import Any
-from functools import partial
 
 import mlflow
 import pandas as pd
-from ratiopath.tiling .overlays import tile_overlay_overlap
+from ratiopath.tiling.overlays import tile_overlay_overlap
 from ray.data import Dataset
 from ray.data.expressions import col
 from shapely.geometry import Polygon, box
@@ -42,9 +42,11 @@ class Overlapper(ABC):
         if target_path.exists():
             return str(target_path)
 
-        return fallback # not for all slides there are all masks, we return dummy black mask
+        return fallback  # not for all slides there are all masks, we return dummy black mask
 
-    def add_mask_path_batch(self, batch: dict[str, Any], fallback: str) -> dict[str, Any]:
+    def add_mask_path_batch(
+        self, batch: dict[str, Any], fallback: str
+    ) -> dict[str, Any]:
         df = pd.DataFrame(batch)
 
         # assuming same name for the mask with .tiff suffix

@@ -1,29 +1,30 @@
 from functools import partial
-from typing import TYPE_CHECKING, Any
 from pathlib import Path
-import tempfile
+from typing import TYPE_CHECKING, Any
 
 import hydra
 import mlflow
 import pandas as pd
-import ray
 import pyvips
+import ray
 from lightning.pytorch.loggers import Logger
 from omegaconf import DictConfig
+from rationai.masks import write_big_tiff
 from rationai.mlkit import with_cli_args
 from rationai.mlkit.autolog import autolog
 from rationai.tiling.writers import save_mlflow_dataset
 from ratiopath.ray import read_slides
 from ratiopath.tiling import grid_tiles
 from ratiopath.tiling.utils import row_hash
-from rationai.masks import write_big_tiff
 
 
 if TYPE_CHECKING:
     from preprocessing.tiling_v2.overlappers import Overlapper
 
 
-def create_dummy_wsi(path: Path, mpp_x: float = 0.25, mpp_y: float = 0.25, tile_size: int = 512) -> None:
+def create_dummy_wsi(
+    path: Path, mpp_x: float = 0.25, mpp_y: float = 0.25, tile_size: int = 512
+) -> None:
     image = pyvips.Image.black(tile_size, tile_size).bandjoin([0, 0])
     image = image.cast("uchar")
 
@@ -91,7 +92,9 @@ def carcinoma(row: dict[str, Any], df: pd.DataFrame) -> dict[str, Any]:
     return row
 
 
-def tiling(df: pd.DataFrame, config: DictConfig, fallback: str) -> tuple[pd.DataFrame, pd.DataFrame]:
+def tiling(
+    df: pd.DataFrame, config: DictConfig, fallback: str
+) -> tuple[pd.DataFrame, pd.DataFrame]:
     ray.init(runtime_env={"excludes": [".git", ".venv"]})
 
     overlapers: list[Overlapper] = list(
