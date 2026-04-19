@@ -1,10 +1,13 @@
 from functools import partial
 from typing import TYPE_CHECKING, Any
+from pathlib import Path
+import tempfile
 
 import hydra
 import mlflow
 import pandas as pd
 import ray
+import pyvips
 from lightning.pytorch.loggers import Logger
 from omegaconf import DictConfig
 from rationai.mlkit import with_cli_args
@@ -13,6 +16,7 @@ from rationai.tiling.writers import save_mlflow_dataset
 from ratiopath.ray import read_slides
 from ratiopath.tiling import grid_tiles
 from ratiopath.tiling.utils import row_hash
+from rationai.masks import write_big_tiff
 
 
 if TYPE_CHECKING:
@@ -20,6 +24,21 @@ if TYPE_CHECKING:
 
 
 ray.init(runtime_env={"excludes": [".git", ".venv"]})
+
+
+def create_dummy_wsi(path: Path, mpp_x: float = 0.25, mpp_y: float = 0.25, tile_size: int = 512) -> None:
+    image = pyvips.Image.black(tile_size, tile_size).bandjoin([0, 0])
+    image = image.cast("uchar")
+
+    write_big_tiff(
+        image=image,
+        path=path,
+        mpp_x=mpp_x,
+        mpp_y=mpp_y,
+        tile_width=tile_size,
+        tile_height=tile_size,
+    )
+    return path
 
 
 def tile(row: dict[str, Any]) -> list[dict[str, Any]]:
@@ -93,10 +112,14 @@ def tiling(df: pd.DataFrame, config: DictConfig) -> tuple[pd.DataFrame, pd.DataF
     tiles = tiles.repartition(target_num_rows_per_block=config.batch_size)
 
     to_keep = set()
-    for overlaper in overlapers:
-        tiles = overlaper.add_mask_path(tiles)
-        tiles = overlaper.add_percentages(tiles)
-        to_keep |= overlaper.columns_to_keep
+
+    with tempfile.TemporaryDirectory() as tmpdir:
+        fallback = Path(tmpdir) / "dummy_wsi.tiff"
+        create_dummy_wsi(fallback)
+        for overlaper in overlapers:
+            tiles = overlaper.add_mask_path(tiles, str(fallback))
+            tiles = overlaper.add_percentages(tiles)
+            to_keep |= overlaper.columns_to_keep
 
     tiles = tiles.filter(filter_tissue, num_cpus=0.1, memory=128 * 1024**2)
     tiles = tiles.map(

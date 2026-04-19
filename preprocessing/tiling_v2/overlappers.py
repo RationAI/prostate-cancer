@@ -4,9 +4,9 @@ from typing import Any
 
 import mlflow
 import pandas as pd
-from ratiopath.tiling import tile_overlay_overlap
+from ratiopath.tiling .overlays import tile_overlay_overlap
 from ray.data import Dataset
-from ray.data.expressions import col, when
+from ray.data.expressions import col
 from shapely.geometry import Polygon, box
 
 
@@ -36,12 +36,12 @@ class Overlapper(ABC):
         self.mask_name = mask_name
         self.columns_to_keep = set()
 
-    def _resolve_path(self, path: Path) -> str:
+    def _resolve_path(self, path: Path, fallback: str) -> str:
         target_path = self.mask_storage / f"{path.stem}.tiff"
         if target_path.exists():
             return str(target_path)
 
-        return ""  # not for all slides there are all masks
+        return fallback # not for all slides there are all masks, we return dummy black mask
 
     def add_mask_path_batch(self, batch: dict[str, Any]) -> dict[str, Any]:
         df = pd.DataFrame(batch)
@@ -58,17 +58,13 @@ class Overlapper(ABC):
     def add_overlaps(self, tiles: Dataset) -> Dataset:
         return tiles.with_column(
             f"{self.mask_name}_overlap",
-            when(col(f"{self.mask_name}_path") == "")  # no mask present
-            .then({})
-            .otherwise(
-                tile_overlay_overlap(
-                    roi=self.roi,
-                    overlay_path=col(f"{self.mask_name}_path"),
-                    tile_x=col("tile_x"),
-                    tile_y=col("tile_y"),
-                    mpp_x=col("mpp_x"),
-                    mpp_y=col("mpp_y"),
-                )
+            tile_overlay_overlap(
+                roi=self.roi,
+                overlay_path=col(f"{self.mask_name}_path"),
+                tile_x=col("tile_x"),
+                tile_y=col("tile_y"),
+                mpp_x=col("mpp_x"),
+                mpp_y=col("mpp_y"),
             ),
             num_cpus=1,
             memory=4 * 1024**3,
