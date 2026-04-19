@@ -23,9 +23,6 @@ if TYPE_CHECKING:
     from preprocessing.tiling_v2.overlappers import Overlapper
 
 
-ray.init(runtime_env={"excludes": [".git", ".venv"]})
-
-
 def create_dummy_wsi(path: Path, mpp_x: float = 0.25, mpp_y: float = 0.25, tile_size: int = 512) -> None:
     image = pyvips.Image.black(tile_size, tile_size).bandjoin([0, 0])
     image = image.cast("uchar")
@@ -94,7 +91,9 @@ def carcinoma(row: dict[str, Any], df: pd.DataFrame) -> dict[str, Any]:
     return row
 
 
-def tiling(df: pd.DataFrame, config: DictConfig) -> tuple[pd.DataFrame, pd.DataFrame]:
+def tiling(df: pd.DataFrame, config: DictConfig, fallback: str) -> tuple[pd.DataFrame, pd.DataFrame]:
+    ray.init(runtime_env={"excludes": [".git", ".venv"]})
+
     overlapers: list[Overlapper] = list(
         hydra.utils.instantiate(config.overlapers).values()
     )
@@ -112,14 +111,10 @@ def tiling(df: pd.DataFrame, config: DictConfig) -> tuple[pd.DataFrame, pd.DataF
     tiles = tiles.repartition(target_num_rows_per_block=config.batch_size)
 
     to_keep = set()
-
-    with tempfile.TemporaryDirectory() as tmpdir:
-        fallback = Path(tmpdir) / "dummy_wsi.tiff"
-        create_dummy_wsi(fallback)
-        for overlaper in overlapers:
-            tiles = overlaper.add_mask_path(tiles, str(fallback))
-            tiles = overlaper.add_percentages(tiles)
-            to_keep |= overlaper.columns_to_keep
+    for overlaper in overlapers:
+        tiles = overlaper.add_mask_path(tiles, fallback)
+        tiles = overlaper.add_percentages(tiles)
+        to_keep |= overlaper.columns_to_keep
 
     tiles = tiles.filter(filter_tissue, num_cpus=0.1, memory=128 * 1024**2)
     tiles = tiles.map(
@@ -133,9 +128,12 @@ def tiling(df: pd.DataFrame, config: DictConfig) -> tuple[pd.DataFrame, pd.DataF
 @hydra.main(config_path="../../configs", config_name="preprocessing", version_base=None)
 @autolog
 def main(config: DictConfig, logger: Logger | None = None) -> None:
+    fallback = Path(".") / "dummy_wsi.tiff"
+    create_dummy_wsi(fallback)
     df = pd.read_csv(mlflow.artifacts.download_artifacts(config.data.metadata_table))
-    slides, tiles = tiling(df, config)
+    slides, tiles = tiling(df, config, str(fallback))
     save_mlflow_dataset(slides, tiles, config.data.data_name)
+    fallback.unlink()
 
 
 if __name__ == "__main__":
