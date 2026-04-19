@@ -60,7 +60,7 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
             items=list(slides["slide_id"]),
             process_item=process_slide,
             fn_kwargs={
-                "annots_dir": Path(config.combined_masks_dir),
+                "combined_masks_dir": Path(config.combined_masks_dir),
                 "output_dir": Path(output_dir),
                 "untied_masks": config.untied_masks,
             },
