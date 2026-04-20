@@ -3,7 +3,7 @@
 defaults:
   - /callbacks/aggregator@callbacks
   - /aggregator/top_k@aggregator
-  - /experiment/predict/embeddings/vgg16/base
+  - /experiment/predict/images/vgg16/base
   - _self_
 
 aggregator:

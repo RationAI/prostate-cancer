@@ -24,6 +24,8 @@ def get_auc(table: pd.DataFrame, to_estimate: dict[str, list[int]]) -> dict[str,
         # backward compatibility
         if column not in table.columns:
             column = f"pred_{configuration[0]}"
+            if column not in table.columns:
+                raise KeyError("Invalid column")
 
         fpr, tpr, _ = roc_curve(table["target"], table[column])
         # mlflow does not allow "=" in metric name

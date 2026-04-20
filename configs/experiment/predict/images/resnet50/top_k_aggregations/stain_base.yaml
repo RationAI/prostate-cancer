@@ -3,7 +3,7 @@
 defaults:
   - /callbacks/aggregator@callbacks
   - /aggregator/top_k@aggregator
-  - /experiment/predict/embeddings/resnet50/stain_base
+  - /experiment/predict/images/resnet50/stain_base
   - _self_
 
 aggregator:

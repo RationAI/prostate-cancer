@@ -3,7 +3,7 @@
 defaults:
   - /callbacks/aggregator@callbacks
   - /aggregator/top_k@aggregator
-  - /experiment/predict/embeddings/resnet50/base
+  - /experiment/predict/images/resnet50/base
   - _self_
 
 aggregator:

@@ -9,6 +9,6 @@ defaults:
 aggregator:
   kernel_size: 1
   extent_tile: 224
-  stride: 112
+  stride_tile: 112
 
 use_case: "Mean Pool Max. Aggregation"
