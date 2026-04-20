@@ -1,0 +1,13 @@
+# @package _global_
+
+defaults:
+  - /default
+  - _self_
+
+data: ???
+source_of_truth: ???
+correction_type: ???
+
+metadata:
+  run_name: ${correction_type} ${data.data_name}
+  description: ${correction_type} ${data.data_name}

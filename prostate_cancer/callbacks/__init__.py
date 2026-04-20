@@ -1,7 +1,7 @@
 from prostate_cancer.callbacks.aggregator_callback import AggregatorCallback
 from prostate_cancer.callbacks.cam_callback import CAMExplainer
-from prostate_cancer.callbacks.cancer_prediction_table_callback import (
-    CancerPredictionTableCallback,
+from prostate_cancer.callbacks.carcinoma_prediction_table_callback import (
+    CarcinomaPredictionTableCallback,
 )
 from prostate_cancer.callbacks.curves_callback import CurvesCallback
 from prostate_cancer.callbacks.estimation_callback import (
@@ -16,7 +16,7 @@ from prostate_cancer.callbacks.tile_histograms_callback import TileHistogramsCal
 __all__ = [
     "AggregatorCallback",
     "CAMExplainer",
-    "CancerPredictionTableCallback",
+    "CarcinomaPredictionTableCallback",
     "CurvesCallback",
     "EstimationCallback",
     "HeatmapCallback",

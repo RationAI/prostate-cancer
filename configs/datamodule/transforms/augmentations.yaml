@@ -1,0 +1,38 @@
+_target_: albumentations.Compose
+transforms:
+  - _target_: albumentations.RandomRotate90
+    p: 1.0
+  - _target_: albumentations.HorizontalFlip
+    p: 0.5
+  - _target_: albumentations.VerticalFlip
+    p: 0.5
+  - _target_: albumentations.RandomGamma
+    p: 0.5
+  - _target_: albumentations.RandomBrightnessContrast
+    p: 0.5
+  - _target_: albumentations.HueSaturationValue
+    p: 0.5
+
+  - _target_: rationai.staining.AugmentStainingTransform
+
+    conversion:
+      _target_: rationai.staining.ColorConversion.from_stain_vectors
+      stain1: [0.479, 0.823, 0.305]
+      stain2: [0.156, 0.949, 0.273]
+      stain3: [-0.189, -0.242, 0.952]
+
+    noise_transform:
+      _target_: albumentations.Compose
+      transforms:
+        - _target_: albumentations.MultiplicativeNoise
+          multiplier: [0.5, 1.5]
+          per_channel: true
+          elementwise: false
+          p: 1.0
+
+        - _target_: albumentations.AdditiveNoise
+          noise_type: uniform
+          noise_params:
+            ranges:
+              - [-0.005, 0.005]
+          p: 1.0

@@ -1,0 +1,25 @@
+defaults:
+  - datasets@train: images/labeled
+  - datasets@val: images/labeled
+  - datasets@test: images/labeled
+  - datasets@predict: images/unlabeled
+
+  - samplers@sampler: stratified_weighted_random
+  - transforms@default_transform: augmentations
+  - processor: google_vit
+
+train:
+  transforms: ${datamodule.default_transform}
+  processor: ${datamodule.processor}
+  stratified_filter: true
+val:
+  processor: ${datamodule.processor}
+  stratified_filter: true
+test:
+  processor: ${datamodule.processor}
+  stratified_filter: false
+predict:
+  processor: ${datamodule.processor}
+
+batch_size: ???
+num_workers: ???

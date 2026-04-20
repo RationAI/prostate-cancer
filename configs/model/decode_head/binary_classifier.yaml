@@ -1,2 +1,0 @@
-_target_: prostate_cancer.modeling.decode_head.BinaryClassifier
-in_features: ???
