@@ -1,3 +1,7 @@
+defaults:
+  - base
+  - _self_
+
 # points to the public mlflow (was used for QC analysis)
 metadata_table_deprecated: "mlflow-artifacts:/38/20ea4dcde54f42278d69e5eecbd60131/artifacts/radboud_metadata.csv"
 
@@ -5,3 +9,4 @@ metadata_table_deprecated: "mlflow-artifacts:/38/20ea4dcde54f42278d69e5eecbd6013
 metadata_table: "mlflow-artifacts:/38/5181020e7a2245dd8d2a2436adf3db8e/artifacts/radboud_metadata.csv"
 
 data_name: "PANDA - Radboud"
+

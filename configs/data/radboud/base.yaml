@@ -1,0 +1,4 @@
+# point to public mlflow
+qc_masks_uri: "mlflow-artifacts:/38/d4ac853943834fc898de59c60e90ace3/artifacts/qc_masks"
+tissue_masks_uri: "mlflow-artifacts:/38/cd504aaafb8c408184584d808a99cf15/artifacts/tissue_mask"
+carcinoma_masks_uri: "mlflow-artifacts:/38/cd504aaafb8c408184584d808a99cf15/artifacts/carcinoma_mask"
