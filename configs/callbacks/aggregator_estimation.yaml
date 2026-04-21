@@ -1,0 +1,5 @@
+estimation_callback:
+  _target_: prostate_cancer.callbacks.EstimationCallback
+  aggregator_cls_path: ???
+  to_estimate: ???
+  static: ???

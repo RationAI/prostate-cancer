@@ -1,0 +1,8 @@
+# @package _global_
+
+defaults:
+  - /experiment/postprocessing/slide_level_eval/vgg16/base
+
+aggregation_method: "Mean Pool Max"
+pred_column: "pred_1"
+t: ${model_data.slide_mpm_threshold}

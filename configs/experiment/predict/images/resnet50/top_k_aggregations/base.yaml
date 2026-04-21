@@ -1,0 +1,15 @@
+# @package _global_
+
+defaults:
+  - /callbacks/aggregator@callbacks
+  - /aggregator/top_k@aggregator
+  - /experiment/predict/images/resnet50/base
+  - _self_
+
+aggregator:
+  kernel_size: 4
+  extent_tile: 512
+  stride_tile: 256
+  k: 4
+
+use_case: "Top-k Aggregation"

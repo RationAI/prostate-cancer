@@ -1,0 +1,19 @@
+# @package _global_
+
+defaults:
+  - /callbacks/aggregator_estimation@callbacks
+  - /experiment/predict/images/vgg16/stain_base
+  - /data/mmci_sl_group_1@predict_data
+  - _self_
+
+callbacks:
+  estimation_callback:
+    aggregator_cls_path: prostate_cancer.aggregators.span.SpanAggregator
+    static:
+      extent_tile: 512
+      stride_tile: 256
+      cell_threshold: ${model_data.tile_threshold}
+    to_estimate:
+      k: [2, 3, 4, 5]
+
+use_case: "K Estimation (Span Aggregator)"
