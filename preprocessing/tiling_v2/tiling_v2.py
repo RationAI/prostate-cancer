@@ -24,7 +24,7 @@ if TYPE_CHECKING:
 
 def create_dummy_wsi(
     path: Path, mpp_x: float = 0.25, mpp_y: float = 0.25, tile_size: int = 512
-) -> None:
+) -> Path:
     image = pyvips.Image.black(tile_size, tile_size).bandjoin([0, 0])
     image = image.cast("uchar")
 
