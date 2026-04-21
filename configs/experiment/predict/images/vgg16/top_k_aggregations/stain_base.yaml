@@ -1,0 +1,15 @@
+# @package _global_
+
+defaults:
+  - /callbacks/aggregator@callbacks
+  - /aggregator/top_k@aggregator
+  - /experiment/predict/images/vgg16/stain_base
+  - _self_
+
+aggregator:
+  kernel_size: 1
+  extent_tile: 512
+  stride_tile: 256
+  k: 2
+
+use_case: "Top-k Aggregation"
