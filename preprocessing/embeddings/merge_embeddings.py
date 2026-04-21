@@ -33,8 +33,8 @@ def process_and_shard_tiles(
     virchow2_embeddings_dir: Path | None,
     pgp_embeddings_dir: Path | None,
 ) -> None:
-    for shard_idx in range(0, len(slides), slides_per_file):
-        slides_chunk = slides.iloc[shard_idx : shard_idx + slides_per_file]
+    for shard_idx, start in enumerate(range(0, len(slides), slides_per_file)):
+        slides_chunk = slides.iloc[start : start + slides_per_file]
 
         tiles_buffer = []
         for (
