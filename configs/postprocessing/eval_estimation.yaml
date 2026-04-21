@@ -1,0 +1,4 @@
+# @package _global_
+
+to_estimate: ??? # dict param_name -> list of tried values
+use_case: Hyper-parameter Estimation Evaluation (AUC) ${aggregation_method}

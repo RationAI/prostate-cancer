@@ -1,0 +1,8 @@
+# @package _global_
+
+defaults:
+  - /experiment/postprocessing/slide_level_eval/pgp/base
+
+aggregation_method: "Span"
+pred_column: "pred_k=4"
+t: ${model_data.slide_span_threshold}

@@ -1,0 +1,7 @@
+# @package _global_
+
+defaults:
+  - /experiment/postprocessing/slide_level_eval/vgg16/max_aggregations/base
+  - /data/mmci_sl_group_1@data
+
+preds_uri: ${model_data.slide_level_prediction_uris.max.mmci_sl_group_1}

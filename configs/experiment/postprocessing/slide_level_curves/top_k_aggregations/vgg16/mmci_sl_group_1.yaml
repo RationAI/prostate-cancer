@@ -1,0 +1,9 @@
+# @package _global_
+
+defaults:
+  - /experiment/postprocessing/slide_level_curves/top_k_aggregations/vgg16/base
+  - /data/mmci_sl_group_1@data
+  - _self_
+
+preds_uri: ${model_data.slide_level_prediction_uris.top_k.mmci_sl_group_1}
+pred_column: "pred_kernel_size=1_k=4"

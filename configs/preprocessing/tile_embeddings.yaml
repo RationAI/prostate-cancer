@@ -3,7 +3,7 @@
 batch_size: 1024
 output_path: ${prostate_cancer_artifacts}/tile_embeddings/${tile_encoder.name}/${data.data_name}
 
-# create embeddings are created for all the tiles
+# create embeddings for all the tiles
 thresholds:
   tissue_roi_t: 0.0
   residual_t: 1.0
