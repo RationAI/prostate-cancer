@@ -1,5 +1,6 @@
 # @package _global_
 
 defaults:
+  - /experiment/preprocessing/merge_embeddings/virchow2/base
   - /data/mmci_sl_group_2@data
   - _self_

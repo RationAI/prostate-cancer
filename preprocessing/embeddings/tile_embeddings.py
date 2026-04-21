@@ -76,11 +76,13 @@ def compute_embeddings_uri(
         ),
     )
 
-    col = f"{tile_encoder.name}_embedding"
-
     partition = uri.split("/")[-1]
     partition_dir = output_dir / f"{partition}_with_{tile_encoder.name}_embeddings"
     partition_dir.mkdir(parents=True, exist_ok=True)
+    slides_output = partition_dir / "slides"
+    slides_output.mkdir(parents=True, exist_ok=True)
+    tiles_output = partition_dir / "tiles"
+    tiles_output.mkdir(parents=True, exist_ok=True)
 
     shard_idx = 0
     slides_in_shard = 0
@@ -96,11 +98,7 @@ def compute_embeddings_uri(
 
         mask = tiles_all["slide_id"] == slide_dataset.slide_metadata.id
         tiles_chunk = tiles_all.loc[mask].copy()
-        tiles_chunk = attach_embeddings(
-            slide_embeddings,
-            tiles_chunk,
-            col,
-        )
+        tiles_chunk = attach_embeddings(slide_embeddings, tiles_chunk)
 
         tiles_buffer.append(tiles_chunk)
         slides_in_shard += 1
@@ -123,10 +121,10 @@ def compute_embeddings_uri(
     # final flush
     if tiles_buffer:
         shard = pd.concat(tiles_buffer, ignore_index=True)
-        shard.to_parquet(partition_dir / f"tiles_{shard_idx:05d}.parquet", index=False)
+        shard.to_parquet(tiles_output / f"tiles_{shard_idx:05d}.parquet", index=False)
         tiles_buffer.clear()
 
-    slides.to_parquet(partition_dir / "slides.parquet", index=False)
+    slides.to_parquet(slides_output / "slides.parquet", index=False)
     return partition_dir
 
 

@@ -1,0 +1,6 @@
+# @package _global_
+
+defaults:
+  - /experiment/preprocessing/merge_embeddings/pgp/base
+  - /data/mmci_sl_group_1@data
+  - _self_
