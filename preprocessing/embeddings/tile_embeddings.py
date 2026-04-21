@@ -65,7 +65,7 @@ def compute_embeddings_uri(
 
     dataset = UnlabeledTilesDataset(
         uris=(uri,),
-        thresholds=config.thresholds,
+        thresholds=config.thresholds,  # thresholds are set so that no tiles are filtered
         transforms=A.Compose(
             [
                 A.Normalize(
@@ -152,7 +152,7 @@ def compute_embeddings(
                 device,
                 output_dir,
             )
-            mlflow.log_artifacts(str(out))
+            mlflow.log_artifacts(str(out), artifact_path=out.name)
 
 
 @with_cli_args(["+preprocessing=tile_embeddings"])

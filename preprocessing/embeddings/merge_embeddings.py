@@ -70,14 +70,15 @@ def process_and_shard_tiles(
 
             tiles_buffer.append(tiles_chunk)
 
-        shard = pd.concat(tiles_buffer, ignore_index=True)
-        shard.to_parquet(
-            str(output_dir / f"tiles_{shard_idx:05d}.parquet"), index=False
-        )
-        tiles_buffer.clear()
+        if len(tiles_buffer) > 0:
+            shard = pd.concat(tiles_buffer, ignore_index=True)
+            shard.to_parquet(
+                str(output_dir / f"tiles_{shard_idx:05d}.parquet"), index=False
+            )
+            tiles_buffer.clear()
 
-        print(f"Saved shard {shard_idx:05d} with {len(shard)} tiles")
-        del tiles_chunk
+            print(f"Saved shard {shard_idx:05d} with {len(shard)} tiles")
+            del tiles_chunk
 
 
 @with_cli_args(["+preprocessing=merge_embeddings"])
