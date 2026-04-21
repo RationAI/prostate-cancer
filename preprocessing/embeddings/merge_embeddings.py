@@ -1,3 +1,5 @@
+"""Script to convert old way of handling embeddings (separate embeddings file per slide) to the new one where they are included in parquet files."""
+
 from pathlib import Path
 
 import hydra
@@ -35,7 +37,10 @@ def process_and_shard_tiles(
         slides_chunk = slides.iloc[shard_idx : shard_idx + slides_per_file]
 
         tiles_buffer = []
-        for _, slide in slides_chunk.iterrows():
+        for (
+            _,
+            slide,
+        ) in slides_chunk.iterrows():  # need for-loop because embed files are per slide
             slide_name = Path(slide.path).stem
             mask = tiles["slide_id"] == slide.id
             tiles_chunk = tiles.loc[mask].copy()
@@ -71,7 +76,7 @@ def process_and_shard_tiles(
         )
         tiles_buffer.clear()
 
-        print(f"Saved shard {shard_idx:05d} with {len(tiles_chunk)} tiles")
+        print(f"Saved shard {shard_idx:05d} with {len(shard)} tiles")
         del tiles_chunk
 
 
@@ -97,7 +102,7 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
     output_dir = Path(config.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     slides_path = output_dir / "slides.parquet"
-    slides.to_parquet(slides_path, index=False)
+    slides.to_parquet(slides_path, index=False)  # slides.parquet is not changed
 
     process_and_shard_tiles(
         slides,
