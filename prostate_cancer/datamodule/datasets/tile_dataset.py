@@ -13,7 +13,7 @@ from prostate_cancer.datamodule.datasets.base import (
     FilterableDataset,
     get_slide_name,
 )
-from prostate_cancer.typing import LabeledSample, Metadata, UnlabeledSample
+from prostate_cancer.typing import LabeledTileSample, TileMetadata, UnlabeledTileSample
 
 
 T = TypeVar("T", covariant=True)
@@ -59,13 +59,13 @@ class TilesDataset(FilterableDataset[T]):
         )
 
 
-class LabeledTilesDataset(TilesDataset[LabeledSample]): ...
+class LabeledTilesDataset(TilesDataset[LabeledTileSample]): ...
 
 
-class UnlabeledTilesDataset(TilesDataset[UnlabeledSample]): ...
+class UnlabeledTilesDataset(TilesDataset[UnlabeledTileSample]): ...
 
 
-class SlideTiles(Dataset[LabeledSample | UnlabeledSample]):
+class SlideTiles(Dataset[LabeledTileSample | UnlabeledTileSample]):
     def __init__(
         self,
         slide_metadata: pd.Series,
@@ -96,9 +96,9 @@ class SlideTiles(Dataset[LabeledSample | UnlabeledSample]):
     def __len__(self) -> int:
         return len(self.slide_tiles)
 
-    def __getitem__(self, idx: int) -> LabeledSample | UnlabeledSample:
+    def __getitem__(self, idx: int) -> LabeledTileSample | UnlabeledTileSample:
         image = self.slide_tiles[idx]
-        metadata = Metadata(
+        metadata = TileMetadata(
             slide=self.slide_tiles.slide_path.stem,
             x=self.slide_tiles.tiles.iloc[idx]["x"],
             y=self.slide_tiles.tiles.iloc[idx]["y"],

@@ -16,7 +16,7 @@ from torchmetrics import (
     Specificity,
 )
 
-from prostate_cancer.typing import LabeledSampleBatch, UnlabeledSampleBatch
+from prostate_cancer.typing import LabeledTileSampleBatch, UnlabeledTileSampleBatch
 
 
 class ProstateCancerModel(LightningModule):
@@ -56,7 +56,7 @@ class ProstateCancerModel(LightningModule):
     def _get_predictions(self, logits: Tensor) -> Tensor:
         return torch.sigmoid(logits)
 
-    def training_step(self, batch: LabeledSampleBatch) -> Tensor:
+    def training_step(self, batch: LabeledTileSampleBatch) -> Tensor:
         inputs, targets, _ = batch
         logits = self(inputs)
         predictions = self._get_predictions(logits)
@@ -75,7 +75,7 @@ class ProstateCancerModel(LightningModule):
 
         return loss
 
-    def validation_step(self, batch: LabeledSampleBatch) -> None:
+    def validation_step(self, batch: LabeledTileSampleBatch) -> None:
         inputs, targets, _ = batch
         logits = self(inputs)
         predictions = self._get_predictions(logits)
@@ -93,7 +93,7 @@ class ProstateCancerModel(LightningModule):
         self.log_dict(self.val_metrics, batch_size=len(inputs), on_epoch=True)
 
     def test_step(
-        self, batch: LabeledSampleBatch, batch_idx: int, dataloader_idx: int = 0
+        self, batch: LabeledTileSampleBatch, batch_idx: int, dataloader_idx: int = 0
     ) -> Tensor:
         inputs, targets, _ = batch
         logits = self(inputs)
@@ -109,7 +109,7 @@ class ProstateCancerModel(LightningModule):
         self.test_metrics.reset()
 
     def predict_step(
-        self, batch: UnlabeledSampleBatch, batch_idx: int, dataloader_idx: int = 0
+        self, batch: UnlabeledTileSampleBatch, batch_idx: int, dataloader_idx: int = 0
     ) -> Tensor:
         inputs, _ = batch
         logits = self(inputs)

@@ -6,11 +6,11 @@ from rationai.mlkit.lightning.callbacks import MultiloaderLifecycle
 from rationai.mlkit.lightning.loggers import MLFlowLogger
 
 from prostate_cancer.datamodule.datasets.base import get_slide_name
-from prostate_cancer.typing import UnlabeledSampleBatch
+from prostate_cancer.typing import UnlabeledTileSampleBatch
 
 
 if TYPE_CHECKING:
-    from prostate_cancer.datamodule import DataModule
+    from prostate_cancer.datamodule import TileDataModule
 
 
 class NumPositiveCallback(MultiloaderLifecycle):
@@ -28,7 +28,7 @@ class NumPositiveCallback(MultiloaderLifecycle):
         trainer: pl.Trainer,
         pl_module: pl.LightningModule,
         outputs: Any,
-        batch: UnlabeledSampleBatch,
+        batch: UnlabeledTileSampleBatch,
         batch_idx: int,
         dataloader_idx: int = 0,
     ) -> None:

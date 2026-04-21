@@ -13,7 +13,7 @@ from torchmetrics import (
     Specificity,
 )
 
-from prostate_cancer.typing import LabeledSampleBatch
+from prostate_cancer.typing import LabeledTileSampleBatch
 
 
 class NestedMetricsCallback(Callback):
@@ -39,7 +39,7 @@ class NestedMetricsCallback(Callback):
         trainer: pl.Trainer,
         pl_module: pl.LightningModule,
         outputs: Any,
-        batch: LabeledSampleBatch,
+        batch: LabeledTileSampleBatch,
         batch_idx: int,
         dataloader_idx: int = 0,
     ) -> None:

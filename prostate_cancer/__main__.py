@@ -8,7 +8,7 @@ from omegaconf import DictConfig, OmegaConf
 from rationai.mlkit import Trainer, autolog
 from rationai.mlkit.lightning.loggers.mlflow import MLFlowLogger
 
-from prostate_cancer.datamodule import DataModule
+from prostate_cancer.datamodule import TileDataModule
 from prostate_cancer.log_title import log_checkpoint_title
 
 
@@ -31,7 +31,7 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
     data = hydra.utils.instantiate(
         config.datamodule,
         _recursive_=False,  # to avoid instantiating all the datasets
-        _target_=DataModule,
+        _target_=TileDataModule,
     )
     model = hydra.utils.instantiate(
         config.model

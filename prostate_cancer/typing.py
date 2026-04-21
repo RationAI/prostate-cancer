@@ -1,22 +1,42 @@
 from typing import TypeAlias, TypedDict
+from pathlib import Path
 
 from torch import Tensor
 
 
-class Metadata(TypedDict):
+class TileMetadata(TypedDict):
     slide: str
     x: int
     y: int
 
 
-class MetadataBatch(TypedDict):
+class TileMetadataBatch(TypedDict):
     slide: list[str]
     x: Tensor
     y: Tensor
 
 
-LabeledSample = tuple[Tensor, Tensor, Metadata]
-UnlabeledSample = tuple[Tensor, Metadata]
+LabeledTileSample: TypeAlias = tuple[Tensor, Tensor, TileMetadata]
+UnlabeledTileSample: TypeAlias = tuple[Tensor, TileMetadata]
 
-LabeledSampleBatch: TypeAlias = tuple[Tensor, Tensor, MetadataBatch]
-UnlabeledSampleBatch: TypeAlias = tuple[Tensor, MetadataBatch]
+LabeledTileSampleBatch: TypeAlias = tuple[Tensor, Tensor, TileMetadataBatch]
+UnlabeledTileSampleBatch: TypeAlias = tuple[Tensor, TileMetadataBatch]
+
+
+class SlideMetadata(TypedDict):
+    slide_id: str
+    slide_name: str
+    slide_path: Path
+
+
+class SlideMetadataBatch(TypedDict):
+    slide_id: list[str]
+    slide_name: list[str]
+    slide_path: list[Path]
+
+
+LabeledSlideSample = tuple[Tensor, Tensor, TileMetadata]
+UnlabeledSlideSample = tuple[Tensor, TileMetadata]
+
+LabeledSlideSampleBatch: TypeAlias = tuple[Tensor, Tensor, TileMetadataBatch]
+UnlabeledSlideSampleBatch: TypeAlias = tuple[Tensor, TileMetadataBatch]

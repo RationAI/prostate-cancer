@@ -7,11 +7,11 @@ import pandas as pd
 from rationai.masks.mask_builders import ScalarMaskBuilder
 from rationai.mlkit.lightning.callbacks import MultiloaderLifecycle
 
-from prostate_cancer.typing import LabeledSampleBatch, UnlabeledSampleBatch
+from prostate_cancer.typing import LabeledTileSampleBatch, UnlabeledTileSampleBatch
 
 
 if TYPE_CHECKING:
-    from prostate_cancer.datamodule import DataModule
+    from prostate_cancer.datamodule import TileDataModule
 
 
 class HeatmapCallback(MultiloaderLifecycle):
@@ -63,7 +63,7 @@ class HeatmapCallback(MultiloaderLifecycle):
     def _on_batch_end(
         self,
         outputs: Any,
-        batch: UnlabeledSampleBatch | LabeledSampleBatch,
+        batch: UnlabeledTileSampleBatch | LabeledTileSampleBatch,
     ) -> None:
         if len(batch) == 3:
             # Test step
@@ -80,7 +80,7 @@ class HeatmapCallback(MultiloaderLifecycle):
         trainer: pl.Trainer,
         pl_module: pl.LightningModule,
         outputs: Any,
-        batch: LabeledSampleBatch,
+        batch: LabeledTileSampleBatch,
         batch_idx: int,
         dataloader_idx: int = 0,
     ) -> None:
@@ -91,7 +91,7 @@ class HeatmapCallback(MultiloaderLifecycle):
         trainer: pl.Trainer,
         pl_module: pl.LightningModule,
         outputs: Any,
-        batch: UnlabeledSampleBatch,
+        batch: UnlabeledTileSampleBatch,
         batch_idx: int,
         dataloader_idx: int = 0,
     ) -> None:

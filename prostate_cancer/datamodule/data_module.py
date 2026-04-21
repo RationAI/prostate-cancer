@@ -7,13 +7,13 @@ from omegaconf import DictConfig
 from rationai.mlkit.data.datasets import MetaTiledSlides
 from torch.utils.data import DataLoader
 
-from prostate_cancer.typing import LabeledSample, LabeledSampleBatch, UnlabeledSample
+from prostate_cancer.typing import LabeledTileSample, LabeledTileSampleBatch, UnlabeledTileSample
 
 
 PartialConf: TypeAlias = DictConfig
 
 
-class DataModule(LightningDataModule):
+class TileDataModule(LightningDataModule):
     def __init__(
         self,
         batch_size: int,
@@ -31,29 +31,29 @@ class DataModule(LightningDataModule):
         match stage:
             case "fit":
                 self.train = cast(
-                    "MetaTiledSlides[LabeledSample]",
+                    "MetaTiledSlides[LabeledTileSample]",
                     instantiate(self.datasets["train"]),
                 )
                 self.val = cast(
-                    "MetaTiledSlides[LabeledSample]", instantiate(self.datasets["val"])
+                    "MetaTiledSlides[LabeledTileSample]", instantiate(self.datasets["val"])
                 )
             case "val":
                 self.val = cast(
-                    "MetaTiledSlides[LabeledSample]", instantiate(self.datasets["val"])
+                    "MetaTiledSlides[LabeledTileSample]", instantiate(self.datasets["val"])
                 )
             case "test":
                 self.test = cast(
-                    "MetaTiledSlides[LabeledSample]", instantiate(self.datasets["test"])
+                    "MetaTiledSlides[LabeledTileSample]", instantiate(self.datasets["test"])
                 )
             case "predict":
                 self.predict = cast(
-                    "MetaTiledSlides[UnlabeledSample]",
+                    "MetaTiledSlides[UnlabeledTileSample]",
                     instantiate(self.datasets["predict"]),
                 )
 
     def _load_sampler(
-        self, dataset: MetaTiledSlides[LabeledSample]
-    ) -> Iterable[LabeledSampleBatch] | None:
+        self, dataset: MetaTiledSlides[LabeledTileSample]
+    ) -> Iterable[LabeledTileSampleBatch] | None:
         if self.sampler_partial is not None:
             return instantiate(self.sampler_partial)(
                 dataset=dataset, target_col="carcinoma"
@@ -61,7 +61,7 @@ class DataModule(LightningDataModule):
 
         return None
 
-    def train_dataloader(self) -> Iterable[LabeledSampleBatch]:
+    def train_dataloader(self) -> Iterable[LabeledTileSampleBatch]:
         sampler = self._load_sampler(self.train)
         shuffle = (
             True if sampler is None else None
@@ -76,7 +76,7 @@ class DataModule(LightningDataModule):
             drop_last=True,
         )
 
-    def val_dataloader(self) -> Iterable[LabeledSampleBatch]:
+    def val_dataloader(self) -> Iterable[LabeledTileSampleBatch]:
         return DataLoader(
             self.val,
             batch_size=self.batch_size,
@@ -84,7 +84,7 @@ class DataModule(LightningDataModule):
             persistent_workers=self.num_workers > 0,
         )
 
-    def test_dataloader(self) -> list[Iterable[LabeledSampleBatch]]:
+    def test_dataloader(self) -> list[Iterable[LabeledTileSampleBatch]]:
         return [
             DataLoader(
                 dataset, batch_size=self.batch_size, num_workers=self.num_workers
@@ -92,7 +92,7 @@ class DataModule(LightningDataModule):
             for dataset in self.test.datasets
         ]
 
-    def predict_dataloader(self) -> list[Iterable[LabeledSampleBatch]]:
+    def predict_dataloader(self) -> list[Iterable[LabeledTileSampleBatch]]:
         return [
             DataLoader(
                 dataset, batch_size=self.batch_size, num_workers=self.num_workers
