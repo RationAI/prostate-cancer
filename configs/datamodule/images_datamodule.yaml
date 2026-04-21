@@ -10,14 +10,18 @@ defaults:
 train:
   transforms: ??? # specified during the training (stain / non-stain augmentations)
   stratified_filter: true
+  processor: null
 val:
   transforms: ${datamodule.default_transform}
   stratified_filter: true
+  processor: null
 test:
   transforms: ${datamodule.default_transform}
   stratified_filter: false
+  processor: null
 predict:
   transforms: ${datamodule.default_transform}
+  processor: null
 
 batch_size: ???
 num_workers: ???

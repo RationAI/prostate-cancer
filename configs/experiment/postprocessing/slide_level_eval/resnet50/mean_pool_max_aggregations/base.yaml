@@ -1,0 +1,8 @@
+# @package _global_
+
+defaults:
+  - /experiment/postprocessing/slide_level_eval/resnet50/base
+
+aggregation_method: "Mean Pool Max"
+pred_column: "pred_5"
+t: ${model_data.slide_mpm_threshold}

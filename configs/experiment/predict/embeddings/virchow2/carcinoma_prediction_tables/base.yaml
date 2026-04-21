@@ -1,0 +1,12 @@
+# @package _global_
+
+defaults:
+  - /callbacks/carcinoma_prediction_table@callbacks
+  - /experiment/predict/embeddings/virchow2/base
+  - _self_
+
+callbacks:
+  carcinoma_table_callback:
+    threshold: ${model_data.tile_threshold}
+
+use_case: "Carcinoma Prediction Table"

@@ -1,0 +1,7 @@
+# @package _global_
+
+defaults:
+  - /experiment/postprocessing/eval_estimation/mpm/base
+  - /data/mmci_sl_group_1@data
+  - /model/checkpoints/resnet50_stain@model_data
+  - _self_

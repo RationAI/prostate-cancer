@@ -21,7 +21,10 @@ from ratiopath.openslide import OpenSlide
 
 @ray.remote(num_cpus=1, memory=(5 * 1024**3))
 def process_slide(
-    name: str, combined_masks_dir: Path, output_dir: Path, untied_masks: dict[str, list[int]]
+    name: str,
+    combined_masks_dir: Path,
+    output_dir: Path,
+    untied_masks: dict[str, list[int]],
 ) -> None:
     combined_mask_path = combined_masks_dir / f"{name}_mask.tiff"
     with OpenSlide(combined_mask_path) as slide:
@@ -50,7 +53,9 @@ def process_slide(
 
 
 @with_cli_args(["+preprocessing=untie_masks"])
-@hydra.main(config_path="../../../configs", config_name="preprocessing", version_base=None)
+@hydra.main(
+    config_path="../../../configs", config_name="preprocessing", version_base=None
+)
 @autolog
 def main(config: DictConfig, logger: MLFlowLogger) -> None:
     slides = pd.read_csv(download_artifacts(config.data.metadata_table))

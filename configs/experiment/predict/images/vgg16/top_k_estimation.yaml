@@ -1,0 +1,19 @@
+# @package _global_
+
+defaults:
+  - /callbacks/aggregator_estimation@callbacks
+  - /experiment/predict/images/vgg16/base
+  - /data/mmci_sl_group_1@predict_data
+  - _self_
+
+callbacks:
+  estimation_callback:
+    aggregator_cls_path: rationai.mlkit.metrics.TopKAggregator
+    static:
+      extent_tile: 512
+      stride_tile: 256
+    to_estimate:
+      kernel_size: [1, 2, 3, 4, 5]
+      k: [2, 3, 4]
+
+use_case: "Kernel Size & K Estimation (Top K Aggregator)"
