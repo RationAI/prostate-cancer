@@ -95,10 +95,11 @@ def carcinoma(row: dict[str, Any], df: pd.DataFrame) -> dict[str, Any]:
 def tiling(
     df: pd.DataFrame, config: DictConfig, fallback: str
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    ray.init(runtime_env={"excludes": [".git", ".venv"]})
+    if not ray.is_initialized():
+        ray.init()
 
-    overlapers: list[Overlapper] = list(
-        hydra.utils.instantiate(config.overlapers).values()
+    overlappers: list[Overlapper] = list(
+        hydra.utils.instantiate(config.overlappers).values()
     )
 
     slides = read_slides(
@@ -114,16 +115,17 @@ def tiling(
     tiles = tiles.repartition(target_num_rows_per_block=config.batch_size)
 
     to_keep = set()
-    for overlaper in overlapers:
-        tiles = overlaper.add_mask_path(tiles, fallback)
-        tiles = overlaper.add_percentages(tiles)
-        to_keep |= overlaper.columns_to_keep
+    for overlapper in overlappers:
+        tiles = overlapper.add_mask_path(tiles, fallback)
+        tiles = overlapper.add_percentages(tiles)
+        to_keep |= overlapper.columns_to_keep
 
     tiles = tiles.filter(filter_tissue, num_cpus=0.1, memory=128 * 1024**2)
     tiles = tiles.map(
         partial(select, to_keep=to_keep), num_cpus=0.1, memory=128 * 1024**2
     )
 
+    ray.shutdown()
     return slides.to_pandas(), tiles.to_pandas()
 
 
@@ -131,7 +133,9 @@ def tiling(
 @hydra.main(config_path="../../configs", config_name="preprocessing", version_base=None)
 @autolog
 def main(config: DictConfig, logger: Logger | None = None) -> None:
-    fallback = Path(".") / "dummy_wsi.tiff"
+    fallback = (
+        Path(".") / "dummy_wsi.tiff"
+    )  # not using tempfile since I encountered strange behaviour with ray
     create_dummy_wsi(fallback)
     df = pd.read_csv(mlflow.artifacts.download_artifacts(config.data.metadata_table))
     slides, tiles = tiling(df, config, str(fallback))

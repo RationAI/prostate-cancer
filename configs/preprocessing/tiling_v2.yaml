@@ -6,7 +6,7 @@ tile_extent: ???
 stride: ???
 use_case: Tiling (v2)
 
-overlapers: ??? # dict of objects for computing overlaps with masks
+overlappers: ??? # dict of objects for computing overlaps with masks
 
 metadata:
   hyperparams:

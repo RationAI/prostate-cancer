@@ -7,7 +7,7 @@ defaults:
 tile_extent: 512
 stride: 256
 
-overlapers:
+overlappers:
 
   tissue:
     _target_: preprocessing.tiling_v2.overlappers.BinaryOverlapper
