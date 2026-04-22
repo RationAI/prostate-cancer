@@ -1,7 +1,7 @@
 # @package _global_
 
 mpp: 0.46
-batch_size: 1024
+batch_size: 4096
 tile_extent: ???
 stride: ???
 use_case: Tiling (v2)

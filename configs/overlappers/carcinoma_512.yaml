@@ -1,0 +1,4 @@
+_target_: preprocessing.tiling_v2.overlappers.BinaryOverlapper
+mask_name: carcinoma_roi
+roi_corners: [128, 128, 384, 384]
+masks_uri: ${data.carcinoma_masks_uri}
