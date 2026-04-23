@@ -95,9 +95,6 @@ def carcinoma(row: dict[str, Any], df: pd.DataFrame) -> dict[str, Any]:
 def tiling(
     df: pd.DataFrame, config: DictConfig, fallback: str
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    if not ray.is_initialized():
-        ray.init()
-
     overlappers: list[Overlapper] = list(
         hydra.utils.instantiate(config.overlappers).values()
     )
@@ -125,7 +122,6 @@ def tiling(
         partial(select, to_keep=to_keep), num_cpus=0.1, memory=128 * 1024**2
     )
 
-    ray.shutdown()
     return slides.to_pandas(), tiles.to_pandas()
 
 
@@ -138,9 +134,14 @@ def main(config: DictConfig, logger: Logger | None = None) -> None:
     )  # not using tempfile since I encountered strange behaviour with ray
     create_dummy_wsi(fallback)
     df = pd.read_csv(mlflow.artifacts.download_artifacts(config.data.metadata_table))
+
+    if not ray.is_initialized():
+        ray.init()
+
     slides, tiles = tiling(df, config, str(fallback))
     save_mlflow_dataset(slides, tiles, config.data.data_name)
     fallback.unlink()
+    ray.shutdown()
 
 
 if __name__ == "__main__":
