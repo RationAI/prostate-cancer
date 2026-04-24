@@ -21,9 +21,7 @@ SlideDfMetadata: TypeAlias = pd.Series
 T = TypeVar("T", covariant=True)
 
 
-class EmbeddingsDataset(FilterableDataset[T]):
-    """This dataset class wraps labeled gigapath features for all the slides in given URIs."""
-
+class TileEmbeddingsDataset(FilterableDataset[T]):
     def __init__(
         self,
         uris: Iterable[str],
@@ -102,12 +100,13 @@ class EmbeddingsDataset(FilterableDataset[T]):
         return slide_tiles, slide_embeddings
 
 
-class LabeledEmbeddingsDataset(EmbeddingsDataset[LabeledTileSample]): ...
+class LabeledTileEmbeddingsDataset(TileEmbeddingsDataset[LabeledTileSample]): ...
 
 
-class UnlabeledEmbeddingsDataset(EmbeddingsDataset[UnlabeledTileSample]): ...
+class UnlabeledTileEmbeddingsDataset(TileEmbeddingsDataset[UnlabeledTileSample]): ...
 
 
+# dataset of tile embeddings for a single slide
 class _TileEmbeddingsSlide(Dataset[LabeledTileSample | UnlabeledTileSample]):
     def __init__(
         self,

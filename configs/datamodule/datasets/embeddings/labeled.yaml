@@ -1,4 +1,4 @@
-_target_: prostate_cancer.datamodule.datasets.LabeledEmbeddingsDataset
+_target_: prostate_cancer.datamodule.datasets.LabeledTileEmbeddingsDataset
 uris: ???
 thresholds: ${thresholds}
 embeddings_uri: ???

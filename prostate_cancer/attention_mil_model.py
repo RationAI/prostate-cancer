@@ -93,6 +93,7 @@ class ProstateCancerAttentionMIL(LightningModule):
         return x.squeeze(-1)  # (batch_size,)
 
     def training_step(self, batch: LabeledSlideSampleBatch) -> Tensor:
+        # bag ~ all embeddings from a single slide
         bags, labels, _ = batch
 
         outputs = self(bags)

@@ -2,7 +2,7 @@
 
 defaults:
   - /experiment/predict/base
-  - /datamodule/embeddings_datamodule@datamodule
+  - /datamodule/tile_embeddings_datamodule@datamodule
   - _self_
 
 datamodule:

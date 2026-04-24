@@ -1,4 +1,4 @@
-from prostate_cancer.datamodule.data_module import TileDataModule
+from prostate_cancer.datamodule.tile_data_module import TileDataModule
 
 
 __all__ = ["TileDataModule"]
