@@ -1,0 +1,12 @@
+defaults:
+  - datasets@train: embeddings/slide_labeled
+  - datasets@val: embeddings/slide_labeled
+  - datasets@test: embeddings/slide_labeled
+  - datasets@predict: embeddings/slide_unlabeled
+
+  - samplers@sampler: slide_stratified_weighted_random
+
+_target_: prostate_cancer.datamodule.SlideDataModule
+
+batch_size: ???
+num_workers: ???

@@ -7,6 +7,8 @@ defaults:
   - transforms@default_transform: normalize
   - samplers@sampler: stratified_weighted_random
 
+_target_: prostate_cancer.datamodule.TileDataModule
+
 train:
   transforms: ??? # specified during the training (stain / non-stain augmentations)
   stratified_filter: true

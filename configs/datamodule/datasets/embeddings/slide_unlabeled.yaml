@@ -1,0 +1,4 @@
+_target_: prostate_cancer.datamodule.datasets.UnlabeledSlideEmbeddingsDataset
+tiling_uris: ???
+thresholds: ${thresholds}
+embeddings_uri: ???

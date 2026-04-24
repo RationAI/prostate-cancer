@@ -31,8 +31,8 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
     data = hydra.utils.instantiate(
         config.datamodule,
         _recursive_=False,  # to avoid instantiating all the datasets
-        _target_=TileDataModule,
     )
+
     model = hydra.utils.instantiate(
         config.model
     )  # Model target is required in the config file

@@ -8,6 +8,8 @@ defaults:
   - transforms@default_transform: augmentations
   - processor: google_vit
 
+_target_: prostate_cancer.datamodule.TileDataModule
+
 train:
   transforms: ${datamodule.default_transform}
   processor: ${datamodule.processor}
