@@ -1,6 +1,6 @@
 defaults:
-  - blur
-  - residual
-  - folding
-  - carcinoma
-  - tissue
+  - blur@blur
+  - residual@residual
+  - folding@folding
+  - carcinoma@carcinoma
+  - tissue@tissue
