@@ -1,7 +1,7 @@
 # @package _global_
 
 defaults:
-  - /experiment/train/embeddings/base
+  - /experiment/train/slide_embeddings/base
   - /model/pgp_model@model
   - _self_
 
@@ -11,4 +11,4 @@ datamodule:
   val:
     embeddings_uri: ${val_data.pgp_embeddings_uri}
 
-model_name: "PGP"
+model_name: "PGP (MIL)"

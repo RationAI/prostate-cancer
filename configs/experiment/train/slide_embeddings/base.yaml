@@ -1,0 +1,19 @@
+# @package _global_
+
+defaults:
+  - /experiment/train/base
+  - /datamodule/slide_embeddings_datamodule@datamodule
+  - _self_
+
+datamodule:
+  batch_size: 4
+  num_workers: 8
+
+  # both foundation models share tiles (embeddings are specified per model)
+  train:
+    uris:
+      - ${train_data.tiles_uri_224}
+
+  val:
+    uris:
+      - ${val_data.tiles_uri_224}
