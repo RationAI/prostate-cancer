@@ -2,7 +2,7 @@
 
 defaults:
   - /experiment/train/slide_embeddings/base
-  - /model/pgp_model@model
+  - /model/pgp_mil_model@model
   - _self_
 
 datamodule:

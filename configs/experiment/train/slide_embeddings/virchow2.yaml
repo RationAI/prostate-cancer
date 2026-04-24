@@ -2,7 +2,7 @@
 
 defaults:
   - /experiment/train/slide_embeddings/base
-  - /model/virchow2_model@model
+  - /model/virchow2_mil_model@model
   - _self_
 
 datamodule:

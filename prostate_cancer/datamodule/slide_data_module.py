@@ -12,7 +12,7 @@ if TYPE_CHECKING:
         LabeledSlideEmbeddingsDataset,
         UnlabeledSlideEmbeddingsDataset,
     )
-from prostate_cancer.datamodule.samplers import SlideStratifiedWeightedRandomSampler
+
 from prostate_cancer.typing import (
     LabeledSlideSampleBatch,
     UnlabeledSlideSampleBatch,
@@ -24,12 +24,14 @@ class SlideDataModule(LightningDataModule):
         self,
         batch_size: int,
         num_workers: int = 0,
+        sampler: DictConfig | None = None,
         **datasets: DictConfig,
     ) -> None:
         super().__init__()
         self.batch_size = batch_size
         self.num_workers = num_workers
         self.datasets = datasets
+        self.sampler_partial = sampler
 
     def setup(self, stage: str) -> None:
         match stage:
@@ -59,9 +61,20 @@ class SlideDataModule(LightningDataModule):
                 )
 
     def train_dataloader(self) -> Iterable[LabeledSlideSampleBatch]:
+
+        if self.sampler_partial:
+            sampler = instantiate(self.sampler_partial)(
+                dataset=self.train, target_col="carcinoma"
+            )
+            shuffle = False
+        else:
+            sampler = None
+            shuffle = True
+
         return DataLoader(
             self.train,
-            sampler=SlideStratifiedWeightedRandomSampler(self.train, "carinoma"),
+            sampler=sampler,
+            shuffle=shuffle,
             batch_size=self.batch_size,
             num_workers=self.num_workers,
             persistent_workers=self.num_workers > 0,

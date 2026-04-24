@@ -6,7 +6,7 @@ from torch.utils.data import WeightedRandomSampler
 from prostate_cancer.datamodule.datasets import LabeledTilesDataset
 
 
-class StratifiedWeightedRandomSampler(WeightedRandomSampler):
+class TileStratifiedWeightedRandomSampler(WeightedRandomSampler):
     def __init__(
         self, dataset: LabeledTilesDataset, target_col: str, replacement: bool = True
     ) -> None:

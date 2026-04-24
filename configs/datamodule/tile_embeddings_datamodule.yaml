@@ -4,7 +4,7 @@ defaults:
   - datasets@test: embeddings/tile_labeled
   - datasets@predict: embeddings/tile_unlabeled
 
-  - samplers@sampler: stratified_weighted_random
+  - samplers@sampler: tile_stratified_weighted_random
 
 _target_: prostate_cancer.datamodule.TileDataModule
 

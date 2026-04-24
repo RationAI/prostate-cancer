@@ -5,7 +5,7 @@ defaults:
   - datasets@predict: images/unlabeled
 
   - transforms@default_transform: normalize
-  - samplers@sampler: stratified_weighted_random
+  - samplers@sampler: tile_stratified_weighted_random
 
 _target_: prostate_cancer.datamodule.TileDataModule
 

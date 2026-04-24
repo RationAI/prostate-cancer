@@ -4,7 +4,7 @@ defaults:
   - datasets@test: images/labeled
   - datasets@predict: images/unlabeled
 
-  - samplers@sampler: stratified_weighted_random
+  - samplers@sampler: tile_stratified_weighted_random
   - transforms@default_transform: augmentations
   - processor: google_vit
 

@@ -8,7 +8,6 @@ from omegaconf import DictConfig, OmegaConf
 from rationai.mlkit import Trainer, autolog
 from rationai.mlkit.lightning.loggers.mlflow import MLFlowLogger
 
-from prostate_cancer.datamodule import TileDataModule
 from prostate_cancer.log_title import log_checkpoint_title
 
 
