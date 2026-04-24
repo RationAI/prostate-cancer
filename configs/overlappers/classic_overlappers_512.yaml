@@ -1,6 +1,0 @@
-defaults:
-  - blur_512@blur
-  - residual_512@residual
-  - folding_512@folding
-  - carcinoma_512@carcinoma
-  - tissue_512@tissue

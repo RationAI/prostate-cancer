@@ -3,5 +3,5 @@
 defaults:
   - /data/radboud/val@data
   - /overlappers/classic_overlappers@overlappers
-  - /experiment/preprocessing/tiling_v2/base_512
+  - /experiment/preprocessing/tiling_v2/base_224
   - _self_

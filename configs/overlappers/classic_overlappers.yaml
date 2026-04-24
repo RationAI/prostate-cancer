@@ -1,0 +1,6 @@
+defaults:
+  - blur
+  - residual
+  - folding
+  - carcinoma
+  - tissue

@@ -1,4 +1,4 @@
 _target_: preprocessing.tiling_v2.overlappers.BinaryOverlapper
 mask_name: residual
-roi_corners: [0, 0, 512, 512]
+roi_corners: ${roi.full}
 masks_uri: ${data.qc_masks_uri}/residual_per_pixel

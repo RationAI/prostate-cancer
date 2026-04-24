@@ -4,6 +4,7 @@ mpp: 0.46
 batch_size: 4096
 tile_extent: ???
 stride: ???
+roi: ???
 use_case: Tiling (v2)
 
 overlappers: ??? # dict of objects for computing overlaps with masks
