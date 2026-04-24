@@ -121,7 +121,9 @@ class _TileEmbeddingsSlide(Dataset[LabeledTileSample | UnlabeledTileSample]):
         self.slide_metadata = slide_metadata
         self.tiles = tiles
         self.embeddings = embeddings
-        assert len(self.tiles) == len(self.embeddings), "Tiles and embeddings not aligned"
+        assert len(self.tiles) == len(self.embeddings), (
+            "Tiles and embeddings not aligned"
+        )
 
     def __len__(self) -> int:
         return len(self.tiles)

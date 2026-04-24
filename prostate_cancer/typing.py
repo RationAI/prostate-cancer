@@ -1,5 +1,5 @@
-from typing import TypeAlias, TypedDict
 from pathlib import Path
+from typing import TypeAlias, TypedDict
 
 from torch import Tensor
 

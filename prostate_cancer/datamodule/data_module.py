@@ -7,7 +7,11 @@ from omegaconf import DictConfig
 from rationai.mlkit.data.datasets import MetaTiledSlides
 from torch.utils.data import DataLoader
 
-from prostate_cancer.typing import LabeledTileSample, LabeledTileSampleBatch, UnlabeledTileSample
+from prostate_cancer.typing import (
+    LabeledTileSample,
+    LabeledTileSampleBatch,
+    UnlabeledTileSample,
+)
 
 
 PartialConf: TypeAlias = DictConfig
@@ -35,15 +39,18 @@ class TileDataModule(LightningDataModule):
                     instantiate(self.datasets["train"]),
                 )
                 self.val = cast(
-                    "MetaTiledSlides[LabeledTileSample]", instantiate(self.datasets["val"])
+                    "MetaTiledSlides[LabeledTileSample]",
+                    instantiate(self.datasets["val"]),
                 )
             case "val":
                 self.val = cast(
-                    "MetaTiledSlides[LabeledTileSample]", instantiate(self.datasets["val"])
+                    "MetaTiledSlides[LabeledTileSample]",
+                    instantiate(self.datasets["val"]),
                 )
             case "test":
                 self.test = cast(
-                    "MetaTiledSlides[LabeledTileSample]", instantiate(self.datasets["test"])
+                    "MetaTiledSlides[LabeledTileSample]",
+                    instantiate(self.datasets["test"]),
                 )
             case "predict":
                 self.predict = cast(

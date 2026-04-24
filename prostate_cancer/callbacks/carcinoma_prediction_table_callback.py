@@ -27,7 +27,7 @@ class CarcinomaPredictionTableCallback(MultiloaderLifecycle):
         if not hasattr(trainer, "datamodule"):
             raise ValueError("Trainer should have datamodule attribute")
 
-        datamodule = cast("DataModule", trainer.datamodule)
+        datamodule = cast("TileDataModule", trainer.datamodule)
         self.slide = cast("pd.Series", datamodule.predict.slides.iloc[dataloader_idx])
         self.table: list[dict[str, Any]] = []
 

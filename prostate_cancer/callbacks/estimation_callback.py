@@ -47,7 +47,7 @@ class EstimationCallback(MultiloaderLifecycle):
                 )
             )
 
-        datamodule = cast("DataModule", trainer.datamodule)
+        datamodule = cast("TileDataModule", trainer.datamodule)
         self.slide = cast("pd.Series", datamodule.predict.slides.iloc[dataloader_idx])
 
     def on_predict_batch_end(

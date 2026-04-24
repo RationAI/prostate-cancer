@@ -29,7 +29,7 @@ class HeatmapCallback(MultiloaderLifecycle):
         if not hasattr(trainer, "datamodule"):
             raise ValueError("Trainer should have datamodule attribute")
 
-        datamodule = cast("DataModule", trainer.datamodule)
+        datamodule = cast("TileDataModule", trainer.datamodule)
         slide = cast("pd.Series", getattr(datamodule, mode).slides.iloc[dataloader_idx])
 
         # Create temporary directory

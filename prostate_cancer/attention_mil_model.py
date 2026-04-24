@@ -1,3 +1,5 @@
+"""Original was created by Adam Kukučka in Ulcerative Colitis project."""
+
 from copy import deepcopy
 
 import torch
@@ -5,9 +7,14 @@ from lightning import LightningModule
 from torch import Tensor, nn
 from torch.optim.adamw import AdamW
 from torch.optim.optimizer import Optimizer
-from torchmetrics import MetricCollection, Metric
+from torchmetrics import Metric, MetricCollection
 from torchmetrics.classification import (
-    AUROC, Recall, Precision, Accuracy, NegativePredictiveValue, Specificity
+    AUROC,
+    Accuracy,
+    NegativePredictiveValue,
+    Precision,
+    Recall,
+    Specificity,
 )
 
 from prostate_cancer.typing import LabeledSlideSampleBatch, UnlabeledSlideSampleBatch
@@ -41,7 +48,7 @@ class ProstateCancerAttentionMIL(LightningModule):
             "precision": Precision("binary"),
             "recall": Recall("binary"),
             "specificity": Specificity("binary"),
-            "negative_predictive_value": NegativePredictiveValue("binary")
+            "negative_predictive_value": NegativePredictiveValue("binary"),
         }
 
         self.train_metrics = MetricCollection(deepcopy(metrics), prefix="train/")
@@ -50,19 +57,40 @@ class ProstateCancerAttentionMIL(LightningModule):
 
     def forward(self, x: Tensor) -> Tensor:
         # x has shape (batch_size, num_tiles_padded, embedding_dim)
-        x = self.encoder(x)
-        attn = self.attention(x)
-        attention_weights = torch.softmax(attn.sigmoid(), dim=0)
-        mask = (x.abs() > 1e-6).any(dim=-1, keepdim=True).float()
-        attention_weights = attention_weights * mask
+
+        # Just identity
+        x = self.encoder(x)  # (batch_size, num_tiles_padded, embedding_dim)
+
+        # TL weights (which tiles to attend to)
+        raw_attn = self.attention(x)  # (batch_size, num_tiles_padded, 1)
+
+        # sigmoid is applied to avoid unimodal spiky distribution
+        attention_weights = torch.softmax(
+            raw_attn.sigmoid(), dim=1
+        )  # (batch_size, num_tiles_padded, 1)
+
+        # Do not attend to padded tiles
+        mask = (
+            (x.abs() > 1e-6).any(dim=-1, keepdim=True).float()
+        )  # (batch_size, num_tiles_padded, 1)
+
+        attention_weights = (
+            attention_weights * mask
+        )  # (batch_size, num_tiles_padded, 1)
+
+        # proper distribution for the non-padded tiles
         attention_weights = attention_weights / attention_weights.sum(
             dim=1, keepdim=True
-        )
-        x = self.classifier(x)
-        x = torch.sum(attention_weights * x, dim=1)
-        x = x.sigmoid()
+        )  # (batch_size, num_tiles_padded, 1)
 
-        return x.squeeze(-1)
+        # TL predictions
+        x = self.classifier(x)  # (batch_size, num_tiles_padded, 1)
+
+        # weight TL predictions with attention
+        x = torch.sum(attention_weights * x, dim=1)  # (batch_size, 1)
+        x = x.sigmoid()  # (batch_size, 1)
+
+        return x.squeeze(-1)  # (batch_size,)
 
     def training_step(self, batch: LabeledSlideSampleBatch) -> Tensor:
         bags, labels, _ = batch

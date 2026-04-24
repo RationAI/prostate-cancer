@@ -28,7 +28,7 @@ class AggregatorCallback(MultiloaderLifecycle):
             raise ValueError("Trainer should have datamodule attribute")
         # aggregator cannot be reset, thus, its original state is copied for each slide
         self.aggregator = deepcopy(self.aggregator_original)
-        datamodule = cast("DataModule", trainer.datamodule)
+        datamodule = cast("TileDataModule", trainer.datamodule)
         self.slide = cast("pd.Series", datamodule.predict.slides.iloc[dataloader_idx])
 
     def on_predict_batch_end(

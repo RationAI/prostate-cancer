@@ -40,7 +40,7 @@ class NumPositiveCallback(MultiloaderLifecycle):
         if not hasattr(trainer, "datamodule"):
             raise ValueError("Trainer should have datamodule attribute")
 
-        datamodule = cast("DataModule", trainer.datamodule)
+        datamodule = cast("TileDataModule", trainer.datamodule)
         slide = cast("pd.Series", datamodule.predict.slides.iloc[dataloader_idx])
         table = {"slide": get_slide_name(slide), "num_positive": self.num_positive}
 

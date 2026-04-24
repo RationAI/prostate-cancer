@@ -17,7 +17,7 @@ from prostate_cancer.typing import LabeledTileSampleBatch
 
 
 if TYPE_CHECKING:
-    from prostate_cancer.datamodule.data_module import TileDataModule
+    from prostate_cancer.datamodule import TileDataModule
     from prostate_cancer.modeling.decode_head import BinaryClassifier
 
 
@@ -42,7 +42,7 @@ class CAMExplainer(MultiloaderLifecycle):
         if not hasattr(trainer, "datamodule"):
             raise ValueError("Trainer should have datamodule attribute")
 
-        datamodule = cast("DataModule", trainer.datamodule)
+        datamodule = cast("TileDataModule", trainer.datamodule)
         slide = cast("pd.Series", datamodule.test.slides.iloc[dataloader_idx])
 
         self.save_dir = "cam_explanations"
