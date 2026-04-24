@@ -3,15 +3,18 @@ from collections.abc import Sequence
 import pandas as pd
 from torch.utils.data import WeightedRandomSampler
 
-from prostate_cancer.datamodule.datasets import LabeledTilesDataset
+from prostate_cancer.datamodule.datasets import LabeledSlideEmbeddingsDataset
 
 
-class StratifiedWeightedRandomSampler(WeightedRandomSampler):
+class SlideStratifiedWeightedRandomSampler(WeightedRandomSampler):
     def __init__(
-        self, dataset: LabeledTilesDataset, target_col: str, replacement: bool = True
+        self,
+        dataset: LabeledSlideEmbeddingsDataset,
+        target_col: str,
+        replacement: bool = True,
     ) -> None:
         super().__init__(
-            self._get_weights(dataset.tiles, target_col),
+            self._get_weights(dataset.slides, target_col),
             num_samples=len(dataset),
             replacement=replacement,
         )

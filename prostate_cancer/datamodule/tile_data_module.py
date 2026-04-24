@@ -11,6 +11,7 @@ from prostate_cancer.typing import (
     LabeledTileSample,
     LabeledTileSampleBatch,
     UnlabeledTileSample,
+    UnlabeledTileSampleBatch,
 )
 
 
@@ -99,7 +100,7 @@ class TileDataModule(LightningDataModule):
             for dataset in self.test.datasets
         ]
 
-    def predict_dataloader(self) -> list[Iterable[LabeledTileSampleBatch]]:
+    def predict_dataloader(self) -> list[Iterable[UnlabeledTileSampleBatch]]:
         return [
             DataLoader(
                 dataset, batch_size=self.batch_size, num_workers=self.num_workers

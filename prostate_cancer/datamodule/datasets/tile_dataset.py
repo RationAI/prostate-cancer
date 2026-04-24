@@ -11,6 +11,7 @@ from transformers import ViTImageProcessor
 
 from prostate_cancer.datamodule.datasets.base import (
     FilterableDataset,
+    filter_tiles_by_thresholds,
     get_slide_name,
 )
 from prostate_cancer.typing import LabeledTileSample, TileMetadata, UnlabeledTileSample
@@ -42,7 +43,7 @@ class TilesDataset(FilterableDataset[T]):
         self.tiles = (
             self.prepare_tiles(self.tiles)
             if self.labeled
-            else self.filter_tiles_by_thresholds(self.tiles)
+            else filter_tiles_by_thresholds(self.tiles, self.thresholds)
         )
         return (
             cast(

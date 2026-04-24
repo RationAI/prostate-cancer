@@ -10,6 +10,7 @@ from torch.utils.data import Dataset
 
 from prostate_cancer.datamodule.datasets.base import (
     FilterableDataset,
+    filter_tiles_by_thresholds,
     get_slide_name,
 )
 from prostate_cancer.typing import LabeledTileSample, TileMetadata, UnlabeledTileSample
@@ -94,7 +95,7 @@ class TileEmbeddingsDataset(FilterableDataset[T]):
         slide_tiles = (
             self.prepare_tiles(slide_tiles)
             if self.labeled
-            else self.filter_tiles_by_thresholds(slide_tiles)
+            else filter_tiles_by_thresholds(slide_tiles, self.thresholds)
         )
         slide_embeddings = slide_embeddings[slide_tiles.index.tolist()]
         return slide_tiles, slide_embeddings
