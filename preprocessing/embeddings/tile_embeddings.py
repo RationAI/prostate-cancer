@@ -97,7 +97,9 @@ def compute_embeddings_uri(
         )
 
         tiles_chunk = slide_dataset.tiles.copy()
-        assert len(tiles_chunk) == len( tiles_all[tiles_all["slide_id"] == slide_dataset.slide_metadata.id] ), "Expected and Used tiles differ in size"
+        assert len(tiles_chunk) == len(
+            tiles_all[tiles_all["slide_id"] == slide_dataset.slide_metadata.id]
+        ), "Expected and Used tiles differ in size"
 
         tiles_chunk = attach_embeddings(slide_embeddings, tiles_chunk)
         tiles_buffer.append(tiles_chunk)
