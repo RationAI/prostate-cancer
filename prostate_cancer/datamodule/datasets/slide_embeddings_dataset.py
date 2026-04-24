@@ -26,7 +26,7 @@ class SlideEmbeddingsDataset(Dataset[T], Generic[T]):
     def __init__(
         self,
         thresholds: dict[str, float],
-        tiling_uris: Iterable[str],
+        uris: Iterable[str],
         embeddings_uri: str,
         padding: bool = True,
         include_labels: bool = True,
@@ -34,7 +34,7 @@ class SlideEmbeddingsDataset(Dataset[T], Generic[T]):
         self.thresholds = thresholds
         self.include_labels = include_labels
         self.slides, self.tiles, self.embeddings_folder = self.download_artifacts(
-            tiling_uris, embeddings_uri
+            uris, embeddings_uri
         )
         self.padding = padding
         self.max_embeddings = self.tiles["slide_id"].value_counts().max()
@@ -95,13 +95,13 @@ class LabeledSlideEmbeddingsDataset(SlideEmbeddingsDataset[LabeledSlideSample]):
     def __init__(
         self,
         thresholds: dict[str, float],
-        tiling_uris: Iterable[str],
+        uris: Iterable[str],
         embeddings_uri: str,
         padding: bool = True,
     ) -> None:
         super().__init__(
             thresholds=thresholds,
-            tiling_uris=tiling_uris,
+            uris=uris,
             embeddings_uri=embeddings_uri,
             padding=padding,
             include_labels=True,
@@ -112,13 +112,13 @@ class UnlabeledSlideEmbeddingsDataset(SlideEmbeddingsDataset[UnlabeledSlideSampl
     def __init__(
         self,
         thresholds: dict[str, float],
-        tiling_uris: Iterable[str],
+        uris: Iterable[str],
         embeddings_uri: str,
         padding: bool = True,
     ) -> None:
         super().__init__(
             thresholds=thresholds,
-            tiling_uris=tiling_uris,
+            uris=uris,
             embeddings_uri=embeddings_uri,
             padding=padding,
             include_labels=False,
