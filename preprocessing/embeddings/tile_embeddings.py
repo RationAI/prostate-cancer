@@ -96,14 +96,14 @@ def compute_embeddings_uri(
             slide_dataset, config.batch_size, device, tile_encoder
         )
 
-        mask = tiles_all["slide_id"] == slide_dataset.slide_metadata.id
-        tiles_chunk = tiles_all.loc[mask].copy()
-        tiles_chunk = attach_embeddings(slide_embeddings, tiles_chunk)
+        tiles_chunk = slide_dataset.tiles.copy()
+        assert len(tiles_chunk) == len( tiles_all[tiles_all["slide_id"] == slide_dataset.slide_metadata.id] ), "Expected and Used tiles differ in size"
 
+        tiles_chunk = attach_embeddings(slide_embeddings, tiles_chunk)
         tiles_buffer.append(tiles_chunk)
         slides_in_shard += 1
 
-        del slide_embeddings, tiles_chunk
+        del slide_embeddings
 
         # flush shard
         if slides_in_shard >= config.slides_per_file:
@@ -163,6 +163,7 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
 
     tile_encoder: FoundationModel = hydra.utils.instantiate(config.tile_encoder)
     tile_encoder = tile_encoder.to(device)
+    tile_encoder = tile_encoder.eval()
 
     compute_embeddings(tile_encoder, config, device)
 
