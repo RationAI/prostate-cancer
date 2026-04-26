@@ -69,7 +69,7 @@ class SlideEmbeddingsDataset(Dataset[T], Generic[T]):
             map_location="cpu",
         )
 
-        slide_tiles = self.tiles[self.tiles["slide_id"] == slide_metadata.id]
+        slide_tiles = self.tiles[self.tiles["slide_id"] == slide_metadata.id].reset_index(drop=True)
         assert len(slide_embeddings) == len(slide_tiles), "Size mismatch"
         filtered_tiles = filter_tiles_by_thresholds(slide_tiles, self.thresholds)
         slide_embeddings = slide_embeddings[filtered_tiles.index.tolist()]
