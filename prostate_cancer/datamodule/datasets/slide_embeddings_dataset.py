@@ -81,7 +81,7 @@ class SlideEmbeddingsDataset(Dataset[T], Generic[T]):
         metadata = SlideMetadata(
             slide_id=slide_metadata["id"],
             slide_name=slide_name,
-            slide_path=Path(slide_metadata["path"]),
+            slide_path=slide_metadata["path"],
         )
 
         if not self.include_labels:

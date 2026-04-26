@@ -26,13 +26,13 @@ UnlabeledTileSampleBatch: TypeAlias = tuple[Tensor, TileMetadataBatch]
 class SlideMetadata(TypedDict):
     slide_id: str
     slide_name: str
-    slide_path: Path
+    slide_path: str
 
 
 class SlideMetadataBatch(TypedDict):
     slide_id: list[str]
     slide_name: list[str]
-    slide_path: list[Path]
+    slide_path: list[str]
 
 
 LabeledSlideSample = tuple[Tensor, Tensor, TileMetadata]
