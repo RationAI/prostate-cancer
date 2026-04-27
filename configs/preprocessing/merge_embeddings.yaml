@@ -1,0 +1,9 @@
+# @package _global_
+
+data: ???
+embeddings_uri: ???
+encoder: ???
+output_dir: ${prostate_cancer_artifacts}/tiling_parquets_sharded/${data.data_name}/${encoder}
+slides_per_file: 15
+
+use_case: Merge Embeddings ${encoder}

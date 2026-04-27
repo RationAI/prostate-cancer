@@ -76,6 +76,8 @@ class SlideTiles(Dataset[LabeledSample | UnlabeledSample]):
     ) -> None:
         super().__init__()
 
+        self.slide_metadata = slide_metadata
+        self.tiles = tiles
         self.slide_tiles = OpenSlideTilesDataset(
             slide_path=slide_metadata.path,
             level=slide_metadata.level,
