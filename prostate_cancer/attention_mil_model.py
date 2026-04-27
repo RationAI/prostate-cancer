@@ -18,7 +18,7 @@ from torchmetrics.classification import (
 )
 
 from prostate_cancer.typing import LabeledSlideSampleBatch, UnlabeledSlideSampleBatch
-
+from prostate_cancer.modeling.decode_head import BinaryEmbeddingClassifier
 
 class ProstateCancerAttentionMIL(LightningModule):
     def __init__(self, foundation: str, lr: float) -> None:
@@ -38,7 +38,7 @@ class ProstateCancerAttentionMIL(LightningModule):
             nn.Linear(512, 1),
         )
 
-        self.classifier = nn.Linear(input_dim, 1)
+        self.classifier = BinaryEmbeddingClassifier(input_dim)
         self.criterion = nn.BCELoss()
         self.lr = lr
 
