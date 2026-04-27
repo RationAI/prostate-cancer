@@ -16,6 +16,9 @@ if TYPE_CHECKING:
 
 class MILPredictionCallback(Callback):
     def get_mask_builder(self, slide_name: str, trainer: Trainer) -> ScalarMaskBuilder:
+        if not hasattr(trainer, "datamodule"):
+            raise ValueError("Trainer should have datamodule attribute")
+
         datamodule = cast("SlideDataModule", trainer.datamodule)
         slides = cast("pd.DataFrame", datamodule.predict.slides)
         slides["name"] = slides["path"].apply(lambda x: Path(x).stem)
@@ -48,18 +51,18 @@ class MILPredictionCallback(Callback):
     ) -> None:
         assert isinstance(trainer.logger, MLFlowLogger)
         sl_preds, tl_preds = outputs
+        slides_embeddings, metadata_batch = batch
 
         # Log SL predictions
         trainer.logger.log_table(
             {
-                "slide": [m["slide_name"] for m in batch[1]],
+                "slide": [name for name in metadata_batch["slide_name"]],
                 "prediction": sl_preds.tolist(),
             },
             artifact_file="tables/sl_predictions.json",
         )
 
         # Log TL predictions
-        slides_embeddings, metadata_batch = batch
         for slide_embeddings, xs, ys, slide_name, tl_preds_slide in zip(
             slides_embeddings,
             metadata_batch["xs"],

@@ -1,0 +1,2 @@
+checkpoint: "mlflow-artifacts:/65/a649871245c040a39022206cbc9471f1/artifacts/checkpoints/epoch=0-step=135/checkpoint.ckpt"
+model_name: "Virchow2 (MIL)"

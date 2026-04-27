@@ -1,0 +1,14 @@
+# @package _global_
+
+defaults:
+  - /experiment/predict/base
+  - /datamodule/slide_embeddings_datamodule@datamodule
+  - _self_
+
+datamodule:
+  batch_size: 4
+  num_workers: 8
+
+  predict:
+    uris:
+      - ${predict_data.tiles_uri_224}

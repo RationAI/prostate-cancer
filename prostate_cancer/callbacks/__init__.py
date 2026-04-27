@@ -11,7 +11,7 @@ from prostate_cancer.callbacks.heatmap_callback import HeatmapCallback
 from prostate_cancer.callbacks.nested_metrics_callback import NestedMetricsCallback
 from prostate_cancer.callbacks.num_positive_callback import NumPositiveCallback
 from prostate_cancer.callbacks.tile_histograms_callback import TileHistogramsCallback
-
+from prostate_cancer.callbacks.mil_prediction_callback import MILPredictionCallback
 
 __all__ = [
     "AggregatorCallback",
@@ -23,4 +23,5 @@ __all__ = [
     "NestedMetricsCallback",
     "NumPositiveCallback",
     "TileHistogramsCallback",
+    "MILPredictionCallback",
 ]

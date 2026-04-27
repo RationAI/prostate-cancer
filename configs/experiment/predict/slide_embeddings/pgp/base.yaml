@@ -1,0 +1,11 @@
+# @package _global_
+
+defaults:
+  - /experiment/predict/slide_embeddings/base
+  - /model/pgp_mil_model@model
+  - /model/checkpoints/pgp_mil@model_data
+  - _self_
+
+datamodule:
+  predict:
+    embeddings_uri: ${predict_data.pgp_embeddings_uri}

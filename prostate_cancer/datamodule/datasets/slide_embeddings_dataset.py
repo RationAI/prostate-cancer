@@ -84,8 +84,8 @@ class SlideEmbeddingsDataset(Dataset[T], Generic[T]):
             slide_id=slide_metadata["id"],
             slide_name=slide_name,
             slide_path=slide_metadata["path"],
-            x=torch.from_numpy(filtered_tiles["x"].to_numpy()),
-            y=torch.from_numpy(filtered_tiles["y"].to_numpy()),
+            xs=torch.from_numpy(filtered_tiles["x"].to_numpy()),
+            ys=torch.from_numpy(filtered_tiles["y"].to_numpy()),
         )
 
         if not self.include_labels:

@@ -1,0 +1,8 @@
+# @package _global_
+
+defaults:
+  - /callbacks/mil_predictions@callbacks
+  - /experiment/predict/slide_embeddings/virchow2/base
+  - _self_
+
+use_case: "MIL predictions"

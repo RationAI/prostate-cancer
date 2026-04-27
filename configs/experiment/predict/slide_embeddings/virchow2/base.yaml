@@ -1,0 +1,11 @@
+# @package _global_
+
+defaults:
+  - /experiment/predict/slide_embeddings/base
+  - /model/virchow2_mil_model@model
+  - /model/checkpoints/virchow2_mil@model_data
+  - _self_
+
+datamodule:
+  predict:
+    embeddings_uri: ${predict_data.virchow2_embeddings_uri}
