@@ -1,4 +1,3 @@
-from pathlib import Path
 from typing import TypeAlias, TypedDict
 
 from torch import Tensor
@@ -27,16 +26,23 @@ class SlideMetadata(TypedDict):
     slide_id: str
     slide_name: str
     slide_path: str
+    xs: Tensor
+    ys: Tensor
 
 
 class SlideMetadataBatch(TypedDict):
     slide_id: list[str]
     slide_name: list[str]
     slide_path: list[str]
+    n_tiles: list[int]
+    xs: Tensor
+    ys: Tensor
 
 
 LabeledSlideSample = tuple[Tensor, Tensor, TileMetadata]
 UnlabeledSlideSample = tuple[Tensor, TileMetadata]
 
-LabeledSlideSampleBatch: TypeAlias = tuple[Tensor, Tensor, TileMetadataBatch]
-UnlabeledSlideSampleBatch: TypeAlias = tuple[Tensor, TileMetadataBatch]
+LabeledSlideSampleBatch: TypeAlias = tuple[Tensor, Tensor, SlideMetadataBatch]
+UnlabeledSlideSampleBatch: TypeAlias = tuple[Tensor, SlideMetadataBatch]
+
+MILModelOutput = tuple[Tensor, Tensor]  # SL preds, TL preds

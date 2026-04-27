@@ -17,7 +17,11 @@ from torchmetrics.classification import (
     Specificity,
 )
 
-from prostate_cancer.typing import LabeledSlideSampleBatch, UnlabeledSlideSampleBatch
+from prostate_cancer.typing import (
+    LabeledSlideSampleBatch,
+    MILModelOutput,
+    UnlabeledSlideSampleBatch,
+)
 
 
 class ProstateCancerAttentionMIL(LightningModule):
@@ -55,7 +59,7 @@ class ProstateCancerAttentionMIL(LightningModule):
         self.val_metrics = MetricCollection(deepcopy(metrics), prefix="validation/")
         self.test_metrics = MetricCollection(deepcopy(metrics), prefix="test/")
 
-    def forward(self, x: Tensor) -> Tensor:
+    def forward(self, x: Tensor) -> MILModelOutput:
         # x has shape (batch_size, num_tiles_padded, embedding_dim)
 
         # Just identity
@@ -84,19 +88,22 @@ class ProstateCancerAttentionMIL(LightningModule):
         )  # (batch_size, num_tiles_padded, 1)
 
         # TL predictions
-        x = self.classifier(x)  # (batch_size, num_tiles_padded, 1)
+        tl_preds = self.classifier(x)  # (batch_size, num_tiles_padded, 1)
 
         # weight TL predictions with attention
-        x = torch.sum(attention_weights * x, dim=1)  # (batch_size, 1)
-        x = x.sigmoid()  # (batch_size, 1)
+        sl_pred_raw = torch.sum(attention_weights * tl_preds, dim=1)  # (batch_size, 1)
+        sl_pred = sl_pred_raw.sigmoid()  # (batch_size, 1)
 
-        return x.squeeze(-1)  # (batch_size,)
+        return (
+            sl_pred.squeeze(-1),
+            tl_preds,
+        )  # (batch_size,), (batch_size, num_tiles_padded, 1)
 
     def training_step(self, batch: LabeledSlideSampleBatch) -> Tensor:
         # bag ~ all embeddings from a single slide
         bags, labels, _ = batch
 
-        outputs = self(bags)
+        outputs, _ = self(bags)
         loss = self.criterion(outputs, labels)
         self.log("train/loss", loss, on_step=True, prog_bar=True, batch_size=len(bags))
 
@@ -110,7 +117,7 @@ class ProstateCancerAttentionMIL(LightningModule):
     def validation_step(self, batch: LabeledSlideSampleBatch) -> None:
         bags, labels, _ = batch
 
-        outputs = self(bags)
+        outputs, _ = self(bags)
         loss = self.criterion(outputs, labels)
         self.log("validation/loss", loss, prog_bar=True, batch_size=len(bags))
 
@@ -122,7 +129,7 @@ class ProstateCancerAttentionMIL(LightningModule):
     def test_step(self, batch: LabeledSlideSampleBatch) -> None:
         bags, labels, _ = batch
 
-        outputs = self(bags)
+        outputs, _ = self(bags)
 
         self.test_metrics.update(outputs, labels)
         self.log_dict(
@@ -131,7 +138,7 @@ class ProstateCancerAttentionMIL(LightningModule):
 
         return outputs
 
-    def predict_step(self, batch: UnlabeledSlideSampleBatch) -> Tensor:
+    def predict_step(self, batch: UnlabeledSlideSampleBatch) -> MILModelOutput:
         return self(batch[0])
 
     def configure_optimizers(self) -> Optimizer:
