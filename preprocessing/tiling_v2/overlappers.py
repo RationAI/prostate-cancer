@@ -105,6 +105,7 @@ class BinaryOverlapper(Overlapper):
 
     def add_percentages(self, tiles: Dataset) -> Dataset:
         tiles = self.add_overlaps(tiles)
+        print(tiles.schema)
         return tiles.map(self.extract_foreground_percentage)
 
 

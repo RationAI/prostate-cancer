@@ -111,7 +111,6 @@ def tiling(
     for overlapper in overlappers:
         tiles = overlapper.add_mask_path(tiles, fallback)
         tiles = overlapper.add_percentages(tiles)
-        print(tiles.schema())
         tiles = overlapper.filter(tiles)
         to_keep |= overlapper.columns_to_keep
 
@@ -134,7 +133,7 @@ def main(config: DictConfig, logger: Logger | None = None) -> None:
 
     ctx = ray.data.DataContext.get_current()
     ctx.enable_rich_progress_bars = True
-    ctx.use_ray_tqdm = False
+    ctx.use_ray_tqdm = True
     with ray.init(runtime_env={"excludes": [".git", ".venv"]}):  # type: ignore[call-arg]
         slides, tiles = tiling(df, config, str(fallback))
         save_mlflow_dataset(slides, tiles, config.data.data_name)
