@@ -111,6 +111,7 @@ def tiling(
     for overlapper in overlappers:
         tiles = overlapper.add_mask_path(tiles, fallback)
         tiles = overlapper.add_percentages(tiles)
+        print(tiles.schema())
         tiles = overlapper.filter(tiles)
         to_keep |= overlapper.columns_to_keep
 
