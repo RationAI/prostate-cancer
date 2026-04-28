@@ -60,11 +60,6 @@ def tile(row: dict[str, Any]) -> list[dict[str, Any]]:
     ]
 
 
-def filter_tissue(row: dict[str, Any]) -> bool:
-    """Filter tiles to contain only tiles with some tissue."""
-    return row["tissue_roi_percentage"] > 0
-
-
 def select(row: dict[str, Any], to_keep: set[str]) -> dict[str, Any]:
     """Filter tiles to contain only desired columns."""
     tile = {

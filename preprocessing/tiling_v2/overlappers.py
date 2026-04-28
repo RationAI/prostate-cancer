@@ -52,7 +52,11 @@ class Overlapper(ABC):
         return batch
 
     def add_mask_path(self, tiles: Dataset, fallback: str) -> Dataset:
-        return tiles.map_batches(self.add_mask_path_batch, fn_kwargs={"fallback":fallback}, batch_format="pandas")
+        return tiles.map_batches(
+            self.add_mask_path_batch,
+            fn_kwargs={"fallback": fallback},
+            batch_format="pandas",
+        )
 
     def add_overlaps(self, tiles: Dataset) -> Dataset:
         return tiles.with_column(
@@ -71,9 +75,9 @@ class Overlapper(ABC):
 
     @abstractmethod
     def add_percentages(self, tiles: Dataset) -> Dataset: ...
-    
+
     def filter(self, tiles: Dataset) -> Dataset:
-        return tiles # most of the overlappers do not filter
+        return tiles  # most of the overlappers do not filter
 
 
 class BinaryOverlapper(Overlapper):
