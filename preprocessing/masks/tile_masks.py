@@ -1,7 +1,6 @@
 """Script for creating outlines of the tiles and also masks based on tiling percentages."""
 
 from pathlib import Path
-from typing import Any
 
 import hydra
 import mlflow
@@ -17,25 +16,17 @@ from rationai.mlkit import autolog, with_cli_args
 from rationai.mlkit.lightning.loggers import MLFlowLogger
 
 
-# This is used to create a filtered carcinoma mask for carcinoma threshold estimate by the pathologist
-def filter_by_tissue(tiles: pd.DataFrame, threshold: float) -> pd.DataFrame:
-    return tiles[tiles["tissue_roi_percentage"] > threshold]
-
-
 @ray.remote
 def process_slide(
-    slide: Any,
+    slide: pd.Series,
     percentage_cols: list[str],
     output_path: Path,
-    tissue_threshold: float,
-    tiles_ref: Any,
+    tiles: pd.DataFrame,
 ) -> None:
-    tiles = ray.get(tiles_ref)
     slide_tiles = tiles[tiles["slide_id"] == slide.id]
 
     # --- Percentage masks
-    for percentage_col in [*percentage_cols, "carcinoma_filtered"]:
-        should_filter = percentage_col == "carcinoma_filtered"
+    for percentage_col in percentage_cols:
         filename = f"{Path(slide.path).stem}.tiff"
         save_dir = output_path / percentage_col
 
@@ -50,20 +41,9 @@ def process_slide(
             slide.stride_x,
         )
 
-        tiles_to_use = (
-            filter_by_tissue(slide_tiles, tissue_threshold)
-            if should_filter
-            else slide_tiles
-        )
-        xs = torch.tensor(tiles_to_use["x"].values)
-        ys = torch.tensor(tiles_to_use["y"].values)
-        data = torch.tensor(
-            tiles_to_use[
-                percentage_col
-                if percentage_col != "carcinoma_filtered"
-                else "carcinoma_roi_percentage"
-            ].values
-        )
+        xs = torch.tensor(slide_tiles["x"].values)
+        ys = torch.tensor(slide_tiles["y"].values)
+        data = torch.tensor(slide_tiles[percentage_col].values)
         builder.update(data, xs, ys)
         builder.save()
     # ---
@@ -92,7 +72,6 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
     paths = [mlflow.artifacts.download_artifacts(uri) for uri in config.tile_uris]
     slides = pd.read_parquet([Path(path) / "slides.parquet" for path in paths])
     tiles = pd.read_parquet([Path(path) / "tiles.parquet" for path in paths])
-    tiles_ref = ray.put(tiles)
 
     output_path = Path(config.output_path)
 
@@ -100,7 +79,6 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
     for percentage_col in [
         *config.percentage_cols,
         "outlines",
-        "carcinoma_filtered",
     ]:
         (output_path / percentage_col).mkdir(parents=True, exist_ok=True)
 
@@ -110,8 +88,7 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
         fn_kwargs={
             "percentage_cols": config.percentage_cols,
             "output_path": output_path,
-            "tissue_threshold": config.thresholds.tissue_roi_t,
-            "tiles_ref": tiles_ref,
+            "tiles": tiles,
         },
         max_concurrent=config.max_concurrent,
     )
