@@ -1,4 +1,3 @@
-from functools import partial
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
@@ -106,7 +105,9 @@ def tiling(
         mpp=config.mpp,
     )
     slides = slides.map(row_hash, num_cpus=0.1, memory=128 * 1024**2)
-    slides = slides.map(partial(carcinoma, df=df), num_cpus=0.1, memory=128 * 1024**2)
+    slides = slides.map(
+        carcinoma, fn_kwargs={"df": df}, num_cpus=0.1, memory=128 * 1024**2
+    )
 
     tiles = slides.flat_map(tile, num_cpus=0.2, memory=128 * 1024**2)
     tiles = tiles.repartition(target_num_rows_per_block=config.batch_size)
@@ -115,11 +116,11 @@ def tiling(
     for overlapper in overlappers:
         tiles = overlapper.add_mask_path(tiles, fallback)
         tiles = overlapper.add_percentages(tiles)
+        tiles = overlapper.filter(tiles)
         to_keep |= overlapper.columns_to_keep
 
-    tiles = tiles.filter(filter_tissue, num_cpus=0.1, memory=128 * 1024**2)
     tiles = tiles.map(
-        partial(select, to_keep=to_keep), num_cpus=0.1, memory=128 * 1024**2
+        select, fn_kwargs={"to_keep": to_keep}, num_cpus=0.1, memory=128 * 1024**2
     )
 
     return slides.to_pandas(), tiles.to_pandas()
@@ -135,13 +136,10 @@ def main(config: DictConfig, logger: Logger | None = None) -> None:
     create_dummy_wsi(fallback)
     df = pd.read_csv(mlflow.artifacts.download_artifacts(config.data.metadata_table))
 
-    if not ray.is_initialized():
-        ray.init()
-
-    slides, tiles = tiling(df, config, str(fallback))
-    save_mlflow_dataset(slides, tiles, config.data.data_name)
-    fallback.unlink()
-    ray.shutdown()
+    with ray.init():
+        slides, tiles = tiling(df, config, str(fallback))
+        save_mlflow_dataset(slides, tiles, config.data.data_name)
+        fallback.unlink()
 
 
 if __name__ == "__main__":

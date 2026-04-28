@@ -1,4 +1,3 @@
-_target_: preprocessing.tiling_v2.overlappers.BinaryOverlapper
-mask_name: tissue_roi
+_target_: preprocessing.tiling_v2.overlappers.TissueOverlapper
 roi_corners: ${roi.half}
 masks_uri: ${data.tissue_masks_uri}

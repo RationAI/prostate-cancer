@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from functools import partial
 from pathlib import Path
 from typing import Any
 
@@ -44,19 +43,16 @@ class Overlapper(ABC):
 
         return fallback  # not for all slides there are all masks, we return dummy black mask
 
-    def add_mask_path_batch(
-        self, batch: dict[str, Any], fallback: str
-    ) -> dict[str, Any]:
-        df = pd.DataFrame(batch)
+    def add_mask_path_batch(self, batch: pd.DataFrame, fallback: str) -> pd.DataFrame:
 
         # assuming same name for the mask with .tiff suffix
-        batch[f"{self.mask_name}_path"] = df["path"].map(
+        batch[f"{self.mask_name}_path"] = batch["path"].map(
             lambda x: self._resolve_path(Path(x), fallback)
         )
         return batch
 
     def add_mask_path(self, tiles: Dataset, fallback: str) -> Dataset:
-        return tiles.map_batches(partial(self.add_mask_path_batch, fallback=fallback))
+        return tiles.map_batches(self.add_mask_path_batch, fn_kwargs={"fallback":fallback}, batch_format="pandas")
 
     def add_overlaps(self, tiles: Dataset) -> Dataset:
         return tiles.with_column(
@@ -75,6 +71,9 @@ class Overlapper(ABC):
 
     @abstractmethod
     def add_percentages(self, tiles: Dataset) -> Dataset: ...
+    
+    def filter(self, tiles: Dataset) -> Dataset:
+        return tiles # most of the overlappers do not filter
 
 
 class BinaryOverlapper(Overlapper):
@@ -103,3 +102,23 @@ class BinaryOverlapper(Overlapper):
     def add_percentages(self, tiles: Dataset) -> Dataset:
         tiles = self.add_overlaps(tiles)
         return tiles.map(self.extract_foreground_percentage)
+
+
+# Is special because its the only one based on which we filter the tiles (and is always present)
+class TissueOverlapper(BinaryOverlapper):
+    def __init__(
+        self,
+        roi_corners: tuple[int, int, int, int],
+        masks_folder: Path | None = None,
+        masks_uri: str | None = None,
+    ) -> None:
+        super().__init__(
+            roi_corners=roi_corners,
+            mask_name="tissue_roi",
+            masks_folder=masks_folder,
+            masks_uri=masks_uri,
+        )
+        self.columns_to_keep |= {f"{self.mask_name}_percentage"}
+
+    def filter(self, tiles: Dataset) -> Dataset:
+        return tiles.filter(lambda row: row["tissue_roi_percentage"] > 0)
