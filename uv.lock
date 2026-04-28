@@ -2065,7 +2065,7 @@ requires-dist = [
     { name = "rationai-staining", git = "https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/staining.git" },
     { name = "rationai-tiling", git = "https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/tiling.git" },
     { name = "ratiopath", specifier = ">=1.0.3" },
-    { name = "ray", extras = ["data"], specifier = ">=2.50.0" },
+    { name = "ray", extras = ["data"], specifier = ">=2.52.1" },
     { name = "regex", specifier = ">=2026.2.28" },
     { name = "scikit-learn", specifier = "==1.6.1" },
     { name = "timm", specifier = "==1.0.15" },

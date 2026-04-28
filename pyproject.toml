@@ -38,7 +38,7 @@ dependencies = [
     "ratiopath>=1.0.3",
     "regex>=2026.2.28",
     "transformers",
-    "ray[data]>=2.50.0",
+    "ray[data]>=2.52.1",
 ]
 
 [dependency-groups]

@@ -34,7 +34,7 @@ class CarcinomaOpenSlideMetadata(OpenSlideMetadata):
     carcinoma: bool | None
 
 
-@ray.remote
+@ray.remote  # type: ignore[arg-type]
 def process_slide(
     slide_path: Path,
     source: OpenSlideTileSource,
@@ -193,7 +193,7 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
 
     slides_df, tiles_df = tiling(
         slides=slides,
-        handler=process_slide,
+        handler=process_slide,  # type: ignore[arg-type]
         fn_kwargs={
             "source": source,
             "blur_mask": blur_mask,

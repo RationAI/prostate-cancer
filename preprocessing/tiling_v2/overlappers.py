@@ -53,7 +53,7 @@ class Overlapper(ABC):
 
     def add_mask_path(self, tiles: Dataset, fallback: str) -> Dataset:
         return tiles.map_batches(
-            self.add_mask_path_batch,
+            self.add_mask_path_batch, # type: ignore[arg-type]
             fn_kwargs={"fallback": fallback},
             batch_format="pandas",
         )
