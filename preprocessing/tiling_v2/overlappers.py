@@ -105,7 +105,6 @@ class BinaryOverlapper(Overlapper):
 
     def add_percentages(self, tiles: Dataset) -> Dataset:
         tiles = self.add_overlaps(tiles)
-        print(tiles.schema)
         return tiles.map(self.extract_foreground_percentage)
 
 
@@ -123,7 +122,6 @@ class TissueOverlapper(BinaryOverlapper):
             masks_folder=masks_folder,
             masks_uri=masks_uri,
         )
-        self.columns_to_keep |= {f"{self.mask_name}_percentage"}
 
     def filter(self, tiles: Dataset) -> Dataset:
         return tiles.filter(lambda row: row["tissue_roi_percentage"] > 0)
