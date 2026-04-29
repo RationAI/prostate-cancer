@@ -1,7 +1,7 @@
 # @package _global_
 
 defaults:
-  - /callbacks/mil_predictions@callbacks
+  - /callbacks/mil_prediction_callback@callbacks
   - /experiment/predict/slide_embeddings/virchow2/base
   - _self_
 
