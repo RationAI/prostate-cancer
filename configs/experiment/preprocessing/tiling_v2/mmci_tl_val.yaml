@@ -2,6 +2,11 @@
 
 defaults:
   - /data/mmci_tl_val@data
-  - /overlappers/classic_overlappers@overlappers
   - /experiment/preprocessing/tiling_v2/base_512
   - _self_
+
+overlappers:
+  tissue_roi:
+    _target_: preprocessing.tiling_v2.overlappers.TissueOverlapper
+    roi_corners: ${roi.half}
+    masks_uri: ${data.tissue_masks_uri}
