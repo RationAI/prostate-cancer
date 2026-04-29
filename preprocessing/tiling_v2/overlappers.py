@@ -43,10 +43,13 @@ class Overlapper(ABC):
 
         return fallback  # not for all slides there are all masks, we return dummy black mask
 
-    def add_mask_path_batch(self, batch: pd.DataFrame, fallback: str) -> pd.DataFrame:
+    def add_mask_path_batch(
+        self, batch: dict[str, Any], fallback: str
+    ) -> dict[str, Any]:
+        df = pd.DataFrame(batch)
 
         # assuming same name for the mask with .tiff suffix
-        batch[f"{self.mask_name}_path"] = batch["path"].map(
+        batch[f"{self.mask_name}_path"] = df["path"].map(
             lambda x: self._resolve_path(Path(x), fallback)
         )
         return batch
@@ -55,7 +58,6 @@ class Overlapper(ABC):
         return tiles.map_batches(
             self.add_mask_path_batch,  # type: ignore[arg-type]
             fn_kwargs={"fallback": fallback},
-            batch_format="pandas",
         )
 
     def add_overlaps(self, tiles: Dataset) -> Dataset:
