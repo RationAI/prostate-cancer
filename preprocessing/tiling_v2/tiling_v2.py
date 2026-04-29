@@ -93,6 +93,10 @@ def tiling(
         hydra.utils.instantiate(config.overlappers).values()
     )
 
+    stems = df["slide_path"].map(lambda x: Path(x).stem)
+    for overlapper in overlappers:
+        overlapper.download_masks_for(stems)
+
     slides = read_slides(
         list(df["slide_path"]),
         tile_extent=config.tile_extent,

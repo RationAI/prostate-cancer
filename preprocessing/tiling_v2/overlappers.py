@@ -12,6 +12,7 @@ from shapely.geometry import Polygon, box
 
 class Overlapper(ABC):
     mask_storage: Path
+    masks_uri: str
     columns_to_keep: set[str]
     roi: Polygon
 
@@ -30,11 +31,19 @@ class Overlapper(ABC):
         if masks_folder is not None:
             self.mask_storage = masks_folder
         else:
-            self.mask_storage = Path(mlflow.artifacts.download_artifacts(masks_uri))
+            self.mask_storage = Path(f"{mask_name}_masks")
+            self.mask_storage.mkdir(parents=True, exist_ok=True)
+            self.masks_uri = masks_uri
 
         self.roi = box(*roi_corners)
         self.mask_name = mask_name
         self.columns_to_keep = set()
+
+    def download_masks_for(self, slide_names: list[str]) -> None:
+        # avoid downloading all of the masks in the uri
+        for name in slide_names:
+            uri = f"{self.masks_uri}/{name}.tiff"
+            mlflow.artifacts.download_artifacts(uri, dst_path=str(self.mask_storage))
 
     def _resolve_path(self, path: Path, fallback: str) -> str:
         target_path = self.mask_storage / f"{path.stem}.tiff"
