@@ -67,6 +67,8 @@ class Overlapper(ABC):
         return tiles.map_batches(
             self.add_mask_path_batch,  # type: ignore[arg-type]
             fn_kwargs={"fallback": fallback},
+            num_cpus=1,
+            memory=128 * 1024**2,
         )
 
     def add_overlaps(self, tiles: Dataset) -> Dataset:
@@ -80,7 +82,7 @@ class Overlapper(ABC):
                 mpp_x=col("mpp_x"),
                 mpp_y=col("mpp_y"),
             ),
-            num_cpus=1,
+            num_cpus=6,
             memory=4 * 1024**3,
         )
 
@@ -116,7 +118,9 @@ class BinaryOverlapper(Overlapper):
 
     def add_percentages(self, tiles: Dataset) -> Dataset:
         tiles = self.add_overlaps(tiles)
-        return tiles.map(self.extract_foreground_percentage)
+        return tiles.map(
+            self.extract_foreground_percentage, num_cpus=6, memory=4 * 1024**3
+        )
 
 
 # Is special because its the only one based on which we filter the tiles (and is always present)

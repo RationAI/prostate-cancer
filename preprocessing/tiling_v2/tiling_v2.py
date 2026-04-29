@@ -108,7 +108,7 @@ def tiling(
         carcinoma, fn_kwargs={"df": df}, num_cpus=0.1, memory=128 * 1024**2
     )
 
-    tiles = slides.flat_map(tile, num_cpus=0.2, memory=128 * 1024**2)
+    tiles = slides.flat_map(tile, num_cpus=1, memory=128 * 1024**2)
     tiles = tiles.repartition(target_num_rows_per_block=config.batch_size)
 
     to_keep = set()
