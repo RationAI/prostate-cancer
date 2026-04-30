@@ -99,12 +99,10 @@ def tiling(
         stride=config.stride,
         mpp=config.mpp,
     )
-    slides = slides.map(row_hash, num_cpus=0.1, memory=128 * 1024**2)
-    slides = slides.map(
-        carcinoma, fn_kwargs={"df": df}, num_cpus=0.1, memory=128 * 1024**2
-    )
+    slides = slides.map(row_hash, memory=128 * 1024**2)
+    slides = slides.map(carcinoma, fn_kwargs={"df": df}, memory=128 * 1024**2)
 
-    tiles = slides.flat_map(tile, num_cpus=1, memory=128 * 1024**2)
+    tiles = slides.flat_map(tile, memory=128 * 1024**2)
     tiles = tiles.repartition(target_num_rows_per_block=config.batch_size)
 
     to_keep = set()
@@ -114,9 +112,7 @@ def tiling(
         tiles = overlapper.filter(tiles)
         to_keep |= overlapper.columns_to_keep
 
-    tiles = tiles.map(
-        select, fn_kwargs={"to_keep": to_keep}, num_cpus=0.1, memory=128 * 1024**2
-    )
+    tiles = tiles.map(select, fn_kwargs={"to_keep": to_keep}, memory=128 * 1024**2)
 
     return slides.to_pandas(), tiles.to_pandas()
 
@@ -133,7 +129,7 @@ def main(config: DictConfig, logger: Logger | None = None) -> None:
 
     ctx = ray.data.DataContext.get_current()
     ctx.enable_rich_progress_bars = True
-    ctx.use_ray_tqdm = True
+    ctx.use_ray_tqdm = False
     with ray.init(runtime_env={"excludes": [".git", ".venv"]}):  # type: ignore[call-arg]
         slides, tiles = tiling(df, config, str(fallback))
         save_mlflow_dataset(slides, tiles, config.data.data_name)
