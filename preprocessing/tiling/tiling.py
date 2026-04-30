@@ -48,6 +48,7 @@ def process_slide(
     tissue_masks_path: Path | None,
     qc_masks_path: Path | None,
     annotation_masks_path: Path | None,
+    carcinoma_masks_path: Path | None,
     slide_labels: pd.DataFrame,
 ) -> TiledSlideMetadata:
     slide_metadata, tiles = source(slide_path)
@@ -71,6 +72,11 @@ def process_slide(
         carcinoma_mask_path = None
         exclude_mask_path = None
         another_path_mask_path = None
+
+    if carcinoma_masks_path:
+        carcinoma_mask_path = Path(carcinoma_masks_path) / tiff_slide_name
+    else:
+        carcinoma_mask_path = None
 
     if qc_masks_path:
         blur_mask_path = Path(qc_masks_path) / "blur_per_pixel" / tiff_slide_name
@@ -132,6 +138,7 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
         if config.data.annotation_masks_uri is None
         else Path(download_artifacts(config.data.annotation_masks_uri))
     )
+    carcinoma_masks_path = None if config.data.carcinoma_masks_uri is None else Path(download_artifacts(config.data.carcinoma_masks_uri))
 
     # --- Source of raw tiles
     source = OpenSlideTileSource(
@@ -206,6 +213,7 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
             "tissue_masks_path": tissue_masks_path,
             "qc_masks_path": qc_masks_path,
             "annotation_masks_path": annotation_masks_path,
+            "carcinoma_masks_path": carcinoma_masks_path,
             "slide_labels": slide_labels,
         },
     )

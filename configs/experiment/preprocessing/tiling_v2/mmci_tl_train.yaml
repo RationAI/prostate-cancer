@@ -1,0 +1,11 @@
+# @package _global_
+
+defaults:
+  - /data/mmci_tl_train@data
+  - /overlappers/classic_overlappers@overlappers
+  - /experiment/preprocessing/tiling_v2/base_224
+  - _self_
+
+overlappers:
+  carcinoma:
+    masks_uri: ${data.annotation_masks_uri}/carcinoma

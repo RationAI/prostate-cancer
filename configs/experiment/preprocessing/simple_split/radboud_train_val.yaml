@@ -1,0 +1,8 @@
+# @package _global_
+
+defaults:
+  - /data/radboud/train_val@data
+  - _self_
+
+target_column: gleason_score
+test_size: 0.1

@@ -1,0 +1,8 @@
+defaults:
+  - base
+  - _self_
+
+# points to the public mlflow
+metadata_table: "mlflow-artifacts:/38/1a718a849be3412ab4621b6772daf049/artifacts/PANDA - Radboud_train.csv"
+
+data_name: "PANDA - Radboud train + val"

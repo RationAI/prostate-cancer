@@ -1,0 +1,10 @@
+# @package _global_
+
+defaults:
+  - /data/radboud@data
+  - _self_
+
+combined_masks_dir: /mnt/data/Public/Public/prostate/PANDA/train_label_masks
+untied_masks:
+  tissue_mask: [1, 2, 3, 4, 5] # all but background
+  carcinoma_mask: [3, 4, 5] # all gleasons
