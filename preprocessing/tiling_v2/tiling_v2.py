@@ -99,10 +99,10 @@ def tiling(
         stride=config.stride,
         mpp=config.mpp,
     )
-    slides = slides.map(row_hash, memory=128 * 1024**2)
-    slides = slides.map(carcinoma, fn_kwargs={"df": df}, memory=128 * 1024**2)
+    slides = slides.map(row_hash)
+    slides = slides.map(carcinoma, fn_kwargs={"df": df})
 
-    tiles = slides.flat_map(tile, memory=128 * 1024**2)
+    tiles = slides.flat_map(tile)
     tiles = tiles.repartition(target_num_rows_per_block=config.batch_size)
 
     to_keep = set()
@@ -112,7 +112,7 @@ def tiling(
         tiles = overlapper.filter(tiles)
         to_keep |= overlapper.columns_to_keep
 
-    tiles = tiles.map(select, fn_kwargs={"to_keep": to_keep}, memory=128 * 1024**2)
+    tiles = tiles.map(select, fn_kwargs={"to_keep": to_keep})
 
     return slides.to_pandas(), tiles.to_pandas()
 
