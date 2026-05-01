@@ -21,13 +21,16 @@ from ratiopath.openslide import OpenSlide
 
 @ray.remote(num_cpus=1, memory=(5 * 1024**3))
 def process_slide(
-    name: str,
+    slide_path: str,
     combined_masks_dir: Path,
     output_dir: Path,
     untied_masks: dict[str, list[int]],
 ) -> None:
+    name = Path(slide_path).stem
     combined_mask_path = combined_masks_dir / f"{name}_mask.tiff"
-    with OpenSlide(combined_mask_path) as slide:
+
+    # use resolution of the original slide, not the mask, since they are a bit off
+    with OpenSlide(slide_path) as slide:
         mpp_x, mpp_y = slide.slide_resolution(level=0)
 
     mask: NDArray[np.uint8] = tifffile.imread(combined_mask_path)
@@ -62,7 +65,7 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
 
     with TemporaryDirectory() as output_dir:
         process_items(
-            items=list(slides["slide_id"]),
+            items=list(slides["slide_path"]),
             process_item=process_slide,
             fn_kwargs={
                 "combined_masks_dir": Path(config.combined_masks_dir),
