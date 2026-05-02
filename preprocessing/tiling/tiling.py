@@ -138,7 +138,11 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
         if config.data.annotation_masks_uri is None
         else Path(download_artifacts(config.data.annotation_masks_uri))
     )
-    carcinoma_masks_path = None if config.data.carcinoma_masks_uri is None else Path(download_artifacts(config.data.carcinoma_masks_uri))
+    carcinoma_masks_path = (
+        None
+        if config.data.carcinoma_masks_uri is None
+        else Path(download_artifacts(config.data.carcinoma_masks_uri))
+    )
 
     # --- Source of raw tiles
     source = OpenSlideTileSource(
