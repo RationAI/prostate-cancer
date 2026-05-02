@@ -5,7 +5,7 @@ defaults:
   - _self_
 
 tile_uris:
-  - "mlflow-artifacts:/38/b1f919cfef924649be77baecac9f2c32/artifacts/PANDA - Radboud val"
+  - ${data.tiles_uri_512}
 
 percentage_cols:
   - "tissue_roi_percentage"
