@@ -1,0 +1,8 @@
+# @package _global_
+
+max_concurrent: 100
+data: ???
+combined_masks_dir: ???
+untied_masks: ???
+
+use_case: Untie Masks

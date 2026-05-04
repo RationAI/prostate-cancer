@@ -1,0 +1,9 @@
+# @package _global_
+
+test_size: ???
+target_column: ???
+use_case: Simple Data Split
+
+metadata:
+  hyperparams:
+    test_size: ${test_size}
