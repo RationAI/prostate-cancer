@@ -7,10 +7,10 @@ import mlflow
 import pandas as pd
 import ray
 import torch
-from ray.data import Dataset
 from omegaconf import DictConfig
 from rationai.mlkit import autolog, with_cli_args
 from rationai.mlkit.lightning.loggers import MLFlowLogger
+from ray.data import Dataset
 
 
 def attach_embeddings_group(group: pd.DataFrame, embeddings_dir: Path) -> pd.DataFrame:
@@ -55,7 +55,7 @@ def process_and_shard_tiles(
 
     # batch on the level of slides to avoid opening a single embedding file multiple times
     ds = ds.groupby("slide_id").map_groups(
-        attach_embeddings_group, # type: ignore[arg-type]
+        attach_embeddings_group,  # type: ignore[arg-type]
         fn_kwargs={"embeddings_dir": embeddings_dir},
         batch_format="pandas",
     )
@@ -83,7 +83,7 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
     slides_path = slides_output / "slides.parquet"
     slides.to_parquet(slides_path, index=False)  # slides.parquet is not changed
 
-    with ray.init(): # type: ignore[call-arg]
+    with ray.init():  # type: ignore[call-arg]
         process_and_shard_tiles(
             slides,
             tiles,
