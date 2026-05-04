@@ -1,0 +1,8 @@
+# @package _global_
+
+tile_extent: 224
+stride: 112
+
+roi:
+  full: [0, 0, 224, 224]
+  half: [56, 56, 168, 168]

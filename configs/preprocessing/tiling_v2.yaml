@@ -1,0 +1,16 @@
+# @package _global_
+
+mpp: 0.46
+batch_size: 4096
+tile_extent: ???
+stride: ???
+roi: ???
+use_case: Tiling (v2)
+
+overlappers: ??? # dict of objects for computing overlaps with masks
+
+metadata:
+  hyperparams:
+    tile_extent: ${tile_extent}
+    stride: ${stride}
+    mpp: ${mpp}

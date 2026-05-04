@@ -72,3 +72,30 @@ class CarcinomaMask(PyvipsMask[TileMetadata]):
         data = asdict(tile_labels)
         data["carcinoma_roi_percentage"] = class_overlaps.get(255, 0)
         return AugmentedTileMetadata(**data)
+
+
+class PANDAHybridMask(PyvipsMask[TileMetadata]):
+    background = 0
+    stroma_connective_non_epithelium = 1
+    healthy_epithelium = 2
+    gleason_3 = 3
+    gleason_4 = 4
+    gleason_5 = 5
+
+    def forward_tile(
+        self, tile_labels: TileMetadata, class_overlaps: dict[int, float]
+    ) -> TileMetadata:
+        data = asdict(tile_labels)
+
+        # tissue is all but background
+        tissue = 1 - class_overlaps.get(self.background, 0)
+        data["tissue_roi_percentage"] = tissue
+
+        # carcinoma is any type of carcinoma (overlaps are disjoint)
+        data["carcinoma_roi_percentage"] = (
+            class_overlaps.get(self.gleason_3, 0)
+            + class_overlaps.get(self.gleason_4, 0)
+            + class_overlaps.get(self.gleason_5, 0)
+        )
+
+        return AugmentedTileMetadata(**data)
