@@ -5,73 +5,74 @@ from pathlib import Path
 import hydra
 import mlflow
 import pandas as pd
+import ray
 import torch
+from ray.data import Dataset
 from omegaconf import DictConfig
 from rationai.mlkit import autolog, with_cli_args
 from rationai.mlkit.lightning.loggers import MLFlowLogger
 
 
-def attach_embeddings(
-    slide_embeddings: torch.Tensor,
-    tiles: pd.DataFrame,
-) -> pd.DataFrame:
-    embeds = slide_embeddings.cpu().numpy()
+def attach_embeddings_group(group: pd.DataFrame, embeddings_dir: Path) -> pd.DataFrame:
+    assert group["path"].nunique() == 1, "Expected one unique path per group"
 
-    if len(tiles) != len(embeds):
-        raise ValueError(f"Mismatch: {len(tiles)} tiles vs {len(embeds)} embeddings")
+    slide_path = group["path"].iloc[0]
+    slide_name = Path(slide_path).stem
 
-    tiles["embedding"] = list(embeds)
-    return tiles
+    embeds = (
+        torch.load(
+            str(embeddings_dir / f"{slide_name}.pt"),
+            map_location="cpu",
+        )
+        .cpu()
+        .numpy()
+    )
+
+    if len(group) != len(embeds):
+        raise ValueError(
+            f"Mismatch: {len(group)} tiles vs {len(embeds)} embeddings for {slide_name}"
+        )
+
+    group = group.copy()
+    group["embedding"] = list(embeds)
+    return group
 
 
 def process_and_shard_tiles(
     slides: pd.DataFrame,
     tiles: pd.DataFrame,
-    slides_per_file: int,
     output_dir: Path,
     embeddings_dir: Path,
 ) -> None:
     tiles_output = output_dir / "tiles"
     tiles_output.mkdir(parents=True, exist_ok=True)
 
-    for shard_idx, start in enumerate(range(0, len(slides), slides_per_file)):
-        slides_chunk = slides.iloc[start : start + slides_per_file]
+    tiles_enriched = tiles.join(
+        slides.set_index("id")[["path"]],
+        on="slide_id",
+    )
+    ds: Dataset = ray.data.from_pandas(tiles_enriched)
 
-        tiles_buffer = []
-        for (
-            _,
-            slide,
-        ) in slides_chunk.iterrows():  # need for-loop because embed files are per slide
-            slide_name = Path(slide.path).stem
-            mask = tiles["slide_id"] == slide.id
-            tiles_chunk = tiles.loc[mask].copy()
-            tiles_chunk["embedding"] = None
-            embeds = torch.load(
-                (embeddings_dir / slide_name).with_suffix(".pt"), map_location="cpu"
-            )
-            tiles_chunk = attach_embeddings(embeds, tiles_chunk)
-            del embeds
+    # batch on the level of slides to avoid opening a single embedding file multiple times
+    ds = ds.groupby("slide_id").map_groups(
+        attach_embeddings_group, # type: ignore[arg-type]
+        fn_kwargs={"embeddings_dir": embeddings_dir},
+        batch_format="pandas",
+    )
 
-            tiles_buffer.append(tiles_chunk)
-
-        if len(tiles_buffer) > 0:
-            shard = pd.concat(tiles_buffer, ignore_index=True)
-            shard.to_parquet(
-                str(tiles_output / f"tiles_{shard_idx:05d}.parquet"), index=False
-            )
-            tiles_buffer.clear()
-
-            print(f"Saved shard {shard_idx:05d} with {len(shard)} tiles")
-            del tiles_chunk
+    ds.write_parquet(
+        str(tiles_output),
+        max_rows_per_file=500_000,
+    )
 
 
 @with_cli_args(["+preprocessing=merge_embeddings"])
 @hydra.main(config_path="../../configs", config_name="preprocessing", version_base=None)
 @autolog
 def main(config: DictConfig, logger: MLFlowLogger) -> None:
-    tiling_path = mlflow.artifacts.download_artifacts(config.data.tiles_uri_224)
-    slides = pd.read_parquet(tiling_path + "/slides.parquet")
-    tiles = pd.read_parquet(tiling_path + "/tiles.parquet")
+    tiling_path = Path(mlflow.artifacts.download_artifacts(config.data.tiles_uri_224))
+    slides = pd.read_parquet(tiling_path / "slides.parquet")
+    tiles = pd.read_parquet(tiling_path / "tiles.parquet")
 
     embeds_dir = Path(mlflow.artifacts.download_artifacts(config.embeddings_uri))
 
@@ -82,13 +83,13 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
     slides_path = slides_output / "slides.parquet"
     slides.to_parquet(slides_path, index=False)  # slides.parquet is not changed
 
-    process_and_shard_tiles(
-        slides,
-        tiles,
-        config.slides_per_file,
-        output_dir,
-        embeds_dir,
-    )
+    with ray.init(): # type: ignore[call-arg]
+        process_and_shard_tiles(
+            slides,
+            tiles,
+            output_dir,
+            embeds_dir,
+        )
 
     mlflow.log_artifacts(str(output_dir), config.data.data_name + "_sharded")
 
