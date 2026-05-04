@@ -62,7 +62,7 @@ def process_and_shard_tiles(
 
     ds.write_parquet(
         str(tiles_output),
-        max_rows_per_file=500_000,
+        max_rows_per_file=10000,
     )
 
 
