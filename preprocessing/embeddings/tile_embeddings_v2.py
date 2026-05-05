@@ -1,4 +1,4 @@
-"""Serves the same purpose as tile_embeddings.py, but uses new approach and outputs different format."""
+"""Serves the same purpose as tile_embeddings.py, but uses new approach and outputs different format. Was inspired by Adam Kukučka."""
 
 import shutil
 from pathlib import Path
@@ -19,8 +19,8 @@ from ray.data.expressions import col
 
 
 class EmbedTiles:
-    def __init__(self, model: str, concurrency: int) -> None:
-        self.model = model
+    def __init__(self, encoder: str, concurrency: int) -> None:
+        self.encoder = encoder
         self.client = AsyncClient(
             limits=httpx.Limits(
                 max_connections=concurrency, max_keepalive_connections=concurrency
@@ -30,7 +30,7 @@ class EmbedTiles:
 
     async def __call__(self, row: dict[str, Any]) -> dict[str, Any]:
         embedding = (
-            (await self.client.models.embed_image(self.model, row["tile"]))
+            (await self.client.models.embed_image(self.encoder, row["tile"]))
             .reshape(-1)
             .tolist()
         )
@@ -70,7 +70,7 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
     ds = ds.drop_columns(["path", "level", "tile_extent_x", "tile_extent_y"])
     ds = ds.map(
         EmbedTiles,  # type: ignore[arg-type]
-        fn_constructor_args=(config.model, config.concurrency),
+        fn_constructor_args=(config.encoder, config.concurrency),
         compute=ray.data.ActorPoolStrategy(
             max_size=4,
             max_tasks_in_flight_per_actor=config.concurrency // 4,
@@ -97,5 +97,5 @@ if __name__ == "__main__":
     ctx.enable_rich_progress_bars = True
     ctx.use_ray_tqdm = False
 
-    with ray.init(runtime_env={"excludes": [".git", ".venv"]}): # type: ignore[call-arg]
+    with ray.init(runtime_env={"excludes": [".git", ".venv"]}):  # type: ignore[call-arg]
         main()
