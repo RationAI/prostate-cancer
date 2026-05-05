@@ -8,6 +8,7 @@ import pandas as pd
 import ray
 import torch
 from omegaconf import DictConfig
+from ray.data import SaveMode
 from rationai.mlkit import autolog, with_cli_args
 from rationai.mlkit.lightning.loggers import MLFlowLogger
 from ray.data import Dataset
@@ -65,7 +66,7 @@ def process_and_shard_tiles(
     ds.write_parquet(
         str(tiles_output),
         max_rows_per_file=10000,
-        mode="overwrite",
+        mode=SaveMode.OVERWRITE
     )
 
 
