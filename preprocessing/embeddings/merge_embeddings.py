@@ -60,9 +60,12 @@ def process_and_shard_tiles(
         batch_format="pandas",
     )
 
+    ds = ds.drop_columns(["path"])
+
     ds.write_parquet(
         str(tiles_output),
         max_rows_per_file=10000,
+        mode="overwrite",
     )
 
 

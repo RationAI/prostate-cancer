@@ -1,6 +1,6 @@
 # @package _global_
 
 defaults:
-  - /experiment/preprocessing/merge_embeddings/virchow2/base
+  - /experiment/preprocessing/merge_embeddings/pgp/base
   - /data/mmci_tl_val@data
   - _self_
