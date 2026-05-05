@@ -8,10 +8,9 @@ import pandas as pd
 import ray
 import torch
 from omegaconf import DictConfig
-from ray.data import SaveMode
 from rationai.mlkit import autolog, with_cli_args
 from rationai.mlkit.lightning.loggers import MLFlowLogger
-from ray.data import Dataset
+from ray.data import Dataset, SaveMode
 
 
 def attach_embeddings_group(group: pd.DataFrame, embeddings_dir: Path) -> pd.DataFrame:
@@ -64,9 +63,7 @@ def process_and_shard_tiles(
     ds = ds.drop_columns(["path"])
 
     ds.write_parquet(
-        str(tiles_output),
-        max_rows_per_file=10000,
-        mode=SaveMode.OVERWRITE
+        str(tiles_output), max_rows_per_file=10000, mode=SaveMode.OVERWRITE
     )
 
 
