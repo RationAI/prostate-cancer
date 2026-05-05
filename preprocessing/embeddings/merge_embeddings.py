@@ -34,7 +34,7 @@ def attach_embeddings_group(group: pd.DataFrame, embeddings_dir: Path) -> pd.Dat
         )
 
     group = group.copy()
-    group["embedding"] = list(embeds)
+    group["embedding"] = embeds.tolist()
     return group
 
 
