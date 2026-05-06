@@ -2,5 +2,5 @@
 
 defaults:
   - /experiment/predict/embeddings/pgp/heatmaps_and_max_aggregations/base
-  - /data/mmci_sl_group_2@predict_data
+  - /data/mmci/sl_group_2@predict_data
   - _self_

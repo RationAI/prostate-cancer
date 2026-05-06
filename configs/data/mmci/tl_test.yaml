@@ -1,3 +1,7 @@
+defaults:
+  - base
+  - _self_
+
 tiles_uri_512: "mlflow-artifacts:/65/c47cd842fbf14bf399cd4aca43af3127/artifacts/MMCI TL Test 512"
 tiles_uri_224: "mlflow-artifacts:/65/74c7b6e1a10444688910b8835adf4208/artifacts/MMCI TL Test 224"
 

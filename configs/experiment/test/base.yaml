@@ -8,5 +8,5 @@ model:
 tile_threshold: ${model_data.tile_threshold}
 checkpoint: ${model_data.checkpoint}
 model_name: ${model_data.model_name}
-
+thresholds: ${test_data.thresholds}
 data_name: ${test_data.data_name}

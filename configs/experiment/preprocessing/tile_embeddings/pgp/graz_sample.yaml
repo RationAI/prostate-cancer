@@ -2,7 +2,7 @@
 
 defaults:
   - /experiment/preprocessing/tile_embeddings/pgp/base
-  - /data/graz_sample@data
+  - /data/graz/graz_sample@data
   - _self_
 
 uris:

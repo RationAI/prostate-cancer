@@ -2,7 +2,7 @@
 
 defaults:
   - /experiment/preprocessing/tile_embeddings/virchow2/base
-  - /data/comenius_3_sample@data
+  - /data/comenius/comenius_3_sample@data
   - _self_
 
 uris:
