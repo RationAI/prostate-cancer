@@ -84,7 +84,7 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
     slides_path = slides_output / "slides.parquet"
     slides.to_parquet(slides_path, index=False)  # slides.parquet is not changed
 
-    with ray.init():  # type: ignore[call-arg]
+    with ray.init(num_cpus=10):  # type: ignore[call-arg]
         process_and_shard_tiles(
             slides,
             tiles,
