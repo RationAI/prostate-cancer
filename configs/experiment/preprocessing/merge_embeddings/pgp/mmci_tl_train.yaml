@@ -2,5 +2,5 @@
 
 defaults:
   - /experiment/preprocessing/merge_embeddings/pgp/base
-  - /data/mmci_tl_train@data
+  - /data/mmci/tl_train@data
   - _self_

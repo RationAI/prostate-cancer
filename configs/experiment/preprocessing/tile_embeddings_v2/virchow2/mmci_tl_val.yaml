@@ -2,4 +2,4 @@
 
 defaults:
   - /experiment/preprocessing/tile_embeddings_v2/virchow2/base
-  - /data/mmci_tl_val@data
+  - /data/mmci/tl_val@data

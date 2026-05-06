@@ -2,5 +2,5 @@
 
 defaults:
   - /experiment/preprocessing/merge_embeddings/virchow2/base
-  - /data/mmci_tl_val@data
+  - /data/mmci/tl_val@data
   - _self_
