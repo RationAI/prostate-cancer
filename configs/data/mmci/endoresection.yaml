@@ -1,3 +1,7 @@
+defaults:
+  - base
+  - _self_
+
 tiles_uri_224: "mlflow-artifacts:/65/4ee2bdfbe3e74961959b5c19d7a1cef3/artifacts/MMCI Endoresections"
 tiles_uri_512: "mlflow-artifacts:/65/9bf1b392cecb4913b6d139d3276e0e2a/artifacts/MMCI Endoresections"
 

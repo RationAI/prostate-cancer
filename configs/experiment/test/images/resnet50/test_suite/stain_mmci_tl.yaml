@@ -2,5 +2,5 @@
 
 defaults:
   - /experiment/test/images/resnet50/test_suite/stain_base
-  - /data/mmci_tl_test@test_data
+  - /data/mmci/tl_test@test_data
   - _self_

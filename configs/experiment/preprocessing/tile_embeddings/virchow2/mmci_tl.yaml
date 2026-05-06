@@ -2,9 +2,9 @@
 
 defaults:
   - /experiment/preprocessing/tile_embeddings/virchow2/base
-  - /data/mmci_tl_train@data_train
-  - /data/mmci_tl_val@data_val
-  - /data/mmci_tl_test@data_test
+  - /data/mmci/tl_train@data_train
+  - /data/mmci/tl_val@data_val
+  - /data/mmci/tl_test@data_test
   - _self_
 
 uris:

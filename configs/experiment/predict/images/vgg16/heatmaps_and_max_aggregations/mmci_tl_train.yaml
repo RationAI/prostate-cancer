@@ -2,5 +2,5 @@
 
 defaults:
   - /experiment/predict/images/vgg16/heatmaps_and_max_aggregations/base
-  - /data/mmci_tl_train@predict_data
+  - /data/mmci/tl_train@predict_data
   - _self_

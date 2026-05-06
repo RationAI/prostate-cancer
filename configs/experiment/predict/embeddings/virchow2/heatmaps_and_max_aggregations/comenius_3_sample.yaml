@@ -2,5 +2,5 @@
 
 defaults:
   - /experiment/predict/embeddings/virchow2/heatmaps_and_max_aggregations/base
-  - /data/comenius_3_sample@predict_data
+  - /data/comenius/comenius_3_sample@predict_data
   - _self_

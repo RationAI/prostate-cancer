@@ -2,6 +2,6 @@
 
 defaults:
   - /experiment/postprocessing/eval_estimation/span/base
-  - /data/mmci_sl_group_1@data
+  - /data/mmci/sl_group_1@data
   - /model/checkpoints/resnet50@model_data
   - _self_
