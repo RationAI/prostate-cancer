@@ -78,17 +78,17 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
         max_concurrency=config.concurrency,
     )
 
-    output_dir = Path(config.output_dir)
-    output_dir.mkdir(parents=True, exist_ok=True)
-    tiles_parquet_dir = output_dir / "tiles"
+    output_path = Path(config.output_path)
+    output_path.mkdir(parents=True, exist_ok=True)
+    tiles_parquet_dir = output_path / "tiles"
     if tiles_parquet_dir.exists():
         shutil.rmtree(tiles_parquet_dir)
 
-    slides.to_parquet(output_dir / "slides.parquet", index=False)
+    slides.to_parquet(output_path / "slides.parquet", index=False)
     ds.write_parquet(str(tiles_parquet_dir), min_rows_per_file=config.rows_per_file)
 
     logger.log_artifacts(
-        str(output_dir), f"{config.data.data_name} - {config.dataset.institution}"
+        str(output_path), f"{config.data.data_name} - {config.dataset.institution}"
     )
 
 
