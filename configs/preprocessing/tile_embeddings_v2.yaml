@@ -3,9 +3,9 @@
 encoder: ???
 
 output_path: ${prostate_cancer_artifacts}/tiles_with_embeddings/${encoder}/${data.data_name}
-concurrency: 512
+concurrency: 64
 block_size: 128
-rows_per_file: 50000
+rows_per_file: 10000
 
 use_case: Tile Embeddings (V2)
 
