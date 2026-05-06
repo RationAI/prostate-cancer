@@ -2,6 +2,6 @@
 
 defaults:
   - /experiment/postprocessing/slide_level_eval/resnet50_stain/span_aggregations/base
-  - /data/mmci_sl_group_1@data
+  - /data/mmci/sl_group_1@data
 
 preds_uri: ${model_data.slide_level_prediction_uris.span.mmci_sl_group_1}

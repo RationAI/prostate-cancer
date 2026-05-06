@@ -1,3 +1,7 @@
+defaults:
+  - base
+  - _self_
+
 metadata_table: "mlflow-artifacts:/65/5a159bf29b034e08a12e9a683f84e752/artifacts/mmci_2k_prostate.csv"
 
 tiles_uri_224: "mlflow-artifacts:/105/682b14944f1b416193871333574eb30a/artifacts/MMCI 2k 224"

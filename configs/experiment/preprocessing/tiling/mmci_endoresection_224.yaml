@@ -1,7 +1,7 @@
 # @package _global_
 
 defaults:
-  - /data/mmci_endoresection@data
+  - /data/mmci/endoresection@data
   - _self_
 
 tile_extent: 224
