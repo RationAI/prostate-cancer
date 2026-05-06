@@ -20,4 +20,3 @@ metadata:
   hyperparams:
     batch_size: ${datamodule.batch_size}
     num_workers: ${datamodule.num_workers}
-    carcinoma_t: ${thresholds.carcinoma_roi_t}

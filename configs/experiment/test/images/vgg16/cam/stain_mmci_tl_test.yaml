@@ -2,5 +2,5 @@
 
 defaults:
   - /experiment/test/images/vgg16/cam/stain_base
-  - /datamodule/data/mmci/tl_test@test_data
+  - /data/mmci/tl_test@test_data
   - _self_
