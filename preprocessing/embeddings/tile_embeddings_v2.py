@@ -40,7 +40,7 @@ class EmbedTiles:
 
 
 @with_cli_args(["+preprocessing=tile_embeddings_v2"])
-@hydra.main(config_path="../configs", config_name="preprocessing", version_base=None)
+@hydra.main(config_path="../../configs", config_name="preprocessing", version_base=None)
 @autolog
 def main(config: DictConfig, logger: MLFlowLogger) -> None:
     folder = Path(mlflow.artifacts.download_artifacts(config.data.tiles_uri_224))
