@@ -1,0 +1,7 @@
+# @package _global_
+
+defaults:
+  - /data/radboud/val@data
+  - _self_
+
+normalized_data_dir: /mnt/projects/prostate_cancer/stain_normalization/Radboud_val_test
