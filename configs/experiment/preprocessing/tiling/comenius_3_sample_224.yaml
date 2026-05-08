@@ -1,7 +1,7 @@
 # @package _global_
 
 defaults:
-  - /data/comenius_3_sample@data
+  - /data/comenius/comenius_3_sample@data
   - _self_
 
 tile_extent: 224

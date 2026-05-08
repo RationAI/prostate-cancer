@@ -1,3 +1,7 @@
+defaults:
+  - base
+  - _self_
+
 metadata_table: "mlflow-artifacts:/65/6fa22cb78ac641c6973845eba7177340/artifacts/mmci_tl_train_data.csv"
 
 tissue_masks_uri: "mlflow-artifacts:/65/4ea7cee809a2443389855facba548959/artifacts/tissue_masks"

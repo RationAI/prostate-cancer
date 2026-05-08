@@ -1,9 +1,11 @@
 # @package _global_
 defaults:
   - /callbacks/train@callbacks
-  - /data/mmci_tl_train@train_data
-  - /data/mmci_tl_val@val_data
+  - /data/mmci/tl_train@train_data
+  - /data/mmci/tl_val@val_data
   - _self_
+
+thresholds: ${train_data.thresholds}
 
 trainer:
   enable_checkpointing: True

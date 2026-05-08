@@ -2,5 +2,5 @@
 
 defaults:
   - /experiment/predict/embeddings/pgp/heatmaps_and_max_aggregations/base
-  - /data/graz_sample@predict_data
+  - /data/graz/graz_sample@predict_data
   - _self_
