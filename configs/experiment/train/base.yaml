@@ -7,6 +7,7 @@ thresholds: ${train_data.thresholds}
 
 mean: ${train_data.mean}
 std: ${train_data.std}
+stains: ${train_data.stains}
 
 trainer:
   enable_checkpointing: True

@@ -10,3 +10,8 @@ thresholds:
   folding_t: 0.25
 
   carcinoma_roi_t: 0.0
+
+stains:
+  hematoxylin: [0.52747465, 0.73745016, 0.42182669]
+  eosin: [0.21168435, 0.8554456 , 0.47265481]
+  resiudal: [-0.037, -0.476, 0.878]
