@@ -90,7 +90,7 @@ class SlideTiles(Dataset[LabeledSample | UnlabeledSample]):
 
         if len(tiles) == 0:
             print(
-                f"Warning: No tiles found for slide {get_slide_name(slide_metadata.path)}."
+                f"Warning: No tiles found for slide {get_slide_name(slide_metadata)}."
             )
 
     def __len__(self) -> int:
