@@ -17,9 +17,9 @@ transforms:
 
     conversion:
       _target_: rationai.staining.ColorConversion.from_stain_vectors
-      stain1: [0.479, 0.823, 0.305]
-      stain2: [0.156, 0.949, 0.273]
-      stain3: [-0.189, -0.242, 0.952]
+      stain1: ${stains.hematoxylin}
+      stain2: ${stains.eosin}
+      stain3: ${stains.residual}
 
     noise_transform:
       _target_: albumentations.Compose
