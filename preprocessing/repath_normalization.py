@@ -33,7 +33,7 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
         repath_and_log(config.data.tiles_uri_512, normalized_map, config.data.data_name + "512")
 
     if hasattr(config.data, "tiles_uri_224") and config.data.tiles_uri_224 is not None:
-        repath_and_log(config.data.tiles_uri_512, normalized_map, config.data.data_name + "224")
+        repath_and_log(config.data.tiles_uri_224, normalized_map, config.data.data_name + "224")
 
 
 if __name__ == "__main__":
