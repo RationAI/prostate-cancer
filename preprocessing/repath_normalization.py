@@ -18,7 +18,7 @@ def repath_and_log(
     slides = pd.read_parquet(tiling_path / "slides.parquet")
     tiles = pd.read_parquet(tiling_path / "tiles.parquet")
 
-    slides["path"].map(lambda x: normalized_map[Path(x).name])
+    slides["path"] = slides["path"].map(lambda x: normalized_map[Path(x).name])
     save_mlflow_dataset(slides, tiles, f"{dataset_name}_normalized")
 
 
