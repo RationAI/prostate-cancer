@@ -20,7 +20,7 @@ from prostate_cancer.typing import LabeledSampleBatch, UnlabeledSampleBatch
 
 
 class ProstateCancerModel(LightningModule):
-    def __init__(self, lr: float, tl_threshold: float=0.5) -> None:
+    def __init__(self, lr: float, tl_threshold: float) -> None:
         super().__init__()
         self.lr = lr
 
