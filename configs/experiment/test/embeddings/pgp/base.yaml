@@ -3,7 +3,7 @@
 defaults:
   - /experiment/test/embeddings/base
   - /model/pgp_model@model
-  - /model/checkpoints/pgp@model_data
+  - /model/checkpoints/mmci_tl/pgp@model_data
   - _self_
 
 datamodule:

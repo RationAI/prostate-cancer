@@ -1,3 +1,7 @@
+defaults:
+  - base
+  - _self_
+
 tile_threshold: 0.73
 slide_max_threshold: 0.986
 slide_mpm_threshold: 0.983
