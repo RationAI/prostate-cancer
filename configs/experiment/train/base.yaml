@@ -26,5 +26,6 @@ datamodule:
 
 model:
   lr: 1e-4
+  tl_threshold: 0.5
 
 use_case: "Training"

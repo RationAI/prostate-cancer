@@ -2,6 +2,7 @@
 
 model:
   lr: 0
+  tl_threshold: ${tile_threshold}
 
 tile_threshold: ${model_data.tile_threshold}
 checkpoint: ${model_data.checkpoint}
