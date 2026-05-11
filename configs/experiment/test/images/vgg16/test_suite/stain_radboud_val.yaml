@@ -1,0 +1,8 @@
+# @package _global_
+
+defaults:
+  - /experiment/test/images/vgg16/test_suite/stain_base
+  - /data/radboud/val@test_data
+  - _self_
+
+checkpoint: ${model_data.public_checkpoint}
