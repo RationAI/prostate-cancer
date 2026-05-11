@@ -32,7 +32,9 @@ class ProstateCancerModel(LightningModule):
             "precision": Precision("binary", threshold=tl_threshold),
             "recall": Recall("binary", threshold=tl_threshold),
             "specificity": Specificity("binary", threshold=tl_threshold),
-            "negative_predictive_value": NegativePredictiveValue("binary", threshold=tl_threshold),
+            "negative_predictive_value": NegativePredictiveValue(
+                "binary", threshold=tl_threshold
+            ),
         }
 
         self.train_metrics = MetricCollection(
