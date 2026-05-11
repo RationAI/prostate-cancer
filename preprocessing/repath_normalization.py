@@ -18,7 +18,7 @@ def repath_and_log(
     slides = pd.read_parquet(tiling_path / "slides.parquet")
     tiles = pd.read_parquet(tiling_path / "tiles.parquet")
 
-    slides["path"] = slides["path"].map(lambda x: normalized_map[Path(x).name])
+    slides["path"] = slides["path"].map(lambda x: normalized_map[Path(x).stem])
     save_mlflow_dataset(slides, tiles, f"{dataset_name}_normalized")
 
 
@@ -27,7 +27,7 @@ def repath_and_log(
 @autolog
 def main(config: DictConfig, logger: MLFlowLogger) -> None:
     normalized_slides = list(Path(config.normalized_data_dir).glob("*.tiff"))
-    normalized_map = {p.name: str(p) for p in normalized_slides}
+    normalized_map = {p.stem: str(p) for p in normalized_slides}
 
     if hasattr(config.data, "tiles_uri_512") and config.data.tiles_uri_512 is not None:
         repath_and_log(
