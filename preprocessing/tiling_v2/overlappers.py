@@ -97,10 +97,16 @@ class BinaryOverlapper(Overlapper):
         self.columns_to_keep |= {f"{self.mask_name}_percentage"}
 
     def extract_foreground_percentage(self, tile: dict[str, Any]) -> dict[str, Any]:
-        val = tile[f"{self.mask_name}_overlap"].get("255", 0.0)
-        tile[f"{self.mask_name}_percentage"] = (
-            val if val is not None else 0.0
-        )  # Can be None since dict is shared across slide
+        overlap = tile[f"{self.mask_name}_overlap"]
+        zero_overlap = overlap.get(
+            "0", 0
+        )  # safer option since QC masks are pseudo-binary
+
+        if zero_overlap is None:  # Can be None since dict is shared across slide
+            tile[f"{self.mask_name}_percentage"] = 1.0
+        else:
+            tile[f"{self.mask_name}_percentage"] = 1.0 - zero_overlap
+
         return tile
 
     def add_percentages(self, tiles: Dataset) -> Dataset:
