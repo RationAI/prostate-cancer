@@ -1,0 +1,7 @@
+# @package _global_
+
+
+data: ???
+normalized_data_dir: ???
+
+use_case: Repath Normalization

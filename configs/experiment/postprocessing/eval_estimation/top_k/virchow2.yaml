@@ -3,5 +3,5 @@
 defaults:
   - /experiment/postprocessing/eval_estimation/top_k/base
   - /data/mmci/sl_group_1@data
-  - /model/checkpoints/virchow2@model_data
+  - /model/checkpoints/mmci_tl/virchow2@model_data
   - _self_
