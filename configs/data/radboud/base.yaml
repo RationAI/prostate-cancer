@@ -1,3 +1,7 @@
+defaults:
+  - stats
+  - _self_
+
 # point to public mlflow
 qc_masks_uri: "mlflow-artifacts:/38/d4ac853943834fc898de59c60e90ace3/artifacts/qc_masks"
 tissue_masks_uri: "mlflow-artifacts:/38/62c15fe465ab4d1b867577252ccbbeec/artifacts/tissue_mask"
@@ -10,9 +14,6 @@ thresholds:
   folding_t: 0.25
 
   carcinoma_roi_t: 0.0
-
-mean: [218.9027, 176.6969, 194.9179]
-std: [36.5303, 54.2809, 42.354]
 
 stains:
   hematoxylin: [0.52747465, 0.73745016, 0.42182669]
