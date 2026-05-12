@@ -1,4 +1,4 @@
 # @package _global_
 
 defaults:
-  - /model/checkpoints/pgp@model_data
+  - /model/checkpoints/mmci_tl/pgp@model_data
