@@ -2,4 +2,4 @@
 
 defaults:
   - /experiment/postprocessing/slide_level_curves/max_aggregations/base
-  - /model/checkpoints/vgg16@model_data
+  - /model/checkpoints/mmci_tl/vgg16@model_data
