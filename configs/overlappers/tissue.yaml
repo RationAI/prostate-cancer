@@ -1,3 +1,4 @@
 _target_: preprocessing.tiling_v2.overlappers.TissueOverlapper
 roi_corners: ${roi.half}
-masks_uri: ${data.tissue_masks_uri}
+# masks_uri: ${data.tissue_masks_uri}
+masks_folder: /mnt/projects/prostate_cancer/cancer/tissue_masks/tissue_mask
