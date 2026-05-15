@@ -87,9 +87,7 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
     slides.to_parquet(output_path / "slides.parquet", index=False)
     ds.write_parquet(str(tiles_parquet_dir), min_rows_per_file=config.rows_per_file)
 
-    logger.log_artifacts(
-        str(output_path), f"{config.data.data_name} - {config.dataset.institution}"
-    )
+    logger.log_artifacts(str(output_path), f"{config.data.data_name}")
 
 
 if __name__ == "__main__":
