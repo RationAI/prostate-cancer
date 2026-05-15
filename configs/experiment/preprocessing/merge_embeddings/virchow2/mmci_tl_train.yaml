@@ -1,0 +1,6 @@
+# @package _global_
+
+defaults:
+  - /experiment/preprocessing/merge_embeddings/virchow2/base
+  - /data/mmci/tl_train@data
+  - _self_

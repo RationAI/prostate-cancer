@@ -1,0 +1,4 @@
+# @package _global_
+
+encoder: "Virchow2"
+embeddings_uri: ${data.virchow2_embeddings_uri}
