@@ -4,11 +4,12 @@ use_case: ???
 
 model:
   lr: 0.0
+  tl_threshold: ${tile_threshold}
 
 tile_threshold: ${model_data.tile_threshold}
 checkpoint: ${model_data.checkpoint}
 model_name: ${model_data.model_name}
 thresholds: ${test_data.thresholds}
-mean: ${test_data.mean}
-std: ${test_data.std}
+mean: ${model_data.stats.mean}
+std: ${model_data.stats.std}
 data_name: ${test_data.data_name}

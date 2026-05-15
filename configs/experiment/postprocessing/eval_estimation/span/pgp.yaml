@@ -3,5 +3,5 @@
 defaults:
   - /experiment/postprocessing/eval_estimation/span/base
   - /data/mmci/sl_group_1@data
-  - /model/checkpoints/pgp@model_data
+  - /model/checkpoints/mmci_tl/pgp@model_data
   - _self_

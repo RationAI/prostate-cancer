@@ -3,3 +3,4 @@ decode_head:
   _target_: prostate_cancer.modeling.decode_head.BinaryEmbeddingClassifier
   in_features: 1536
 lr: ???
+tl_threshold: ???

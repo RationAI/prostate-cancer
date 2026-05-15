@@ -1,4 +1,4 @@
 # @package _global_
 
 defaults:
-  - /model/checkpoints/resnet50_stain@model_data
+  - /model/checkpoints/mmci_tl/resnet50_stain@model_data

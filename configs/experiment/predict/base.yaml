@@ -2,11 +2,12 @@
 
 model:
   lr: 0
+  tl_threshold: ${tile_threshold}
 
 tile_threshold: ${model_data.tile_threshold}
 checkpoint: ${model_data.checkpoint}
 model_name: ${model_data.model_name}
 thresholds: ${predict_data.thresholds}
-mean: ${predict_data.mean}
-std: ${predict_data.std}
+mean: ${model_data.stats.mean}
+std: ${model_data.stats.std}
 data_name: ${predict_data.data_name}
