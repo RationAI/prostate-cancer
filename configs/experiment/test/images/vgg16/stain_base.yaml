@@ -3,5 +3,5 @@
 defaults:
   - /experiment/test/images/base
   - /model/vgg16_model@model
-  - /model/checkpoints/vgg16_stain@model_data
+  - /model/checkpoints/mmci_tl/vgg16_stain@model_data
   - _self_

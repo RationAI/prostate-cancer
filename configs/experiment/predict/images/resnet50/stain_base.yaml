@@ -3,5 +3,5 @@
 defaults:
   - /experiment/predict/images/base
   - /model/resnet50_model@model
-  - /model/checkpoints/resnet50_stain@model_data
+  - /model/checkpoints/mmci_tl/resnet50_stain@model_data
   - _self_

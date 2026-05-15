@@ -1,3 +1,7 @@
+defaults:
+  - base
+  - _self_
+
 tile_threshold: 0.73
 slide_max_threshold: 0.986
 slide_mpm_threshold: 0.983
@@ -5,6 +9,9 @@ slide_top_k_threshold: 0.982
 slide_span_threshold: 0.5 # arbitrary - span predictions are binary
 
 checkpoint: "mlflow-artifacts:/65/3d053bb91d4841e28afe2c93dfe0b273/artifacts/checkpoints/epoch=2-step=25564/checkpoint.ckpt"
+public_checkpoint: "mlflow-artifacts:/38/abde571304794242be0c1630b7bd16ce/artifacts/vgg16_stain_checkpoint.ckpt"
+
+
 model_name: "VGG-16 Stain"
 slide_level_prediction_uris:
   mean_pool_max:

@@ -9,3 +9,4 @@ decode_head:
 
 _target_: prostate_cancer.vit_model.ViTProstateModel
 lr: ???
+tl_threshold: ???

@@ -1,3 +1,7 @@
+defaults:
+  - base
+  - _self_
+
 tile_threshold: 0.76
 slide_max_threshold: 0.996
 slide_mpm_threshold: 0.753
@@ -5,6 +9,8 @@ slide_top_k_threshold: 0.990
 slide_span_threshold: 0.5 # arbitrary - span predictions are binary
 
 checkpoint: "mlflow-artifacts:/65/0d6af27cf5d848279c891eb3039b11c8/artifacts/checkpoints/epoch=0-step=6972/checkpoint.ckpt"
+public_checkpoint: "mlflow-artifacts:/38/abde571304794242be0c1630b7bd16ce/artifacts/resnet50_stain_checkpoint.ckpt"
+
 model_name: "ResNet50 Stain"
 slide_level_prediction_uris:
   mean_pool_max:

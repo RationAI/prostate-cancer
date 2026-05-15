@@ -1,0 +1,8 @@
+defaults:
+  - base_val
+  - _self_
+
+tiles_uri_512: "mlflow-artifacts:/38/4ced588761614abda73d2f447284d6ce/artifacts/PANDA - Radboud val512_normalized"
+tiles_uri_224: "mlflow-artifacts:/38/4ced588761614abda73d2f447284d6ce/artifacts/PANDA - Radboud val224_normalized"
+
+data_name: "PANDA - Radboud val (Heuristic Normalized)"
