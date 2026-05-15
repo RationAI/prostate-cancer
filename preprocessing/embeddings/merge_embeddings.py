@@ -43,6 +43,7 @@ def process_and_shard_tiles(
     tiles: pd.DataFrame,
     output_dir: Path,
     embeddings_dir: Path,
+    rows_per_file: int,
 ) -> None:
     tiles_output = output_dir / "tiles"
     tiles_output.mkdir(parents=True, exist_ok=True)
@@ -63,7 +64,7 @@ def process_and_shard_tiles(
     ds = ds.drop_columns(["path"])
 
     ds.write_parquet(
-        str(tiles_output), max_rows_per_file=10000, mode=SaveMode.OVERWRITE
+        str(tiles_output), max_rows_per_file=rows_per_file, mode=SaveMode.OVERWRITE
     )
 
 
@@ -86,10 +87,7 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
 
     with ray.init(num_cpus=10):  # type: ignore[call-arg]
         process_and_shard_tiles(
-            slides,
-            tiles,
-            output_dir,
-            embeds_dir,
+            slides, tiles, output_dir, embeds_dir, config.rows_per_file
         )
 
     mlflow.log_artifacts(str(output_dir), config.data.data_name + "_sharded")
