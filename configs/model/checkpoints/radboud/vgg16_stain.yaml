@@ -1,0 +1,5 @@
+defaults:
+  - base
+  - _self_
+
+public_checkpoint: "mlflow-artifacts:/38/0607fa72ad8a4c298c781a130343808b/artifacts/checkpoints/epoch=4-step=70840/checkpoint.ckpt"
