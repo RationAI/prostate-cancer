@@ -1,0 +1,6 @@
+# @package _global_
+
+defaults:
+  - /experiment/preprocessing/merge_embeddings/pgp/base
+  - /data/mmci/tl_val@data
+  - _self_

@@ -1,0 +1,17 @@
+# @package _global_
+
+encoder: ???
+
+output_path: ${prostate_cancer_artifacts}/tiles_with_embeddings/${encoder}/${data.data_name}
+concurrency: 64
+block_size: 128
+rows_per_file: 50000
+
+use_case: Tile Embeddings (V2)
+
+metadata:
+  hyperparams:
+    encoder: ${encoder}
+    concurrency: ${concurrency}
+    block_size: ${block_size}
+    rows_per_file: ${rows_per_file}
