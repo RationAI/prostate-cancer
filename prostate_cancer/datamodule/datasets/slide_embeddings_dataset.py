@@ -80,7 +80,7 @@ class SlideEmbeddingsDataset(Dataset[T], Generic[T]):
         if self.padding:
             slide_embeddings = F.pad(slide_embeddings, (0, 0, 0, pad_amount), value=0.0)
 
-        print("PADDING", pad_amount, len(slide_embeddings), self.max_embeddings)
+        print("PADDING", pad_amount, self.max_embeddings, slide_embeddings.shape)
         metadata = SlideMetadata(
             slide_id=slide_metadata["id"],
             slide_name=slide_name,
