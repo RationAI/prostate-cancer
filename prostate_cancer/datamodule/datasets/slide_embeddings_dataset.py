@@ -77,6 +77,7 @@ class SlideEmbeddingsDataset(Dataset[T], Generic[T]):
         slide_embeddings = slide_embeddings[filtered_tiles.index.tolist()]
 
         pad_amount = self.max_embeddings - slide_embeddings.shape[0]
+        print("PADDING", pad_amount)
         if self.padding:
             slide_embeddings = F.pad(slide_embeddings, (0, 0, 0, pad_amount), value=0.0)
 
