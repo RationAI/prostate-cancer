@@ -3,7 +3,7 @@
 defaults:
   - /experiment/predict/slide_embeddings/base
   - /model/virchow2_mil_model@model
-  - /model/checkpoints/virchow2_mil@model_data
+  - /model/checkpoints/mmci_tl/virchow2_mil@model_data
   - _self_
 
 datamodule:
