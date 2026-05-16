@@ -8,3 +8,4 @@ decode_head:
 
 _target_: prostate_cancer.cnn_model.CNNProstateModel
 lr: ???
+tl_threshold: ???

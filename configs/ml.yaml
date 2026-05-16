@@ -3,21 +3,8 @@ defaults:
   - _self_
   - /experiment: ???
 
-
-# Mean and std for normalization
-mean: [228.5544, 178.8584, 219.8793]
-std: [27.8285, 51.4639, 26.4458]
-
-# These are used for all the ML related tasks
-thresholds:
-  tissue_roi_t: 0.5
-  exclude_t: 0.0
-  another_pathology_t: 0.0
-  residual_t: 0.25
-  blur_t: 0.25
-  folding_t: 0.25
-
-  carcinoma_roi_t: 0.5
+mean: ???
+std: ???
 
 seed: ${random_seed:}
 mode: ???
@@ -31,4 +18,3 @@ metadata:
   hyperparams:
     batch_size: ${datamodule.batch_size}
     num_workers: ${datamodule.num_workers}
-    carcinoma_t: ${thresholds.carcinoma_roi_t}

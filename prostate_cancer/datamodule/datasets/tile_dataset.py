@@ -77,6 +77,7 @@ class SlideTiles(Dataset[LabeledTileSample | UnlabeledTileSample]):
     ) -> None:
         super().__init__()
 
+        self.slide_metadata = slide_metadata
         self.slide_tiles = OpenSlideTilesDataset(
             slide_path=slide_metadata.path,
             level=slide_metadata.level,
@@ -91,7 +92,7 @@ class SlideTiles(Dataset[LabeledTileSample | UnlabeledTileSample]):
 
         if len(tiles) == 0:
             print(
-                f"Warning: No tiles found for slide {get_slide_name(slide_metadata.path)}."
+                f"Warning: No tiles found for slide {get_slide_name(slide_metadata)}."
             )
 
     def __len__(self) -> int:

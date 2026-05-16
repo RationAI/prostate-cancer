@@ -2,4 +2,4 @@
 
 defaults:
   - /experiment/postprocessing/slide_prediction_table/max_aggregations/base
-  - /model/checkpoints/vgg16_stain@model_data
+  - /model/checkpoints/mmci_tl/vgg16_stain@model_data

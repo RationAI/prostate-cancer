@@ -1,0 +1,8 @@
+# @package _global_
+
+defaults:
+  - /experiment/test/images/resnet50/test_suite/stain_base
+  - /data/radboud/val_heuristic_normalized@test_data
+  - _self_
+
+checkpoint: ${model_data.public_checkpoint}

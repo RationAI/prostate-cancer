@@ -1,0 +1,18 @@
+defaults:
+  - stats
+  - _self_
+
+thresholds:
+  tissue_roi_t: 0.5
+  exclude_t: 0.0
+  another_pathology_t: 0.0
+  residual_t: 0.25
+  blur_t: 0.25
+  folding_t: 0.25
+
+  carcinoma_roi_t: 0.5
+
+stains:
+  hematoxylin: [0.479, 0.823, 0.305]
+  eosin: [0.156, 0.949, 0.273]
+  residual: [-0.189, -0.242, 0.952]

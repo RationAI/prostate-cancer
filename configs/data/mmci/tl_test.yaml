@@ -1,0 +1,17 @@
+defaults:
+  - base
+  - _self_
+
+tiles_uri_512: "mlflow-artifacts:/65/c47cd842fbf14bf399cd4aca43af3127/artifacts/MMCI TL Test 512"
+tiles_uri_224: "mlflow-artifacts:/65/74c7b6e1a10444688910b8835adf4208/artifacts/MMCI TL Test 224"
+
+pgp_embeddings_uri: "mlflow-artifacts:/65/177737375ce349ecaee630dbae50e338/artifacts/MMCI TL Test 224"
+virchow2_embeddings_uri: "mlflow-artifacts:/65/beab5f8f21f14beb85b32a3180fa1798/artifacts/MMCI TL Test 224"
+
+metadata_table: "mlflow-artifacts:/65/bfc694d7d3234720bfb699a6504ae7b2/artifacts/mmci_tl_test_data.csv"
+
+tissue_masks_uri: "mlflow-artifacts:/65/4ea7cee809a2443389855facba548959/artifacts/tissue_masks"
+qc_masks_uri: "mlflow-artifacts:/65/df5ccd31178549afb5e843b1ea0741a0/artifacts/qc_masks"
+annotation_masks_uri: "mlflow-artifacts:/65/199141b76f90457fbf6183bd70a1e488/artifacts/annotation_masks"
+
+data_name: "MMCI TL Test"

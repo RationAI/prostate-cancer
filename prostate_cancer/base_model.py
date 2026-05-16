@@ -20,7 +20,7 @@ from prostate_cancer.typing import LabeledTileSampleBatch, UnlabeledTileSampleBa
 
 
 class ProstateCancerModel(LightningModule):
-    def __init__(self, lr: float) -> None:
+    def __init__(self, lr: float, tl_threshold: float) -> None:
         super().__init__()
         self.lr = lr
 
@@ -28,11 +28,13 @@ class ProstateCancerModel(LightningModule):
 
         metrics: dict[str, Metric | MetricCollection] = {
             "AUC": AUROC("binary"),
-            "accuracy": Accuracy("binary"),
-            "precision": Precision("binary"),
-            "recall": Recall("binary"),
-            "specificity": Specificity("binary"),
-            "negative_predictive_value": NegativePredictiveValue("binary"),
+            "accuracy": Accuracy("binary", threshold=tl_threshold),
+            "precision": Precision("binary", threshold=tl_threshold),
+            "recall": Recall("binary", threshold=tl_threshold),
+            "specificity": Specificity("binary", threshold=tl_threshold),
+            "negative_predictive_value": NegativePredictiveValue(
+                "binary", threshold=tl_threshold
+            ),
         }
 
         self.train_metrics = MetricCollection(
