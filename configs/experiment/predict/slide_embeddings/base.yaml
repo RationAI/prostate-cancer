@@ -6,8 +6,8 @@ defaults:
   - _self_
 
 datamodule:
-  batch_size: 4
-  num_workers: 8
+  batch_size: 2
+  num_workers: 4
 
   predict:
     uris:
