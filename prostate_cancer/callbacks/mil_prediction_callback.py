@@ -51,31 +51,24 @@ class MILPredictionCallback(Callback):
     ) -> None:
         assert isinstance(trainer.logger, MLFlowLogger)
         sl_preds, tl_preds = outputs
-        slides_embeddings, metadata_batch = batch
+        _, metadata_batch = batch
 
         # Log SL predictions
         trainer.logger.log_table(
             {
-                "slide": [name for name in metadata_batch["slide_name"]],
+                "slide": [metadata["slide_name"] for metadata in metadata_batch],
                 "prediction": sl_preds.tolist(),
             },
             artifact_file="tables/sl_predictions.json",
         )
 
         # Log TL predictions
-        for slide_embeddings, xs, ys, slide_name, tl_preds_slide in zip(
-            slides_embeddings,
-            metadata_batch["xs"],
-            metadata_batch["ys"],
-            metadata_batch["slide_name"],
-            tl_preds,
-            strict=True,
-        ):
-            mask_builder = self.get_mask_builder(slide_name, trainer)
-            slide_embeddings = slide_embeddings[
-                : len(xs)
-            ]  # take only real tiles (not padding)
-            mask_builder.update(tl_preds_slide, xs, ys)
+        for metadata, tl_preds_slide in zip(metadata_batch, tl_preds, strict=True):
+            mask_builder = self.get_mask_builder(metadata["slide_name"], trainer)
+            tl_preds_slide = tl_preds_slide[
+                : len(metadata["xs"])
+            ]  # take only real predictions (not padding)
+            mask_builder.update(tl_preds_slide, metadata["xs"], metadata["ys"])
 
             mlflow.log_artifact(
                 str(mask_builder.save()), artifact_path=str(mask_builder.save_dir)

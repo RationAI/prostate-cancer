@@ -1,6 +1,7 @@
 from collections.abc import Iterable
 from typing import TYPE_CHECKING, cast
 
+import torch
 from hydra.utils import instantiate
 from lightning import LightningDataModule
 from omegaconf import DictConfig
@@ -14,7 +15,9 @@ if TYPE_CHECKING:
     )
 
 from prostate_cancer.typing import (
+    LabeledSlideSample,
     LabeledSlideSampleBatch,
+    UnlabeledSlideSample,
     UnlabeledSlideSampleBatch,
 )
 
@@ -75,6 +78,7 @@ class SlideDataModule(LightningDataModule):
             self.train,
             sampler=sampler,
             shuffle=shuffle,
+            collate_fn=collate_fn_labeled,
             batch_size=self.batch_size,
             num_workers=self.num_workers,
             persistent_workers=self.num_workers > 0,
@@ -85,6 +89,7 @@ class SlideDataModule(LightningDataModule):
         return DataLoader(
             self.val,
             batch_size=self.batch_size,
+            collate_fn=collate_fn_labeled,
             num_workers=self.num_workers,
             persistent_workers=self.num_workers > 0,
         )
@@ -93,6 +98,7 @@ class SlideDataModule(LightningDataModule):
         return DataLoader(
             self.test,
             batch_size=self.batch_size,
+            collate_fn=collate_fn_labeled,
             num_workers=self.num_workers,
             persistent_workers=self.num_workers > 0,
         )
@@ -101,6 +107,33 @@ class SlideDataModule(LightningDataModule):
         return DataLoader(
             self.predict,
             batch_size=self.batch_size,
+            collate_fn=collate_fn_unlabeled,
             num_workers=self.num_workers,
             persistent_workers=self.num_workers > 0,
         )
+
+
+def collate_fn_labeled(batch: list[LabeledSlideSample]) -> LabeledSlideSampleBatch:
+    inputs = []
+    labels = []
+    metadatas = []
+    for input, label, metadata in batch:
+        inputs.append(input)
+        labels.append(label)
+        metadatas.append(metadata)
+
+    inputs_tensor = torch.stack(inputs)
+    labels_tensor = torch.stack(labels)
+    return inputs_tensor, labels_tensor, metadatas
+
+
+def collate_fn_unlabeled(
+    batch: list[UnlabeledSlideSample],
+) -> UnlabeledSlideSampleBatch:
+    inputs = []
+    metadatas = []
+    for input, metadata in batch:
+        inputs.append(input)
+        metadatas.append(metadata)
+    inputs_tensor = torch.stack(inputs)
+    return inputs_tensor, metadatas
