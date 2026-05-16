@@ -68,7 +68,7 @@ class MILPredictionCallback(Callback):
             tl_preds_slide = tl_preds_slide[
                 : len(metadata["xs"])
             ]  # take only real predictions (not padding)
-            mask_builder.update(tl_preds_slide, metadata["xs"], metadata["ys"])
+            mask_builder.update(tl_preds_slide.cpu(), metadata["xs"], metadata["ys"])
 
             mlflow.log_artifact(
                 str(mask_builder.save()), artifact_path=str(mask_builder.save_dir)
