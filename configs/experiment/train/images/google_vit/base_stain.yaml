@@ -1,7 +1,8 @@
 # @package _global_
 
 defaults:
-  - /experiment/train/images/processor_base
+  - /experiment/train/images/base
+  - /datamodule/transforms/normalize_w_stain_augments@transforms
   - /model/google_vit_model@model
   - _self_
 

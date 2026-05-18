@@ -2,6 +2,6 @@
 
 defaults:
   - /experiment/train/images/google_vit/base_stain
-  - /data/mmci/tl_train@train_data
-  - /data/mmci/tl_val@val_data
+  - /data/radboud/train@train_data
+  - /data/radboud/val@val_data
   - _self_
