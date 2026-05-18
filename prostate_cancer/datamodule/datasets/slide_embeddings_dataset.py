@@ -36,6 +36,10 @@ class SlideEmbeddingsDataset(Dataset[T], Generic[T]):
         self.slides, self.tiles, self.embeddings_folder = self.download_artifacts(
             uris, embeddings_uri
         )
+
+        if include_labels:
+            self.tiles["carcinoma"] = self.tiles["carcinoma_roi_percentage"] > 0.5
+
         self.padding = padding
         self.max_embeddings = self.tiles["slide_id"].value_counts().max()
 
@@ -91,8 +95,14 @@ class SlideEmbeddingsDataset(Dataset[T], Generic[T]):
         if not self.include_labels:
             return slide_embeddings, metadata  # type: ignore[return-value]
 
-        label = torch.tensor(slide_metadata.carcinoma).float()
-        return slide_embeddings, label, metadata  # type: ignore[return-value]
+        sl_label = torch.tensor(slide_metadata["carcinoma"]).float()
+
+        tl_labels = torch.zeros(len(slide_embeddings)).float()
+        tl_labels[: len(filtered_tiles)] = torch.tensor(
+            filtered_tiles["carcinoma"]
+        ).float()
+
+        return slide_embeddings, tl_labels, sl_label, metadata  # type: ignore[return-value]
 
 
 class LabeledSlideEmbeddingsDataset(SlideEmbeddingsDataset[LabeledSlideSample]):

@@ -115,16 +115,19 @@ class SlideDataModule(LightningDataModule):
 
 def collate_fn_labeled(batch: list[LabeledSlideSample]) -> LabeledSlideSampleBatch:
     inputs = []
-    labels = []
+    sl_labels = []
+    tl_labels = []
     metadatas = []
-    for input, label, metadata in batch:
+    for input, sl_label, tl_label, metadata in batch:
         inputs.append(input)
-        labels.append(label)
+        sl_labels.append(sl_label)
+        tl_labels.append(tl_label)
         metadatas.append(metadata)
 
     inputs_tensor = torch.stack(inputs)
-    labels_tensor = torch.stack(labels)
-    return inputs_tensor, labels_tensor, metadatas
+    sl_labels_tensor = torch.stack(sl_labels)
+    tl_labels_tensor = torch.stack(tl_labels)
+    return inputs_tensor, sl_labels_tensor, tl_labels_tensor, metadatas
 
 
 def collate_fn_unlabeled(
