@@ -5,6 +5,14 @@ defaults:
   - /datamodule/slide_embeddings_datamodule@datamodule
   - _self_
 
+callbacks:
+  checkpointing:
+    monitor: validation/loss
+    mode: min
+  early_stopping:
+    monitor: validation/loss
+    mode: min
+
 datamodule:
   batch_size: 4
   num_workers: 8

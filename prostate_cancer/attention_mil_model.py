@@ -56,9 +56,17 @@ class ProstateCancerAttentionMIL(LightningModule):
             "negative_predictive_value": NegativePredictiveValue("binary"),
         }
 
-        self.train_metrics = MetricCollection(deepcopy(metrics), prefix="train/")
-        self.val_metrics = MetricCollection(deepcopy(metrics), prefix="validation/")
-        self.test_metrics = MetricCollection(deepcopy(metrics), prefix="test/")
+        self.train_metrics_sl = MetricCollection(deepcopy(metrics), prefix="sl_train/")
+        self.val_metrics_sl = MetricCollection(
+            deepcopy(metrics), prefix="sl_validation/"
+        )
+        self.test_metrics_sl = MetricCollection(deepcopy(metrics), prefix="sl_test/")
+
+        self.train_metrics_tl = MetricCollection(deepcopy(metrics), prefix="tl_train/")
+        self.val_metrics_tl = MetricCollection(
+            deepcopy(metrics), prefix="tl_validation/"
+        )
+        self.test_metrics_tl = MetricCollection(deepcopy(metrics), prefix="tl_test/")
 
     def forward(self, x: Tensor) -> MILModelOutput:
         # x has shape (batch_size, num_tiles_padded, embedding_dim)
@@ -113,9 +121,14 @@ class ProstateCancerAttentionMIL(LightningModule):
 
         self.log("train/loss", loss, on_step=True, prog_bar=True, batch_size=len(bags))
 
-        self.train_metrics.update(sl_outputs, sl_labels)
+        self.train_metrics_sl.update(sl_outputs, sl_labels)
+        self.train_metrics_tl.update(tl_outputs, tl_labels)
+
         self.log_dict(
-            self.train_metrics, on_epoch=True, on_step=False, batch_size=len(bags)
+            self.train_metrics_sl, on_epoch=True, on_step=False, batch_size=len(bags)
+        )
+        self.log_dict(
+            self.train_metrics_tl, on_epoch=True, on_step=False, batch_size=len(bags)
         )
 
         return loss
@@ -130,19 +143,29 @@ class ProstateCancerAttentionMIL(LightningModule):
 
         self.log("validation/loss", loss, prog_bar=True, batch_size=len(bags))
 
-        self.val_metrics.update(sl_outputs, sl_labels)
+        self.val_metrics_sl.update(sl_outputs, sl_labels)
+        self.val_metrics_tl.update(tl_outputs, tl_labels)
+
         self.log_dict(
-            self.val_metrics, on_epoch=True, on_step=False, batch_size=len(bags)
+            self.val_metrics_sl, on_epoch=True, on_step=False, batch_size=len(bags)
+        )
+        self.log_dict(
+            self.val_metrics_tl, on_epoch=True, on_step=False, batch_size=len(bags)
         )
 
     def test_step(self, batch: LabeledSlideSampleBatch) -> None:
-        bags, _, sl_labels, _ = batch
+        bags, tl_labels, sl_labels, _ = batch
 
-        sl_outputs, _ = self(bags)
+        sl_outputs, tl_outputs = self(bags)
 
-        self.test_metrics.update(sl_outputs, sl_labels)
+        self.test_metrics_sl.update(sl_outputs, sl_labels)
+        self.test_metrics_tl.update(tl_outputs, tl_labels)
+
         self.log_dict(
-            self.test_metrics, on_epoch=True, on_step=False, batch_size=len(bags)
+            self.test_metrics_sl, on_epoch=True, on_step=False, batch_size=len(bags)
+        )
+        self.log_dict(
+            self.test_metrics_tl, on_epoch=True, on_step=False, batch_size=len(bags)
         )
 
     def predict_step(self, batch: UnlabeledSlideSampleBatch) -> MILModelOutput:
