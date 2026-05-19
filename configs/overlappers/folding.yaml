@@ -1,5 +1,4 @@
 _target_: preprocessing.tiling_v2.overlappers.BinaryOverlapper
 mask_name: folding
 roi_corners: ${roi.full}
-# masks_uri: ${data.qc_masks_uri}/folding_per_pixel
-masks_folder: /mnt/projects/prostate_cancer/cancer/qc_masks_radboud/qc_masks/folding_per_pixel
+masks_uri: ${data.qc_masks_uri}/folding_per_pixel

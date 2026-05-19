@@ -1,5 +1,4 @@
 _target_: preprocessing.tiling_v2.overlappers.BinaryOverlapper
 mask_name: carcinoma_roi
 roi_corners: ${roi.half}
-# masks_uri: ${data.carcinoma_masks_uri}
-masks_folder: /mnt/projects/prostate_cancer/cancer/carcinoma_masks/carcinoma_mask
+masks_uri: ${data.carcinoma_masks_uri}

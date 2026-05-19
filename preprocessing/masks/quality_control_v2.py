@@ -23,6 +23,7 @@ class QCParameters(TypedDict):
     check_folding: bool
     check_focus: bool
     wb_correction: bool
+    store_masks_at_original_resolution: bool
 
 
 def get_qc_masks(qc_parameters: QCParameters) -> Generator[tuple[str, str], None, None]:
@@ -97,6 +98,9 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
     dataset = pd.read_csv(download_artifacts(config.data.metadata_table))
 
     output_path = Path(config.output_path)
+    if output_path.exists():
+        output_path.rmdir()
+
     output_path.mkdir(parents=True, exist_ok=True)
 
     asyncio.run(

@@ -10,6 +10,7 @@ qc_parameters:
   check_folding: False
   check_focus: True
   wb_correction: True
+  store_masks_at_original_resolution: True
 
 output_path: ${prostate_cancer_artifacts}/qc_masks/${data.data_name}
 use_case: QC Masks (v2)
