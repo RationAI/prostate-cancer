@@ -4,6 +4,7 @@ import asyncio
 from collections.abc import Generator
 from pathlib import Path
 from typing import TypedDict
+import shutil
 
 import hydra
 import pandas as pd
@@ -99,7 +100,7 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
 
     output_path = Path(config.output_path)
     if output_path.exists():
-        output_path.rmdir()
+        shutil.rmtree(str(output_path))
 
     output_path.mkdir(parents=True, exist_ok=True)
 
