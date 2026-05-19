@@ -4,9 +4,9 @@ request_timeout: 18000
 max_concurrent: 5
 
 qc_parameters:
+  check_blur: True
   check_residual: True
   check_folding: False
-  check_focus: True
   wb_correction: True
   store_masks_at_original_resolution: True
 

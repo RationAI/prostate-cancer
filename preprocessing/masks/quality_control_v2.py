@@ -18,17 +18,15 @@ from tqdm.asyncio import tqdm
 
 
 class QCParameters(TypedDict):
-    mask_level: int
-    sample_level: int
     check_residual: bool
     check_folding: bool
-    check_focus: bool
+    check_blur: bool
     wb_correction: bool
     store_masks_at_original_resolution: bool
 
 
 def get_qc_masks(qc_parameters: QCParameters) -> Generator[tuple[str, str], None, None]:
-    if qc_parameters["check_focus"]:
+    if qc_parameters["check_blur"]:
         yield ("Piqe_focus_score_piqe_median", "blur_per_tile")
         yield ("Piqe_piqe_median_activity_mask", "blur_per_pixel")
 
