@@ -1,0 +1,4 @@
+# @package _global_
+
+encoder: "PGP"
+embeddings_uri: ${data.pgp_embeddings_uri}
