@@ -1,0 +1,9 @@
+# @package _global_
+
+defaults:
+  - /data/radboud/full@data
+  - _self_
+
+qc_parameters:
+  mask_level: 2
+  sample_level: 0

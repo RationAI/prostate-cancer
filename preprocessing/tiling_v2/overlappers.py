@@ -3,9 +3,8 @@ from pathlib import Path
 from typing import Any
 
 import mlflow
-import numpy as np
 import pandas as pd
-from ratiopath.tiling.overlays import tile_overlay_overlap, tile_overlay
+from ratiopath.tiling.overlays import tile_overlay_overlap
 from ray.data import Dataset
 from ray.data.expressions import col
 from shapely.geometry import Polygon, box
@@ -20,7 +19,7 @@ class Overlapper(ABC):
         self,
         roi_corners: tuple[int, int, int, int],
         mask_name: str,
-        masks_folder: str | None = None,
+        masks_folder: Path | None = None,
         masks_uri: str | None = None,
     ) -> None:
         if (masks_folder is None and masks_uri is None) or (
@@ -29,7 +28,7 @@ class Overlapper(ABC):
             raise ValueError("Provide exactly one source of masks")
 
         if masks_folder is not None:
-            self.mask_storage = Path(masks_folder)
+            self.mask_storage = masks_folder
         else:
             self.mask_storage = Path(mlflow.artifacts.download_artifacts(masks_uri))
 
@@ -47,18 +46,12 @@ class Overlapper(ABC):
     def add_mask_path_batch(
         self, batch: dict[str, Any], fallback: str
     ) -> dict[str, Any]:
-        """
         df = pd.DataFrame(batch)
 
         # assuming same name for the mask with .tiff suffix
         batch[f"{self.mask_name}_path"] = df["path"].map(
             lambda x: self._resolve_path(Path(x), fallback)
         )
-        return batch
-        """
-
-        # assuming same name for the mask with .tiff suffix
-        batch[f"{self.mask_name}_path"] = list( map(lambda x: self._resolve_path(Path(x), fallback), batch["path"] ) )
         return batch
 
     def add_mask_path(self, tiles: Dataset, fallback: str) -> Dataset:
@@ -70,7 +63,7 @@ class Overlapper(ABC):
     def add_overlaps(self, tiles: Dataset) -> Dataset:
         return tiles.with_column(
             f"{self.mask_name}_overlap",
-            tile_overlay(
+            tile_overlay_overlap(
                 roi=self.roi,
                 overlay_path=col(f"{self.mask_name}_path"),
                 tile_x=col("tile_x"),
@@ -104,25 +97,10 @@ class BinaryOverlapper(Overlapper):
         self.columns_to_keep |= {f"{self.mask_name}_percentage"}
 
     def extract_foreground_percentage(self, tile: dict[str, Any]) -> dict[str, Any]:
-        overlap = tile[f"{self.mask_name}_overlap"]
-        if "blur" in self.mask_name:
-            t, mask = overlap[0], overlap[1]
-            print(tile["tile_x"], tile["tile_y"])
-            print(t.shape, mask.shape)
-            print(np.unique( t ), np.unique( mask ))
-
-        tile[f"{self.mask_name}_percentage"] = 1.0
-        return tile
-
-        zero_overlap = overlap.get(
-            "0", 0
-        )  # safer option since QC masks are pseudo-binary
-
-        if zero_overlap is None:  # Can be None since dict is shared across slide
-            tile[f"{self.mask_name}_percentage"] = 1.0
-        else:
-            tile[f"{self.mask_name}_percentage"] = 1.0 - zero_overlap
-
+        val = tile[f"{self.mask_name}_overlap"].get("255", 0.0)
+        tile[f"{self.mask_name}_percentage"] = (
+            val if val is not None else 0.0
+        )  # Can be None since dict is shared across slide
         return tile
 
     def add_percentages(self, tiles: Dataset) -> Dataset:
