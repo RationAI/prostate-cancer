@@ -2,6 +2,8 @@
 
 defaults:
   - /experiment/train/base
+  - /data/mmci/tl_train@train_data
+  - /data/mmci/tl_val@val_data
   - /datamodule/slide_embeddings_datamodule@datamodule
   - _self_
 
