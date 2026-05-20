@@ -25,7 +25,7 @@ from prostate_cancer.typing import (
 
 
 class ProstateCancerAttentionMIL(LightningModule):
-    def __init__(self, foundation: str, lr: float) -> None:
+    def __init__(self, foundation: str, lr: float, tl_threshold: float) -> None:
         super().__init__()
         match foundation:
             case "pgp":
