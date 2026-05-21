@@ -99,7 +99,7 @@ class SlideEmbeddingsDataset(Dataset[T], Generic[T]):
 
         tl_labels = torch.zeros(len(slide_embeddings)).float()
         tl_labels[: len(filtered_tiles)] = torch.tensor(
-            filtered_tiles["carcinoma"]
+            filtered_tiles["carcinoma"].to_numpy()
         ).float()
 
         return slide_embeddings, tl_labels, sl_label, metadata  # type: ignore[return-value]
