@@ -50,7 +50,7 @@ class MILPredictionCallback(Callback):
         dataloader_idx: int = 0,
     ) -> None:
         assert isinstance(trainer.logger, MLFlowLogger)
-        sl_preds, tl_preds = outputs
+        sl_preds, tl_preds, batch_mask = outputs
         _, metadata_batch = batch
 
         # Log SL predictions
@@ -63,10 +63,12 @@ class MILPredictionCallback(Callback):
         )
 
         # Log TL predictions
-        for metadata, tl_preds_slide in zip(metadata_batch, tl_preds, strict=True):
+        for metadata, tl_preds_slide, mask_slide in zip(
+            metadata_batch, tl_preds, batch_mask, strict=True
+        ):
             mask_builder = self.get_mask_builder(metadata["slide_name"], trainer)
             tl_preds_slide = tl_preds_slide[
-                : len(metadata["xs"])
+                mask_slide.bool()
             ]  # take only real predictions (not padding)
             mask_builder.update(tl_preds_slide.cpu(), metadata["xs"], metadata["ys"])
 

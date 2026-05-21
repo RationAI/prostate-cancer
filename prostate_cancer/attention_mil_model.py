@@ -44,7 +44,7 @@ class ProstateCancerAttentionMIL(LightningModule):
 
         self.classifier = nn.Linear(input_dim, 1)
         self.sl_criterion = nn.BCEWithLogitsLoss(reduction="mean")
-        self.tl_criterion = nn.BCEWithLogitsLoss(reduction="mean")
+        self.tl_criterion = nn.BCEWithLogitsLoss(reduction="none")  # handle padding
         self.lr = lr
 
         metrics: dict[str, Metric | MetricCollection] = {
@@ -108,21 +108,23 @@ class ProstateCancerAttentionMIL(LightningModule):
         return (
             sl_pred_raw.squeeze(-1),
             tl_preds_valid_raw.squeeze(-1),
-        )  # (batch_size,), (batch_size, num_tiles_padded)
+            mask.squeeze(-1),
+        )  # (batch_size,), (batch_size, num_tiles_padded), (batch_size, num_tiles_padded)
 
     def training_step(self, batch: LabeledSlideSampleBatch) -> Tensor:
         # bag ~ all embeddings from a single slide
         bags, tl_labels, sl_labels, _ = batch
 
-        sl_outputs, tl_outputs = self(bags)
+        sl_outputs, tl_outputs, mask = self(bags)
         sl_loss = self.sl_criterion(sl_outputs, sl_labels)
-        tl_loss = self.tl_criterion(tl_outputs, tl_labels)
+        tl_loss_all = self.tl_criterion(tl_outputs, tl_labels)
+        tl_loss = (tl_loss_all * mask).sum() / mask.sum()
         loss = sl_loss + tl_loss
 
         self.log("train/loss", loss, on_step=True, prog_bar=True, batch_size=len(bags))
 
         self.train_metrics_sl.update(sl_outputs, sl_labels)
-        self.train_metrics_tl.update(tl_outputs, tl_labels)
+        self.train_metrics_tl.update(tl_outputs[mask.bool()], tl_labels[mask.bool()])
 
         self.log_dict(
             self.train_metrics_sl, on_epoch=True, on_step=False, batch_size=len(bags)
@@ -136,15 +138,16 @@ class ProstateCancerAttentionMIL(LightningModule):
     def validation_step(self, batch: LabeledSlideSampleBatch) -> None:
         bags, tl_labels, sl_labels, _ = batch
 
-        sl_outputs, tl_outputs = self(bags)
+        sl_outputs, tl_outputs, mask = self(bags)
         sl_loss = self.sl_criterion(sl_outputs, sl_labels)
-        tl_loss = self.tl_criterion(tl_outputs, tl_labels)
+        tl_loss_all = self.tl_criterion(tl_outputs, tl_labels)
+        tl_loss = (tl_loss_all * mask).sum() / mask.sum()
         loss = sl_loss + tl_loss
 
         self.log("validation/loss", loss, prog_bar=True, batch_size=len(bags))
 
         self.val_metrics_sl.update(sl_outputs, sl_labels)
-        self.val_metrics_tl.update(tl_outputs, tl_labels)
+        self.val_metrics_tl.update(tl_outputs[mask.bool()], tl_labels[mask.bool()])
 
         self.log_dict(
             self.val_metrics_sl, on_epoch=True, on_step=False, batch_size=len(bags)
@@ -156,10 +159,10 @@ class ProstateCancerAttentionMIL(LightningModule):
     def test_step(self, batch: LabeledSlideSampleBatch) -> None:
         bags, tl_labels, sl_labels, _ = batch
 
-        sl_outputs, tl_outputs = self(bags)
+        sl_outputs, tl_outputs, mask = self(bags)
 
         self.test_metrics_sl.update(sl_outputs, sl_labels)
-        self.test_metrics_tl.update(tl_outputs, tl_labels)
+        self.test_metrics_tl.update(tl_outputs[mask.bool()], tl_labels[mask.bool()])
 
         self.log_dict(
             self.test_metrics_sl, on_epoch=True, on_step=False, batch_size=len(bags)
@@ -169,8 +172,8 @@ class ProstateCancerAttentionMIL(LightningModule):
         )
 
     def predict_step(self, batch: UnlabeledSlideSampleBatch) -> MILModelOutput:
-        sl_preds_raw, tl_preds_raw = self(batch[0])
-        return sl_preds_raw.sigmoid(), tl_preds_raw.sigmoid()
+        sl_preds_raw, tl_preds_raw, mask = self(batch[0])
+        return sl_preds_raw.sigmoid(), tl_preds_raw.sigmoid(), mask
 
     def configure_optimizers(self) -> Optimizer:
         return AdamW(self.parameters(), lr=self.lr)

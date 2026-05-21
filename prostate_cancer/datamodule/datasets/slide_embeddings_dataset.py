@@ -22,6 +22,11 @@ from prostate_cancer.typing import (
 T = TypeVar("T", bound=LabeledSlideSample | UnlabeledSlideSample)
 
 
+def get_embedding_ceiling(tiles: pd.DataFrame, thresholds: dict[str, float]) -> int:
+    filtered_tiles = filter_tiles_by_thresholds(tiles, thresholds)
+    return filtered_tiles["slide_id"].value_counts().max()
+
+
 class SlideEmbeddingsDataset(Dataset[T], Generic[T]):
     def __init__(
         self,
@@ -38,10 +43,12 @@ class SlideEmbeddingsDataset(Dataset[T], Generic[T]):
         )
 
         if include_labels:
-            self.tiles["carcinoma"] = self.tiles["carcinoma_roi_percentage"] > 0.5
+            self.tiles["carcinoma"] = self.tiles[
+                "carcinoma_roi_percentage"
+            ] > self.thresholds.get("carcinoma_roi_t")
 
         self.padding = padding
-        self.max_embeddings = self.tiles["slide_id"].value_counts().max()
+        self.max_embeddings = get_embedding_ceiling(self.tiles, self.thresholds)
 
     def download_artifacts(
         self, tiling_uris: Iterable[str], embeddings_uri: str
@@ -81,6 +88,8 @@ class SlideEmbeddingsDataset(Dataset[T], Generic[T]):
         slide_embeddings = slide_embeddings[filtered_tiles.index.tolist()]
 
         pad_amount = self.max_embeddings - slide_embeddings.shape[0]
+        assert pad_amount >= 0, "Invalid padding"
+
         if self.padding:
             slide_embeddings = F.pad(slide_embeddings, (0, 0, 0, pad_amount), value=0.0)
 
