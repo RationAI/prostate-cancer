@@ -1,10 +1,10 @@
 # credits: https://gitlab.ics.muni.cz/rationai/digital-pathology/pathology/lymph-nodes/-/blob/develop/preprocessing/qc.py?ref_type=heads
 
 import asyncio
+import shutil
 from collections.abc import Generator
 from pathlib import Path
 from typing import TypedDict
-import shutil
 
 import hydra
 import pandas as pd
@@ -56,7 +56,9 @@ async def qc_main(
     max_concurrent: int,
     qc_parameters: QCParameters,
 ) -> None:
-    async with rationai.AsyncClient() as client:  # type: ignore[attr-defined]
+    async with rationai.AsyncClient(
+        qc_base_url="http://rayservice-qc-update-trial-serve-svc.rationai-jobs-ns.svc.cluster.local:8000/"
+    ) as client:  # type: ignore[attr-defined]
         async for result in tqdm(
             client.qc.check_slides(
                 slides,
