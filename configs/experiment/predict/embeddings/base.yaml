@@ -12,8 +12,3 @@ datamodule:
   predict:
     uris:
       - ${predict_data.tiles_uri_224}
-
-model:
-  tl_threshold: ${tile_threshold}
-
-tile_threshold: ${model_data.tile_threshold}
