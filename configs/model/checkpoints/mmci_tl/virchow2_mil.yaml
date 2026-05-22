@@ -2,5 +2,5 @@ defaults:
   - base
   - _self_
 
-checkpoint: "mlflow-artifacts:/65/a649871245c040a39022206cbc9471f1/artifacts/checkpoints/epoch=0-step=135/checkpoint.ckpt"
-model_name: "Virchow2 (MIL)"
+checkpoint: "mlflow-artifacts:/65/1d58d8b3d3c347a9be88b25822313d98/artifacts/checkpoints/epoch=2-step=452/checkpoint.ckpt"
+model_name: "Virchow2 (E-MIL)"
