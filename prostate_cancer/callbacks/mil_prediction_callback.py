@@ -15,7 +15,9 @@ if TYPE_CHECKING:
 
 
 class MILPredictionCallback(Callback):
-    def get_mask_builder(self, slide_name: str, trainer: Trainer) -> ScalarMaskBuilder:
+    def get_mask_builder(
+        self, slide_name: str, trainer: Trainer, save_dir: str
+    ) -> ScalarMaskBuilder:
         if not hasattr(trainer, "datamodule"):
             raise ValueError("Trainer should have datamodule attribute")
 
@@ -28,7 +30,7 @@ class MILPredictionCallback(Callback):
         slide = _slide.iloc[0]
 
         kwargs = {
-            "save_dir": Path("heatmaps"),
+            "save_dir": Path(save_dir),
             "filename": Path(slide.path).stem,
             "extent_x": slide.extent_x,
             "extent_y": slide.extent_y,
@@ -50,28 +52,32 @@ class MILPredictionCallback(Callback):
         dataloader_idx: int = 0,
     ) -> None:
         assert isinstance(trainer.logger, MLFlowLogger)
-        sl_preds, tl_preds, batch_mask = outputs
+        sl_preds, tl_preds, batch_mask, batch_attention = outputs
         _, metadata_batch = batch
 
         # Log SL predictions
         trainer.logger.log_table(
             {
                 "slide": [metadata["slide_name"] for metadata in metadata_batch],
-                "prediction": sl_preds.tolist(),
+                "sl_prediction": sl_preds.tolist(),
             },
             artifact_file="tables/sl_predictions.json",
         )
 
-        # Log TL predictions
-        for metadata, tl_preds_slide, mask_slide in zip(
-            metadata_batch, tl_preds, batch_mask, strict=True
+        # Log TL predictions and Attention Map
+        for metadata, tl_preds_slide, mask_slide, attention_slide in zip(
+            metadata_batch, tl_preds, batch_mask, batch_attention, strict=True
         ):
-            mask_builder = self.get_mask_builder(metadata["slide_name"], trainer)
-            tl_preds_slide = tl_preds_slide[
-                mask_slide.bool()
-            ]  # take only real predictions (not padding)
-            mask_builder.update(tl_preds_slide.cpu(), metadata["xs"], metadata["ys"])
-
-            mlflow.log_artifact(
-                str(mask_builder.save()), artifact_path=str(mask_builder.save_dir)
-            )
+            for mask_type, data in zip(
+                ["heatmaps", "attention"],
+                [tl_preds_slide, attention_slide],
+                strict=True,
+            ):
+                mask_builder = self.get_mask_builder(
+                    metadata["slide_name"], trainer, mask_type
+                )
+                data = data[mask_slide.bool()]  # take only real tiles (not padding)
+                mask_builder.update(data.cpu(), metadata["xs"], metadata["ys"])
+                mlflow.log_artifact(
+                    str(mask_builder.save()), artifact_path=str(mask_builder.save_dir)
+                )

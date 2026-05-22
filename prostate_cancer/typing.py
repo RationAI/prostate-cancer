@@ -36,4 +36,6 @@ UnlabeledSlideSample = tuple[Tensor, SlideMetadata]
 LabeledSlideSampleBatch: TypeAlias = tuple[Tensor, Tensor, Tensor, list[SlideMetadata]]
 UnlabeledSlideSampleBatch: TypeAlias = tuple[Tensor, list[SlideMetadata]]
 
-MILModelOutput = tuple[Tensor, Tensor, Tensor]  # SL preds, TL preds, Padding TL mask
+MILModelOutput = tuple[
+    Tensor, Tensor, Tensor, Tensor
+]  # SL preds, TL preds, Padding TL mask, Attention

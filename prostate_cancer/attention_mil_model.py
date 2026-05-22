@@ -97,7 +97,7 @@ class ProstateCancerAttentionMIL(LightningModule):
         )  # (batch_size, num_tiles_padded, 1)
 
         # TL predictions
-        tl_preds_raw = self.classifier(x)  # (batch_size, num_tiles_padded, 1)
+        tl_preds_raw: Tensor = self.classifier(x)  # (batch_size, num_tiles_padded, 1)
         tl_preds_valid_raw = tl_preds_raw * mask
 
         # weight TL predictions with attention
@@ -109,13 +109,14 @@ class ProstateCancerAttentionMIL(LightningModule):
             sl_pred_raw.squeeze(-1),
             tl_preds_valid_raw.squeeze(-1),
             mask.squeeze(-1),
-        )  # (batch_size,), (batch_size, num_tiles_padded), (batch_size, num_tiles_padded)
+            attention_weights.squeeze(-1),
+        )  # (batch_size,), (batch_size, num_tiles_padded), (batch_size, num_tiles_padded), (batch_size, num_tiles_padded)
 
     def training_step(self, batch: LabeledSlideSampleBatch) -> Tensor:
         # bag ~ all embeddings from a single slide
         bags, tl_labels, sl_labels, _ = batch
 
-        sl_outputs, tl_outputs, mask = self(bags)
+        sl_outputs, tl_outputs, mask, _ = self(bags)
         sl_loss = self.sl_criterion(sl_outputs, sl_labels)
         tl_loss_all = self.tl_criterion(tl_outputs, tl_labels)
         tl_loss = (tl_loss_all * mask).sum() / mask.sum()
@@ -138,7 +139,7 @@ class ProstateCancerAttentionMIL(LightningModule):
     def validation_step(self, batch: LabeledSlideSampleBatch) -> None:
         bags, tl_labels, sl_labels, _ = batch
 
-        sl_outputs, tl_outputs, mask = self(bags)
+        sl_outputs, tl_outputs, mask, _ = self(bags)
         sl_loss = self.sl_criterion(sl_outputs, sl_labels)
         tl_loss_all = self.tl_criterion(tl_outputs, tl_labels)
         tl_loss = (tl_loss_all * mask).sum() / mask.sum()
@@ -159,7 +160,7 @@ class ProstateCancerAttentionMIL(LightningModule):
     def test_step(self, batch: LabeledSlideSampleBatch) -> None:
         bags, tl_labels, sl_labels, _ = batch
 
-        sl_outputs, tl_outputs, mask = self(bags)
+        sl_outputs, tl_outputs, mask, _ = self(bags)
 
         self.test_metrics_sl.update(sl_outputs, sl_labels)
         self.test_metrics_tl.update(tl_outputs[mask.bool()], tl_labels[mask.bool()])
@@ -172,8 +173,8 @@ class ProstateCancerAttentionMIL(LightningModule):
         )
 
     def predict_step(self, batch: UnlabeledSlideSampleBatch) -> MILModelOutput:
-        sl_preds_raw, tl_preds_raw, mask = self(batch[0])
-        return sl_preds_raw.sigmoid(), tl_preds_raw.sigmoid(), mask
+        sl_preds_raw, tl_preds_raw, mask, attention = self(batch[0])
+        return sl_preds_raw.sigmoid(), tl_preds_raw.sigmoid(), mask, attention
 
     def configure_optimizers(self) -> Optimizer:
         return AdamW(self.parameters(), lr=self.lr)
