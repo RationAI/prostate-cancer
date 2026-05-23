@@ -2,6 +2,7 @@
 
 import asyncio
 import shutil
+from collections.abc import Generator
 from pathlib import Path
 from typing import TypedDict
 
@@ -22,6 +23,30 @@ class QCParameters(TypedDict):
     check_blur: bool
     wb_correction: bool
     store_masks_at_original_resolution: bool
+
+
+def get_qc_masks(qc_parameters: QCParameters) -> Generator[tuple[str, str], None, None]:
+    if qc_parameters["check_blur"]:
+        yield ("Piqe/blur_score_coverage", "blur_per_tile")
+        yield ("Piqe/blur_score_per_pixel", "blur_per_pixel")
+
+    if qc_parameters["check_residual"]:
+        yield ("ResidualArtifactsAndCoverage/artifacts_coverage", "residual_per_tile")
+        yield ("ResidualArtifactsAndCoverage/artifacts_per_pixel", "residual_per_pixel")
+
+    if qc_parameters["check_folding"]:
+        yield ("FoldingFunction/folding_per_pixel", "folding_per_pixel")
+
+
+def organize_masks(output_path: Path, subdir: str, current_subdir: str) -> None:
+    prefix_dir = output_path / subdir
+    prefix_dir.mkdir(parents=True, exist_ok=True)
+
+    current_dir = output_path / current_subdir
+
+    for file in list(current_dir.glob("*.tiff")):
+        destination = prefix_dir / file.name
+        file.rename(destination)
 
 
 async def qc_main(
@@ -51,9 +76,12 @@ async def qc_main(
                         f"Failed to process {result.wsi_path}: {result.error}\n"
                     )
 
+        # Organize generated masks into subdirectories
+        for prefix, artifact_name in get_qc_masks(qc_parameters):
+            organize_masks(Path(output_path), artifact_name, prefix)
+
         # Merge generated csv files
         csvs = list(Path(output_path).glob("*.csv"))
-
         if len(csvs) > 0:
             pd.concat([pd.read_csv(f) for f in csvs]).to_csv(
                 Path(output_path, "qc_metrics.csv"), index=False
