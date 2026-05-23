@@ -2,7 +2,6 @@
 
 import asyncio
 import shutil
-from collections.abc import Generator
 from pathlib import Path
 from typing import TypedDict
 
@@ -23,29 +22,6 @@ class QCParameters(TypedDict):
     check_blur: bool
     wb_correction: bool
     store_masks_at_original_resolution: bool
-
-
-def get_qc_masks(qc_parameters: QCParameters) -> Generator[tuple[str, str], None, None]:
-    if qc_parameters["check_blur"]:
-        yield ("Piqe_focus_score_piqe_median", "blur_per_tile")
-        yield ("Piqe_piqe_median_activity_mask", "blur_per_pixel")
-
-    if qc_parameters["check_residual"]:
-        yield ("ResidualArtifactsAndCoverage_cov_percent_heatmap", "residual_per_tile")
-        yield ("ResidualArtifactsAndCoverage_coverage_mask", "residual_per_pixel")
-
-    if qc_parameters["check_folding"]:
-        yield ("FoldingFunction_folding_test", "folding_per_pixel")
-
-
-def organize_masks(output_path: Path, subdir: str, mask_prefix: str) -> None:
-    prefix_dir = output_path / subdir
-    prefix_dir.mkdir(parents=True, exist_ok=True)
-
-    for file in list(output_path.glob(f"{mask_prefix}_*.tiff")):
-        slide_name = file.name.replace(f"{mask_prefix}_", "")
-        destination = prefix_dir / slide_name
-        file.rename(destination)
 
 
 async def qc_main(
@@ -75,19 +51,17 @@ async def qc_main(
                         f"Failed to process {result.wsi_path}: {result.error}\n"
                     )
 
-        # Organize generated masks into subdirectories
-        for prefix, artifact_name in get_qc_masks(qc_parameters):
-            organize_masks(Path(output_path), artifact_name, prefix)
-
         # Merge generated csv files
         csvs = list(Path(output_path).glob("*.csv"))
-        pd.concat([pd.read_csv(f) for f in csvs]).to_csv(
-            Path(output_path, "qc_metrics.csv"), index=False
-        )
 
-        # Remove individual csv files
-        for f in csvs:
-            f.unlink()
+        if len(csvs) > 0:
+            pd.concat([pd.read_csv(f) for f in csvs]).to_csv(
+                Path(output_path, "qc_metrics.csv"), index=False
+            )
+
+            # Remove individual csv files
+            for f in csvs:
+                f.unlink()
 
         logger.log_artifacts(local_dir=str(output_path))
 
