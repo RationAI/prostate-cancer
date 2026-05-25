@@ -3,6 +3,7 @@ from typing import TYPE_CHECKING, cast
 
 import mlflow
 import pandas as pd
+import torch
 from lightning import Callback, LightningModule, Trainer
 from rationai.masks.mask_builders import ScalarMaskBuilder
 from rationai.mlkit.lightning.loggers.mlflow import MLFlowLogger
@@ -12,6 +13,12 @@ from prostate_cancer.typing import MILModelOutput, UnlabeledSlideSampleBatch
 
 if TYPE_CHECKING:
     from prostate_cancer.datamodule import SlideDataModule
+
+
+def min_max_normalization(tensor: torch.Tensor) -> torch.Tensor:
+    weights_max = tensor.max()
+    weights_min = tensor.min()
+    return (tensor - weights_min) / (weights_max - weights_min)
 
 
 class MILPredictionCallback(Callback):
@@ -69,7 +76,7 @@ class MILPredictionCallback(Callback):
             metadata_batch, tl_preds, batch_mask, batch_attention, strict=True
         ):
             for mask_type, data in zip(
-                ["heatmaps", "attention"],
+                ["heatmaps", "attention_rescaled"],
                 [tl_preds_slide, attention_slide],
                 strict=True,
             ):
@@ -77,7 +84,9 @@ class MILPredictionCallback(Callback):
                     metadata["slide_name"], trainer, mask_type
                 )
                 data = data[mask_slide.bool()]  # take only real tiles (not padding)
-                mask_builder.update(data.cpu(), metadata["xs"], metadata["ys"])
+                mask_builder.update(
+                    min_max_normalization(data).cpu(), metadata["xs"], metadata["ys"]
+                )
                 mlflow.log_artifact(
                     str(mask_builder.save()), artifact_path=str(mask_builder.save_dir)
                 )
