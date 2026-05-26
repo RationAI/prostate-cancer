@@ -2,7 +2,6 @@
 
 defaults:
   - /experiment/test/base
-  - /datamodule/images_processor_datamodule@datamodule
   - /model/google_vit_model@model
   - /model/checkpoints/mmci_tl/google_vit@model_data
   - _self_

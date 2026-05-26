@@ -3,15 +3,15 @@
 defaults:
   - /experiment/train/images/base
   - /datamodule/transforms/normalize_w_stain_augments@transforms
-  - /model/vgg16_model@model
+  - /model/google_vit_model@model
   - _self_
 
-model_name: "VGG-16 Stain"
+model_name: "Google ViT"
 
 datamodule:
   train:
     uris:
-      - ${train_data.tiles_uri_512}
+      - ${train_data.tiles_uri_224}
   val:
     uris:
-      - ${val_data.tiles_uri_512}
+      - ${val_data.tiles_uri_224}
