@@ -7,7 +7,6 @@ from albumentations.core.composition import TransformType
 from albumentations.pytorch import ToTensorV2
 from rationai.mlkit.data.datasets import OpenSlideTilesDataset
 from torch.utils.data import Dataset
-from transformers import ViTImageProcessor
 
 from prostate_cancer.datamodule.datasets.base import (
     FilterableDataset,
@@ -27,10 +26,8 @@ class TilesDataset(FilterableDataset[T]):
         carcinoma_roi_t: float | None = None,
         stratified_filter: bool | None = None,
         transforms: TransformType | None = None,
-        processor: ViTImageProcessor | None = None,
     ) -> None:
         self.transforms = transforms
-        self.processor = processor
         super().__init__(
             uris=uris,
             thresholds=thresholds,
@@ -52,7 +49,6 @@ class TilesDataset(FilterableDataset[T]):
                     tiles=self.filter_tiles_by_slide(slide["id"]),
                     include_label=self.labeled,
                     transforms=self.transforms,
-                    processor=self.processor,
                 ),
             )
             for _, slide in self.slides.iterrows()
@@ -72,7 +68,6 @@ class SlideTiles(Dataset[LabeledSample | UnlabeledSample]):
         tiles: pd.DataFrame,
         include_label: bool,
         transforms: TransformType | None = None,
-        processor: ViTImageProcessor | None = None,
     ) -> None:
         super().__init__()
 
@@ -87,7 +82,6 @@ class SlideTiles(Dataset[LabeledSample | UnlabeledSample]):
         self.transforms = transforms
         self.include_label = include_label
         self.to_tensor = ToTensorV2()
-        self.processor = processor
 
         if len(tiles) == 0:
             print(
@@ -108,12 +102,7 @@ class SlideTiles(Dataset[LabeledSample | UnlabeledSample]):
         if self.transforms is not None:
             image = self.transforms(image=image)["image"]
 
-        if self.processor is None:
-            tensor_image = self.to_tensor(image=image)["image"]
-        else:
-            tensor_image = self.processor(image, return_tensors="pt")[
-                "pixel_values"
-            ].squeeze(0)
+        tensor_image = self.to_tensor(image=image)["image"]
 
         if self.include_label:
             label = torch.tensor(
