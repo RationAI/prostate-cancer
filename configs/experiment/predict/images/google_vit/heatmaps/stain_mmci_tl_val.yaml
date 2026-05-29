@@ -1,6 +1,6 @@
 # @package _global_
 
 defaults:
-  - /experiment/predict/images/google_vit/heatmaps/base
+  - /experiment/predict/images/google_vit/heatmaps/stain_base
   - /data/mmci/tl_val@predict_data
   - _self_

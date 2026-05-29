@@ -3,7 +3,7 @@
 defaults:
   - /callbacks/aggregator@callbacks
   - /aggregator/max@aggregator
-  - /experiment/predict/images/google_vit/base
+  - /experiment/predict/images/google_vit/stain_base
   - _self_
 
 use_case: "Max. Aggregation"

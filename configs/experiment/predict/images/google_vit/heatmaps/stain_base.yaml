@@ -1,7 +1,7 @@
 # @package _global_
 
 defaults:
-  - /experiment/predict/images/google_vit/base
+  - /experiment/predict/images/google_vit/stain_base
   - /callbacks/heatmap@callbacks
   - _self_
 

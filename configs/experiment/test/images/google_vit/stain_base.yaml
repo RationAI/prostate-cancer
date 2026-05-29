@@ -3,7 +3,7 @@
 defaults:
   - /experiment/test/images/base
   - /model/google_vit_model@model
-  - /model/checkpoints/mmci_tl/google_vit@model_data
+  - /model/checkpoints/mmci_tl/google_vit_stain@model_data
   - _self_
 
 datamodule:

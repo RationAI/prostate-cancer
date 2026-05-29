@@ -2,7 +2,7 @@
 
 defaults:
   - /callbacks/tile_threshold@callbacks
-  - /experiment/test/images/google_vit/base
+  - /experiment/test/images/google_vit/stain_base
   - /data/mmci/tl_val@test_data
   - _self_
 

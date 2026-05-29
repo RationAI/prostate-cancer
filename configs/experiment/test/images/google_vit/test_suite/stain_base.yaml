@@ -2,7 +2,7 @@
 
 defaults:
   - /callbacks/combined_test_suite@callbacks
-  - /experiment/test/images/google_vit/base
+  - /experiment/test/images/google_vit/stain_base
   - _self_
 
 use_case: "TL Test"
