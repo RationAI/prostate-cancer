@@ -1,0 +1,10 @@
+defaults:
+  - base
+  - _self_
+
+tile_threshold: 0.90
+slide_max_threshold: 0.0
+slide_mpm_threshold: 0.0
+
+checkpoint: "mlflow-artifacts:/65/4b7c1663713b4dd0b03063c9f9b60925/artifacts/checkpoints/epoch=0-step=55556/checkpoint.ckpt"
+model_name: "Google ViT"
