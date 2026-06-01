@@ -3,7 +3,7 @@ defaults:
   - _self_
 
 # point to public mlflow
-qc_masks_uri: "mlflow-artifacts:/38/129e3a98987c437081325cbd94bf8a21/artifacts/"
+qc_masks_uri: "mlflow-artifacts:/38/2e84a7253cd44865b40b02aaeec25f71/artifacts/"
 tissue_masks_uri: "mlflow-artifacts:/38/62c15fe465ab4d1b867577252ccbbeec/artifacts/tissue_mask"
 carcinoma_masks_uri: "mlflow-artifacts:/38/62c15fe465ab4d1b867577252ccbbeec/artifacts/carcinoma_mask"
 
