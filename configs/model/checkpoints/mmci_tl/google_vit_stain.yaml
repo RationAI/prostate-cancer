@@ -1,0 +1,10 @@
+defaults:
+  - base
+  - _self_
+
+tile_threshold: 0.92
+slide_max_threshold: 0.0
+slide_mpm_threshold: 0.0
+
+checkpoint: "mlflow-artifacts:/65/a07e33c384a64cb9ab73621200efd314/artifacts/checkpoints/epoch=5-step=291684/checkpoint.ckpt"
+model_name: "Google ViT (Stain)"

@@ -2,11 +2,11 @@
 
 defaults:
   - /experiment/train/images/base
-  - /datamodule/transforms/normalize_w_stain_augments@transforms
+  - /datamodule/transforms/normalize_w_augments@transforms
   - /model/google_vit_model@model
   - _self_
 
-model_name: "Google ViT (Stain)"
+model_name: "Google ViT"
 
 datamodule:
   train:

@@ -9,7 +9,6 @@ from rationai.mlkit import Trainer, autolog
 from rationai.mlkit.lightning.loggers.mlflow import MLFlowLogger
 
 from prostate_cancer.datamodule import DataModule
-from prostate_cancer.log_title import log_checkpoint_title
 
 
 OmegaConf.register_new_resolver(
@@ -38,9 +37,6 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
     )  # Model target is required in the config file
 
     trainer = hydra.utils.instantiate(config.trainer, _target_=Trainer, logger=logger)
-
-    if config.checkpoint and isinstance(trainer.logger, MLFlowLogger):
-        log_checkpoint_title(trainer.logger, config.checkpoint)
 
     # Run the trainer in the specified mode
     getattr(trainer, config.mode)(model, datamodule=data, ckpt_path=config.checkpoint)
