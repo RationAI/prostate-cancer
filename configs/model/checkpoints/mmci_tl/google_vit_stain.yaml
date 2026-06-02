@@ -18,3 +18,5 @@ slide_level_prediction_uris:
     mmci_sl_group_1: "mlflow-artifacts:/65/0a0ac745e45d49648c68ba667732b67a/artifacts/tables/aggregated_predictions.json"
   top_k:
     mmci_sl_group_1: "mlflow-artifacts:/65/53f5ad7868e94fe7b3a09ec1175c9f7b/artifacts/tables/aggregated_predictions.json"
+  span:
+    mmci_sl_group_1: "mlflow-artifacts:/65/6461ccf2b2a646048f808bdef6a6246b/artifacts/tables/aggregated_predictions.json"
