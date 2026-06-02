@@ -12,3 +12,5 @@ model_name: "Google ViT"
 slide_level_prediction_uris:
   max:
     mmci_sl_group_1: "mlflow-artifacts:/65/14059f41cc864b84b0c45a8967150b4a/artifacts/tables/aggregated_predictions.json"
+  mean_pool_max:
+    mmci_sl_group_1: "mlflow-artifacts:/65/872981529bf54121822bab214866c376/artifacts/tables/aggregated_predictions.json"

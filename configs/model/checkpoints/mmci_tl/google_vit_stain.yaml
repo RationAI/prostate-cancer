@@ -12,3 +12,5 @@ model_name: "Google ViT (Stain)"
 slide_level_prediction_uris:
   max:
     mmci_sl_group_1: "mlflow-artifacts:/65/2f9507b977224978a0b16d30ffa7416e/artifacts/tables/aggregated_predictions.json"
+  mean_pool_max:
+    mmci_sl_group_1: "mlflow-artifacts:/65/0a0ac745e45d49648c68ba667732b67a/artifacts/tables/aggregated_predictions.json"
