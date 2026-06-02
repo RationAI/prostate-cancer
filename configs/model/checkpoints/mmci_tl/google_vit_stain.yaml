@@ -8,3 +8,7 @@ slide_mpm_threshold: 0.0
 
 checkpoint: "mlflow-artifacts:/65/a07e33c384a64cb9ab73621200efd314/artifacts/checkpoints/epoch=5-step=291684/checkpoint.ckpt"
 model_name: "Google ViT (Stain)"
+
+slide_level_prediction_uris:
+  max:
+    mmci_sl_group_1: "mlflow-artifacts:/65/2f9507b977224978a0b16d30ffa7416e/artifacts/tables/aggregated_predictions.json"
