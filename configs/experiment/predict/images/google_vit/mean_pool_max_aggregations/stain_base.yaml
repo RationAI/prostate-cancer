@@ -6,4 +6,4 @@ defaults:
   - /experiment/predict/images/google_vit/stain_base
   - _self_
 
-use_case: "Mean Pool Max. Aggregation"
+use_case: "MPM Aggregation"
