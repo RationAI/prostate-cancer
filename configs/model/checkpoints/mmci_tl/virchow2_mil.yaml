@@ -3,6 +3,7 @@ defaults:
   - _self_
 
 tile_threshold: 0.5
+slide_threshold: 0.5
 
 checkpoint: "mlflow-artifacts:/65/1d58d8b3d3c347a9be88b25822313d98/artifacts/checkpoints/epoch=2-step=452/checkpoint.ckpt"
 model_name: "Virchow2 (E-MIL)"

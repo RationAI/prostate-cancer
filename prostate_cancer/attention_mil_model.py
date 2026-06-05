@@ -25,7 +25,9 @@ from prostate_cancer.typing import (
 
 
 class ProstateCancerAttentionMIL(LightningModule):
-    def __init__(self, foundation: str, lr: float, tl_threshold: float) -> None:
+    def __init__(
+        self, foundation: str, lr: float, tl_threshold: float, sl_threshold: float
+    ) -> None:
         super().__init__()
         match foundation:
             case "pgp":
@@ -35,6 +37,8 @@ class ProstateCancerAttentionMIL(LightningModule):
             case _:
                 raise ValueError(f"Unknown foundation model: {foundation}")
 
+        # if we did not precompute the embeddings, we would obtain it from this module
+        # (idendity replaced with foundation model)
         self.encoder = nn.Identity()
         self.attention = nn.Sequential(
             nn.Linear(input_dim, 512),
@@ -42,31 +46,46 @@ class ProstateCancerAttentionMIL(LightningModule):
             nn.Linear(512, 1),
         )
 
+        # TL Classifier
         self.classifier = nn.Linear(input_dim, 1)
+
         self.sl_criterion = nn.BCEWithLogitsLoss(reduction="mean")
         self.tl_criterion = nn.BCEWithLogitsLoss(reduction="none")  # handle padding
         self.lr = lr
 
-        metrics: dict[str, Metric | MetricCollection] = {
-            "AUC": AUROC("binary"),
-            "accuracy": Accuracy("binary"),
-            "precision": Precision("binary"),
-            "recall": Recall("binary"),
-            "specificity": Specificity("binary"),
-            "negative_predictive_value": NegativePredictiveValue("binary"),
-        }
+        metrics: dict[str, dict[str, Metric | MetricCollection]] = {}
 
-        self.train_metrics_sl = MetricCollection(deepcopy(metrics), prefix="sl_train/")
+        for task_type, t in [("tl", tl_threshold), ("sl", sl_threshold)]:
+            metrics[task_type] = {
+                "AUC": AUROC("binary"),
+                "accuracy": Accuracy("binary", threshold=t),
+                "precision": Precision("binary", threshold=t),
+                "recall": Recall("binary", threshold=t),
+                "specificity": Specificity("binary", threshold=t),
+                "negative_predictive_value": NegativePredictiveValue(
+                    "binary", threshold=t
+                ),
+            }
+
+        self.train_metrics_sl = MetricCollection(
+            deepcopy(metrics["sl"]), prefix="sl_train/"
+        )
         self.val_metrics_sl = MetricCollection(
-            deepcopy(metrics), prefix="sl_validation/"
+            deepcopy(metrics["sl"]), prefix="sl_validation/"
         )
-        self.test_metrics_sl = MetricCollection(deepcopy(metrics), prefix="sl_test/")
+        self.test_metrics_sl = MetricCollection(
+            deepcopy(metrics["sl"]), prefix="sl_test/"
+        )
 
-        self.train_metrics_tl = MetricCollection(deepcopy(metrics), prefix="tl_train/")
-        self.val_metrics_tl = MetricCollection(
-            deepcopy(metrics), prefix="tl_validation/"
+        self.train_metrics_tl = MetricCollection(
+            deepcopy(metrics["tl"]), prefix="tl_train/"
         )
-        self.test_metrics_tl = MetricCollection(deepcopy(metrics), prefix="tl_test/")
+        self.val_metrics_tl = MetricCollection(
+            deepcopy(metrics["tl"]), prefix="tl_validation/"
+        )
+        self.test_metrics_tl = MetricCollection(
+            deepcopy(metrics["tl"]), prefix="tl_test/"
+        )
 
     def forward(self, x: Tensor) -> MILModelOutput:
         # x has shape (batch_size, num_tiles_padded, embedding_dim)
@@ -82,7 +101,7 @@ class ProstateCancerAttentionMIL(LightningModule):
             raw_attn.sigmoid(), dim=1
         )  # (batch_size, num_tiles_padded, 1)
 
-        # Do not attend to padded tiles
+        # Do not attend to padded tiles (true for non-padded elements)
         mask = (
             (x.abs() > 1e-6).any(dim=-1, keepdim=True).float()
         )  # (batch_size, num_tiles_padded, 1)

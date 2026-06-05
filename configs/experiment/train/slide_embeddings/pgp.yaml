@@ -11,4 +11,4 @@ datamodule:
   val:
     embeddings_uri: ${val_data.pgp_embeddings_uri}
 
-model_name: "PGP (MIL)"
+model_name: "PGP (Hybrid-MIL)"

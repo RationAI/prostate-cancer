@@ -7,6 +7,9 @@ defaults:
   - /datamodule/slide_embeddings_datamodule@datamodule
   - _self_
 
+model:
+  sl_threshold: 0.5
+
 callbacks:
   checkpointing:
     monitor: validation/loss

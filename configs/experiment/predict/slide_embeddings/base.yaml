@@ -5,6 +5,10 @@ defaults:
   - /datamodule/slide_embeddings_datamodule@datamodule
   - _self_
 
+slide_threshold: ${model_data.slide_threshold}
+model:
+  sl_threshold: ${slide_threshold}
+
 datamodule:
   batch_size: 2
   num_workers: 4

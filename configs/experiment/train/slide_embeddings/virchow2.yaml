@@ -11,4 +11,4 @@ datamodule:
   val:
     embeddings_uri: ${val_data.virchow2_embeddings_uri}
 
-model_name: "Virchow2 (MIL)"
+model_name: "Virchow2 (Hybrid-MIL)"
