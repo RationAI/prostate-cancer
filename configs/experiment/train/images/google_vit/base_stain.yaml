@@ -1,0 +1,17 @@
+# @package _global_
+
+defaults:
+  - /experiment/train/images/base
+  - /datamodule/transforms/normalize_w_stain_augments@transforms
+  - /model/google_vit_model@model
+  - _self_
+
+model_name: "Google ViT (Stain)"
+
+datamodule:
+  train:
+    uris:
+      - ${train_data.tiles_uri_224}
+  val:
+    uris:
+      - ${val_data.tiles_uri_224}

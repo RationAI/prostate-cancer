@@ -1,0 +1,8 @@
+defaults:
+  - base
+  - _self_
+
+tile_threshold: 0.57
+
+model_name: "VGG-16 Stain"
+public_checkpoint: "mlflow-artifacts:/38/0607fa72ad8a4c298c781a130343808b/artifacts/checkpoints/epoch=4-step=70840/checkpoint.ckpt"

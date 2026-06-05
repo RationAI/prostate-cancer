@@ -2,5 +2,5 @@
 
 defaults:
   - /experiment/test/images/google_vit/test_suite/base
-  - /data/mmci_tl_test@test_data
+  - /data/mmci/tl_test@test_data
   - _self_

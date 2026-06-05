@@ -1,0 +1,22 @@
+defaults:
+  - base
+  - _self_
+
+tile_threshold: 0.92
+slide_max_threshold: 0.9999734163
+slide_mpm_threshold: 0.9052270055
+slide_top_k_threshold: 0.9986477494
+slide_span_threshold: 0.5 # arbitrary - span predictions are binary
+
+checkpoint: "mlflow-artifacts:/65/a07e33c384a64cb9ab73621200efd314/artifacts/checkpoints/epoch=5-step=291684/checkpoint.ckpt"
+model_name: "Google ViT (Stain)"
+
+slide_level_prediction_uris:
+  max:
+    mmci_sl_group_1: "mlflow-artifacts:/65/2f9507b977224978a0b16d30ffa7416e/artifacts/tables/aggregated_predictions.json"
+  mean_pool_max:
+    mmci_sl_group_1: "mlflow-artifacts:/65/0a0ac745e45d49648c68ba667732b67a/artifacts/tables/aggregated_predictions.json"
+  top_k:
+    mmci_sl_group_1: "mlflow-artifacts:/65/53f5ad7868e94fe7b3a09ec1175c9f7b/artifacts/tables/aggregated_predictions.json"
+  span:
+    mmci_sl_group_1: "mlflow-artifacts:/65/6461ccf2b2a646048f808bdef6a6246b/artifacts/tables/aggregated_predictions.json"

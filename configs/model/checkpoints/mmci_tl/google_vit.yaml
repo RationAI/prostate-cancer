@@ -2,9 +2,21 @@ defaults:
   - base
   - _self_
 
-tile_threshold: 0.91
-slide_max_threshold: 0.0
-slide_mpm_threshold: 0.0
+tile_threshold: 0.86
+slide_max_threshold: 0.9998925924
+slide_mpm_threshold: 0.9998629093
+slide_top_k_threshold: 0.9998286963
+slide_span_threshold: 0.5 # arbitrary - span predictions are binary
 
-checkpoint: "mlflow-artifacts:/65/d56efaa9e46546938e40156d8574327e/artifacts/checkpoints/epoch=0-step=41667/checkpoint.ckpt"
+checkpoint: "mlflow-artifacts:/65/4b7c1663713b4dd0b03063c9f9b60925/artifacts/checkpoints/epoch=0-step=55556/checkpoint.ckpt"
 model_name: "Google ViT"
+
+slide_level_prediction_uris:
+  max:
+    mmci_sl_group_1: "mlflow-artifacts:/65/14059f41cc864b84b0c45a8967150b4a/artifacts/tables/aggregated_predictions.json"
+  mean_pool_max:
+    mmci_sl_group_1: "mlflow-artifacts:/65/872981529bf54121822bab214866c376/artifacts/tables/aggregated_predictions.json"
+  top_k:
+    mmci_sl_group_1: "mlflow-artifacts:/65/15eb8d742c1f439a8ede9af78c328fb0/artifacts/tables/aggregated_predictions.json"
+  span:
+    mmci_sl_group_1: "mlflow-artifacts:/65/86c76dfadc5d4592a6f8e7521ff18ae5/artifacts/tables/aggregated_predictions.json"
