@@ -1,8 +1,0 @@
-# @package _global_
-
-defaults:
-  - /data/radboud/sus_slide@data
-  - _self_
-
-tile_extent: 512
-stride: 256
