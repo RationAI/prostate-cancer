@@ -56,7 +56,7 @@ async def qc_main(
     request_timeout: int,
     max_concurrent: int,
     qc_parameters: QCParameters,
-    base_url: str
+    base_url: str,
 ) -> None:
     async with rationai.AsyncClient(qc_base_url=base_url) as client:  # type: ignore[attr-defined]
         async for result in tqdm(
@@ -113,7 +113,7 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
             request_timeout=config.request_timeout,
             max_concurrent=config.max_concurrent,
             qc_parameters=config.qc_parameters,
-            base_url=config.base_url
+            base_url=config.base_url,
         )
     )
 
