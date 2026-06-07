@@ -1,6 +1,6 @@
 # @package _global_
 
 defaults:
-  - /experiment/predict/images/virchow2/max_aggregations/base
+  - /experiment/predict/embeddings/virchow2/max_aggregations/base
   - /data/mmci/tl_test@predict_data
   - _self_
