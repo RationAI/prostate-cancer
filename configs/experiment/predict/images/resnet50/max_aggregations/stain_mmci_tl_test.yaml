@@ -1,0 +1,6 @@
+# @package _global_
+
+defaults:
+  - /experiment/predict/images/resnet50/max_aggregations/stain_base
+  - /data/mmci/tl_test@predict_data
+  - _self_
