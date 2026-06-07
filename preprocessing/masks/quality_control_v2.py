@@ -56,10 +56,9 @@ async def qc_main(
     request_timeout: int,
     max_concurrent: int,
     qc_parameters: QCParameters,
+    base_url: str
 ) -> None:
-    async with rationai.AsyncClient(
-        qc_base_url="http://rayservice-qc-update-trial-serve-svc.rationai-jobs-ns.svc.cluster.local:8000/"
-    ) as client:  # type: ignore[attr-defined]
+    async with rationai.AsyncClient(qc_base_url=base_url) as client:  # type: ignore[attr-defined]
         async for result in tqdm(
             client.qc.check_slides(
                 slides,
@@ -81,7 +80,7 @@ async def qc_main(
             organize_masks(Path(output_path), artifact_name, prefix)
 
         # Merge generated csv files
-        csvs = list(Path(output_path).glob("*.csv"))
+        csvs = list(Path(output_path).rglob("*.csv"))
         if len(csvs) > 0:
             pd.concat([pd.read_csv(f) for f in csvs]).to_csv(
                 Path(output_path, "qc_metrics.csv"), index=False
@@ -114,6 +113,7 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
             request_timeout=config.request_timeout,
             max_concurrent=config.max_concurrent,
             qc_parameters=config.qc_parameters,
+            base_url=config.base_url
         )
     )
 
