@@ -1,7 +1,0 @@
-defaults:
-  - base
-  - _self_
-
-metadata_table: "mlflow-artifacts:/38/762c559e57774b2b959a1f931a52c0ee/artifacts/sus_slide.csv"
-
-data_name: "PANDA - Sus slide"

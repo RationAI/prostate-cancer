@@ -1,7 +1,0 @@
-# @package _global_
-
-defaults:
-  - /data/radboud/sus_slide@data
-  - /overlappers/classic_overlappers@overlappers
-  - /experiment/preprocessing/tiling_v2/base_512
-  - _self_

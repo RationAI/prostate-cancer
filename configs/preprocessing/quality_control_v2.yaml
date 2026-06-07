@@ -8,7 +8,7 @@ qc_parameters:
   check_residual: True
   check_folding: True
   wb_correction: True
-  store_masks_at_original_resolution: True
+  subsample_masks: False
 
 output_path: ${prostate_cancer_artifacts}/qc_masks/${data.data_name}
 use_case: QC Masks (v2)

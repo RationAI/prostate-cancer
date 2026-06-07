@@ -22,7 +22,7 @@ class QCParameters(TypedDict):
     check_folding: bool
     check_blur: bool
     wb_correction: bool
-    store_masks_at_original_resolution: bool
+    subsample_masks: bool
 
 
 def get_qc_masks(qc_parameters: QCParameters) -> Generator[tuple[str, str], None, None]:
