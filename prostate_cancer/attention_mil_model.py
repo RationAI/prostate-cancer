@@ -53,7 +53,9 @@ class ProstateCancerAttentionMIL(LightningModule):
         self.classifier = BinaryMILEmbeddingClassifier(input_dim)
 
         self.sl_criterion = nn.BCEWithLogitsLoss(reduction="mean")
-        self.tl_criterion = nn.BCEWithLogitsLoss(reduction="none")  # handle padding
+        self.tl_criterion = nn.BCEWithLogitsLoss(
+            reduction="none", pos_weight=torch.tensor([9.65])
+        )  # handle padding
         self.lr = lr
 
         metrics: dict[str, dict[str, Metric | MetricCollection]] = {}
@@ -146,8 +148,12 @@ class ProstateCancerAttentionMIL(LightningModule):
         loss = sl_loss + tl_loss
 
         self.log("train/loss", loss, on_step=True, prog_bar=True, batch_size=len(bags))
-        self.log("train/sl_loss", sl_loss, on_step=True, prog_bar=True, batch_size=len(bags))
-        self.log("train/tl_loss", tl_loss, on_step=True, prog_bar=True, batch_size=len(bags))
+        self.log(
+            "train/sl_loss", sl_loss, on_step=True, prog_bar=True, batch_size=len(bags)
+        )
+        self.log(
+            "train/tl_loss", tl_loss, on_step=True, prog_bar=True, batch_size=len(bags)
+        )
 
         self.train_metrics_sl.update(sl_outputs, sl_labels)
         self.train_metrics_tl.update(tl_outputs[mask.bool()], tl_labels[mask.bool()])
