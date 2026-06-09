@@ -32,6 +32,7 @@
   - `preprocessing/`: Ensure data transformations (tiling, QC, tissue masks) are logically sound.
   - `prostate_cancer/`: Focus on training loops, PyTorch Lightning modules, and model definitions.
   - `postprocessing/`: Focus on ensembling and final prediction logic.
+  - `notebooks/`: Focus on a one-time specific experiments.
 
 ## 📚 Types & Documentation
 - **Type Hinting:** We use strict `mypy`, but it is *not required* for PRs to be merged. Gently suggest type hints for complex function signatures, but do not nitpick missing `Any` types or incomplete typing.
