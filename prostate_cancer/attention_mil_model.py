@@ -17,12 +17,12 @@ from torchmetrics.classification import (
     Specificity,
 )
 
+from prostate_cancer.modeling.decode_head import BinaryMILEmbeddingClassifier
 from prostate_cancer.typing import (
     LabeledSlideSampleBatch,
     MILModelOutput,
     UnlabeledSlideSampleBatch,
 )
-from prostate_cancer.modeling.decode_head import BinaryEmbeddingClassifier
 
 
 class ProstateCancerAttentionMIL(LightningModule):
@@ -50,7 +50,7 @@ class ProstateCancerAttentionMIL(LightningModule):
         )
 
         # TL Classifier
-        self.classifier = BinaryEmbeddingClassifier(input_dim)
+        self.classifier = BinaryMILEmbeddingClassifier(input_dim)
 
         self.sl_criterion = nn.BCEWithLogitsLoss(reduction="mean")
         self.tl_criterion = nn.BCEWithLogitsLoss(reduction="none")  # handle padding
