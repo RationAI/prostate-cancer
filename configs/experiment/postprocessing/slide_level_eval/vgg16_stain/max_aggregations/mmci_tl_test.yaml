@@ -1,0 +1,7 @@
+# @package _global_
+
+defaults:
+  - /experiment/postprocessing/slide_level_eval/vgg16_stain/max_aggregations/base
+  - /data/mmci/tl_test@data
+
+preds_uri: "mlflow-artifacts:/65/50bb0b6a6f234b149ad04ef82a24e45c/artifacts/tables/aggregated_predictions.json"

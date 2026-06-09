@@ -1,0 +1,7 @@
+# @package _global_
+
+defaults:
+  - /experiment/postprocessing/slide_level_eval/google_vit/max_aggregations/base
+  - /data/mmci/tl_test@data
+
+preds_uri: "mlflow-artifacts:/65/c5ff83e1fcf8496fb2cf9381c62123a8/artifacts/tables/aggregated_predictions.json"

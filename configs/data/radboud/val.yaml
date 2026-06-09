@@ -2,7 +2,7 @@ defaults:
   - base_val
   - _self_
 
-tiles_uri_512: "mlflow-artifacts:/38/fef64ae0d0bf455f99131ea98499e3ba/artifacts/PANDA - Radboud val"
-tiles_uri_224: "mlflow-artifacts:/38/46ce5992bf434bc1ad9f28e6fbee4833/artifacts/PANDA - Radboud val"
+tiles_uri_512: "mlflow-artifacts:/38/4e3b31f87a8a46df9f911a69206d6a1d/artifacts/PANDA - Radboud val"
+tiles_uri_224: "mlflow-artifacts:/38/fae8eacf77a24fce808de83cb8ec3edd/artifacts/PANDA - Radboud val"
 
 data_name: "PANDA - Radboud val"

@@ -2,5 +2,5 @@
 
 defaults:
   - /experiment/predict/images/google_vit/max_aggregations/stain_base
-  - /data/mmci/sl_group_1@predict_data
+  - /data/mmci/tl_test@predict_data
   - _self_
