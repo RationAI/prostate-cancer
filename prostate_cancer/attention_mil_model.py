@@ -146,6 +146,8 @@ class ProstateCancerAttentionMIL(LightningModule):
         loss = sl_loss + tl_loss
 
         self.log("train/loss", loss, on_step=True, prog_bar=True, batch_size=len(bags))
+        self.log("train/sl_loss", sl_loss, on_step=True, prog_bar=True, batch_size=len(bags))
+        self.log("train/tl_loss", tl_loss, on_step=True, prog_bar=True, batch_size=len(bags))
 
         self.train_metrics_sl.update(sl_outputs, sl_labels)
         self.train_metrics_tl.update(tl_outputs[mask.bool()], tl_labels[mask.bool()])
