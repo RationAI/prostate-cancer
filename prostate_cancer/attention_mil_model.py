@@ -22,6 +22,7 @@ from prostate_cancer.typing import (
     MILModelOutput,
     UnlabeledSlideSampleBatch,
 )
+from prostate_cancer.modeling.decode_head import BinaryEmbeddingClassifier
 
 
 class ProstateCancerAttentionMIL(LightningModule):
@@ -40,6 +41,8 @@ class ProstateCancerAttentionMIL(LightningModule):
         # if we did not precompute the embeddings, we would obtain it from this module
         # (idendity replaced with foundation model)
         self.encoder = nn.Identity()
+
+        # from a paper
         self.attention = nn.Sequential(
             nn.Linear(input_dim, 512),
             nn.Tanh(),
@@ -47,7 +50,7 @@ class ProstateCancerAttentionMIL(LightningModule):
         )
 
         # TL Classifier
-        self.classifier = nn.Linear(input_dim, 1)
+        self.classifier = BinaryEmbeddingClassifier(input_dim)
 
         self.sl_criterion = nn.BCEWithLogitsLoss(reduction="mean")
         self.tl_criterion = nn.BCEWithLogitsLoss(reduction="none")  # handle padding
@@ -55,6 +58,7 @@ class ProstateCancerAttentionMIL(LightningModule):
 
         metrics: dict[str, dict[str, Metric | MetricCollection]] = {}
 
+        # both SL and TL metrics
         for task_type, t in [("tl", tl_threshold), ("sl", sl_threshold)]:
             metrics[task_type] = {
                 "AUC": AUROC("binary"),
