@@ -50,7 +50,7 @@ class ProstateCancerAttentionMIL(LightningModule):
         )
 
         # TL Classifier
-        self.classifier = BinaryMILEmbeddingClassifier(input_dim)
+        self.classifier = nn.Linear(input_dim, 1)
 
         self.sl_criterion = nn.BCEWithLogitsLoss(reduction="mean")
         self.tl_criterion = nn.BCEWithLogitsLoss(
