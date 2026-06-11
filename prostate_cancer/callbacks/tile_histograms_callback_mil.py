@@ -18,7 +18,7 @@ class TileHistogramsCallbackMIL(TileHistogramsCallbackBase):
     ) -> None:
         _, y, _, _ = batch
         _, tl_outputs_raw, mask, _ = outputs
-        tl_outputs_valid = tl_outputs_raw[mask]
+        tl_outputs_valid = tl_outputs_raw[mask.bool()]
         preds = tl_outputs_valid.detach().cpu().numpy().flatten()
         labels = y.detach().cpu().numpy().flatten()
 

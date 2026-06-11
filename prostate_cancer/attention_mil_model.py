@@ -216,7 +216,7 @@ class ProstateCancerAttentionMIL(LightningModule):
             self.test_metrics_tl, on_epoch=True, on_step=False, batch_size=len(bags)
         )
 
-        return sl_outputs, tl_outputs, mask, attention
+        return sl_outputs.sigmoid(), tl_outputs.sigmoid(), mask, attention
 
     def predict_step(self, batch: UnlabeledSlideSampleBatch) -> MILModelOutput:
         sl_preds_raw, tl_preds_raw, mask, attention = self(batch[0])

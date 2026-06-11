@@ -16,7 +16,7 @@ class CurvesCallbackMIL(CurvesCallbackBase):
     ) -> None:
 
         _, tl_outputs_raw, mask, _ = outputs
-        tl_outputs_valid = tl_outputs_raw[mask]
+        tl_outputs_valid = tl_outputs_raw[mask.bool()]
         targets = batch[1]
         self.preds.append(tl_outputs_valid.flatten().cpu())
         self.targets.append(targets.flatten().cpu())
