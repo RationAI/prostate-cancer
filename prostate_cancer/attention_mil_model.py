@@ -17,7 +17,6 @@ from torchmetrics.classification import (
     Specificity,
 )
 
-from prostate_cancer.modeling.decode_head import BinaryMILEmbeddingClassifier
 from prostate_cancer.typing import (
     LabeledSlideSampleBatch,
     MILModelOutput,
@@ -178,10 +177,18 @@ class ProstateCancerAttentionMIL(LightningModule):
 
         self.log("validation/loss", loss, prog_bar=True, batch_size=len(bags))
         self.log(
-            "validation/sl_loss", sl_loss, on_step=True, prog_bar=True, batch_size=len(bags)
+            "validation/sl_loss",
+            sl_loss,
+            on_step=True,
+            prog_bar=True,
+            batch_size=len(bags),
         )
         self.log(
-            "validation/tl_loss", tl_loss, on_step=True, prog_bar=True, batch_size=len(bags)
+            "validation/tl_loss",
+            tl_loss,
+            on_step=True,
+            prog_bar=True,
+            batch_size=len(bags),
         )
 
         self.val_metrics_sl.update(sl_outputs, sl_labels)
