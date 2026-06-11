@@ -201,10 +201,10 @@ class ProstateCancerAttentionMIL(LightningModule):
             self.val_metrics_tl, on_epoch=True, on_step=False, batch_size=len(bags)
         )
 
-    def test_step(self, batch: LabeledSlideSampleBatch) -> None:
+    def test_step(self, batch: LabeledSlideSampleBatch) -> MILModelOutput: # type: ignore[override]
         bags, tl_labels, sl_labels, _ = batch
 
-        sl_outputs, tl_outputs, mask, _ = self(bags)
+        sl_outputs, tl_outputs, mask, attention = self(bags)
 
         self.test_metrics_sl.update(sl_outputs, sl_labels)
         self.test_metrics_tl.update(tl_outputs[mask.bool()], tl_labels[mask.bool()])
@@ -215,6 +215,8 @@ class ProstateCancerAttentionMIL(LightningModule):
         self.log_dict(
             self.test_metrics_tl, on_epoch=True, on_step=False, batch_size=len(bags)
         )
+
+        return sl_outputs, tl_outputs, mask, attention
 
     def predict_step(self, batch: UnlabeledSlideSampleBatch) -> MILModelOutput:
         sl_preds_raw, tl_preds_raw, mask, attention = self(batch[0])

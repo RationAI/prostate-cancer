@@ -1,0 +1,7 @@
+defaults:
+  - tile_histograms_mil
+  - curves_mil
+  - _self_
+
+curves_callback:
+  optimal_seek: true

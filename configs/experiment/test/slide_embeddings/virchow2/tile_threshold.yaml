@@ -1,8 +1,8 @@
 # @package _global_
 
 defaults:
-  - /callbacks/tile_threshold_tl@callbacks
-  - /experiment/test/embeddings/virchow2/base
+  - /callbacks/tile_threshold_mil@callbacks
+  - /experiment/test/slide_embeddings/virchow2/base
   - /data/mmci/tl_val@test_data
   - _self_
 

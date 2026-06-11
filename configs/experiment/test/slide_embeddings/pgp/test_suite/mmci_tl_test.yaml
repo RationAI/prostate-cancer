@@ -1,0 +1,6 @@
+# @package _global_
+
+defaults:
+  - /experiment/test/slide_embeddings/pgp/test_suite/base
+  - /data/mmci/tl_test@test_data
+  - _self_

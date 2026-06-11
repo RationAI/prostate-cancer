@@ -1,7 +1,7 @@
 # @package _global_
 
 defaults:
-  - /callbacks/tile_threshold@callbacks
+  - /callbacks/tile_threshold_tl@callbacks
   - /experiment/test/images/vgg16/base
   - /data/mmci/tl_val@test_data
   - _self_

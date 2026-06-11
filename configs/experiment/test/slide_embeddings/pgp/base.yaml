@@ -1,0 +1,11 @@
+# @package _global_
+
+defaults:
+  - /experiment/test/slide_embeddings/base
+  - /model/pgp_model_mil@model
+  - /model/checkpoints/mmci_tl/pgp_mil@model_data
+  - _self_
+
+datamodule:
+  test:
+    embeddings_uri: ${test_data.pgp_embeddings_uri}

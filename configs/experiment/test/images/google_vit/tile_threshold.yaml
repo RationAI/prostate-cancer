@@ -1,7 +1,7 @@
 # @package _global_
 
 defaults:
-  - /callbacks/tile_threshold@callbacks
+  - /callbacks/tile_threshold_tl@callbacks
   - /experiment/test/images/google_vit/base
   - /data/mmci/tl_val@test_data
   - _self_
