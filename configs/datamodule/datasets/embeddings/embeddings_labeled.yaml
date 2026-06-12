@@ -1,0 +1,6 @@
+_target_: prostate_cancer.datamodule.datasets.LabeledEmbeddingsDataset
+uris: ???
+thresholds: ${thresholds}
+embeddings_uri: ???
+stratified_filter: ???
+carcinoma_roi_t: ${thresholds.carcinoma_roi_t}

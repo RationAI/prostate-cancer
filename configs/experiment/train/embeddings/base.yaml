@@ -1,0 +1,6 @@
+# @package _global_
+
+defaults:
+  - /experiment/train/base
+  - /datamodule/embeddings_datamodule@datamodule
+  - _self_

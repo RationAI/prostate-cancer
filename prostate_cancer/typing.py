@@ -30,11 +30,15 @@ class SlideMetadata(TypedDict):
     ys: Tensor
 
 
-LabeledSlideSample = tuple[Tensor, Tensor, Tensor, SlideMetadata]
-UnlabeledSlideSample = tuple[Tensor, SlideMetadata]
+LabeledBagOfTilesSample = tuple[
+    Tensor, Tensor, Tensor, SlideMetadata
+]  # tiles / embeddings, tl_labels, sl_labels, metadata
+UnlabeledBagOfTilesSample = tuple[Tensor, SlideMetadata]  # tiles / embeddings, metadata
 
-LabeledSlideSampleBatch: TypeAlias = tuple[Tensor, Tensor, Tensor, list[SlideMetadata]]
-UnlabeledSlideSampleBatch: TypeAlias = tuple[Tensor, list[SlideMetadata]]
+LabeledBagOfTilesSampleBatch: TypeAlias = tuple[
+    Tensor, Tensor, Tensor, list[SlideMetadata]
+]
+UnlabeledBagOfTilesSampleBatch: TypeAlias = tuple[Tensor, list[SlideMetadata]]
 
 MILModelOutput = tuple[
     Tensor, Tensor, Tensor, Tensor

@@ -1,7 +1,0 @@
-# @package _global_
-
-defaults:
-  - /experiment/train/tile_embeddings/pgp/base
-  - /data/mmci/tl_train@train_data
-  - /data/mmci/tl_val@val_data
-  - _self_

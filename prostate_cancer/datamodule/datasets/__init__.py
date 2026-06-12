@@ -1,22 +1,22 @@
-from prostate_cancer.datamodule.datasets.slide_embeddings_dataset import (
-    LabeledSlideEmbeddingsDataset,
-    UnlabeledSlideEmbeddingsDataset,
+from prostate_cancer.datamodule.datasets.bag_of_embeddings_dataset import (
+    LabeledBagOfEmbeddingsDataset,
+    UnlabeledBagOfEmbeddingsDataset,
+)
+from prostate_cancer.datamodule.datasets.embeddings_dataset import (
+    LabeledEmbeddingsDataset,
+    UnlabeledEmbeddingsDataset,
 )
 from prostate_cancer.datamodule.datasets.tile_dataset import (
     LabeledTilesDataset,
     UnlabeledTilesDataset,
 )
-from prostate_cancer.datamodule.datasets.tile_embeddings_dataset import (
-    LabeledTileEmbeddingsDataset,
-    UnlabeledTileEmbeddingsDataset,
-)
 
 
 __all__ = [
-    "LabeledSlideEmbeddingsDataset",
-    "LabeledTileEmbeddingsDataset",
+    "LabeledBagOfEmbeddingsDataset",
+    "LabeledEmbeddingsDataset",
     "LabeledTilesDataset",
-    "UnlabeledSlideEmbeddingsDataset",
-    "UnlabeledTileEmbeddingsDataset",
+    "UnlabeledBagOfEmbeddingsDataset",
+    "UnlabeledEmbeddingsDataset",
     "UnlabeledTilesDataset",
 ]

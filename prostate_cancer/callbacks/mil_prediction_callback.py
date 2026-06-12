@@ -8,11 +8,11 @@ from lightning import Callback, LightningModule, Trainer
 from rationai.masks.mask_builders import ScalarMaskBuilder
 from rationai.mlkit.lightning.loggers.mlflow import MLFlowLogger
 
-from prostate_cancer.typing import MILModelOutput, UnlabeledSlideSampleBatch
+from prostate_cancer.typing import MILModelOutput, UnlabeledBagOfTilesSampleBatch
 
 
 if TYPE_CHECKING:
-    from prostate_cancer.datamodule import SlideDataModule
+    from prostate_cancer.datamodule import BagOfTilesDataModule
 
 
 def min_max_normalization(tensor: torch.Tensor) -> torch.Tensor:
@@ -28,7 +28,7 @@ class MILPredictionCallback(Callback):
         if not hasattr(trainer, "datamodule"):
             raise ValueError("Trainer should have datamodule attribute")
 
-        datamodule = cast("SlideDataModule", trainer.datamodule)
+        datamodule = cast("BagOfTilesDataModule", trainer.datamodule)
         slides = cast("pd.DataFrame", datamodule.predict.slides)
         slides["name"] = slides["path"].apply(lambda x: Path(x).stem)
 
@@ -54,7 +54,7 @@ class MILPredictionCallback(Callback):
         trainer: Trainer,
         pl_module: LightningModule,
         outputs: MILModelOutput,
-        batch: UnlabeledSlideSampleBatch,
+        batch: UnlabeledBagOfTilesSampleBatch,
         batch_idx: int,
         dataloader_idx: int = 0,
     ) -> None:

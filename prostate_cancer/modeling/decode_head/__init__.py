@@ -3,15 +3,12 @@ from prostate_cancer.modeling.decode_head.cnn_classifier import BinaryCNNClassif
 from prostate_cancer.modeling.decode_head.embedding_classifier import (
     BinaryEmbeddingClassifier,
 )
-from prostate_cancer.modeling.decode_head.mil_tl_classifier import (
-    BinaryMILEmbeddingClassifier,
-)
+from prostate_cancer.modeling.decode_head.vit_classifier import BinaryViTClassifier
 
 
 __all__ = [
     "BinaryCNNClassifier",
     "BinaryClassifier",
     "BinaryEmbeddingClassifier",
-    "BinaryMILEmbeddingClassifier",
     "BinaryViTClassifier",
 ]

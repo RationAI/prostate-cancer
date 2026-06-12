@@ -18,9 +18,9 @@ from torchmetrics.classification import (
 )
 
 from prostate_cancer.typing import (
-    LabeledSlideSampleBatch,
+    LabeledBagOfTilesSampleBatch,
     MILModelOutput,
-    UnlabeledSlideSampleBatch,
+    UnlabeledBagOfTilesSampleBatch,
 )
 
 
@@ -136,7 +136,7 @@ class ProstateCancerAttentionMIL(LightningModule):
             attention_weights.squeeze(-1),
         )  # (batch_size,), (batch_size, num_tiles_padded), (batch_size, num_tiles_padded), (batch_size, num_tiles_padded)
 
-    def training_step(self, batch: LabeledSlideSampleBatch) -> Tensor:
+    def training_step(self, batch: LabeledBagOfTilesSampleBatch) -> Tensor:
         # bag ~ all embeddings from a single slide
         bags, tl_labels, sl_labels, _ = batch
 
@@ -166,7 +166,7 @@ class ProstateCancerAttentionMIL(LightningModule):
 
         return loss
 
-    def validation_step(self, batch: LabeledSlideSampleBatch) -> None:
+    def validation_step(self, batch: LabeledBagOfTilesSampleBatch) -> None:
         bags, tl_labels, sl_labels, _ = batch
 
         sl_outputs, tl_outputs, mask, _ = self(bags)
@@ -201,7 +201,7 @@ class ProstateCancerAttentionMIL(LightningModule):
             self.val_metrics_tl, on_epoch=True, on_step=False, batch_size=len(bags)
         )
 
-    def test_step(self, batch: LabeledSlideSampleBatch) -> None:
+    def test_step(self, batch: LabeledBagOfTilesSampleBatch) -> None:
         bags, tl_labels, sl_labels, _ = batch
 
         sl_outputs, tl_outputs, mask, _ = self(bags)
@@ -216,7 +216,7 @@ class ProstateCancerAttentionMIL(LightningModule):
             self.test_metrics_tl, on_epoch=True, on_step=False, batch_size=len(bags)
         )
 
-    def predict_step(self, batch: UnlabeledSlideSampleBatch) -> MILModelOutput:
+    def predict_step(self, batch: UnlabeledBagOfTilesSampleBatch) -> MILModelOutput:
         sl_preds_raw, tl_preds_raw, mask, attention = self(batch[0])
         return sl_preds_raw.sigmoid(), tl_preds_raw.sigmoid(), mask, attention
 

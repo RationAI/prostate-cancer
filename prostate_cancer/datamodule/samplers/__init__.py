@@ -1,5 +1,5 @@
-from prostate_cancer.datamodule.samplers.slide_stratified_weighted_random_sampler import (
-    SlideStratifiedWeightedRandomSampler,
+from prostate_cancer.datamodule.samplers.bag_of_tiles_stratified_weighted_random_sampler import (
+    BagOfTilesStratifiedWeightedRandomSampler,
 )
 from prostate_cancer.datamodule.samplers.tile_stratified_weighted_random_sampler import (
     TileStratifiedWeightedRandomSampler,
@@ -7,6 +7,6 @@ from prostate_cancer.datamodule.samplers.tile_stratified_weighted_random_sampler
 
 
 __all__ = [
-    "SlideStratifiedWeightedRandomSampler",
+    "BagOfTilesStratifiedWeightedRandomSampler",
     "TileStratifiedWeightedRandomSampler",
 ]

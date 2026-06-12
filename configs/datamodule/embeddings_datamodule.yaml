@@ -1,0 +1,19 @@
+defaults:
+  - datasets@train: embeddings/embeddings_labeled
+  - datasets@val: embeddings/embeddings_labeled
+  - datasets@test: embeddings/embeddings_labeled
+  - datasets@predict: embeddings/embeddings_unlabeled
+
+  - samplers@sampler: tile_stratified_weighted_random
+
+_target_: prostate_cancer.datamodule.TileDataModule
+
+train:
+  stratified_filter: true
+val:
+  stratified_filter: true
+test:
+  stratified_filter: false # want to test all the tiles
+
+batch_size: ???
+num_workers: ???
