@@ -98,27 +98,26 @@ class ProstateCancerAttentionMIL(LightningModule):
         # Just identity
         x = self.encoder(x)  # (batch_size, num_tiles_padded, embedding_dim)
 
-        # TL weights (which tiles to attend to)
-        raw_attn = self.attention(x)  # (batch_size, num_tiles_padded, 1)
-
-        # sigmoid is applied to avoid unimodal spiky distribution
-        attention_weights = torch.softmax(
-            raw_attn.sigmoid(), dim=1
-        )  # (batch_size, num_tiles_padded, 1)
-
         # Do not attend to padded tiles (true for non-padded elements)
         mask = (
             (x.abs() > 1e-6).any(dim=-1, keepdim=True).float()
         )  # (batch_size, num_tiles_padded, 1)
 
-        attention_weights = (
-            attention_weights * mask
-        )  # (batch_size, num_tiles_padded, 1)
+        # number of non-padded tiles for each bag
+        sqrt_bag_size = (
+            mask.sum(dim=1, keepdim=True).sqrt().clamp(min=1)
+        )  # (batch_size, 1, 1)
 
-        # proper distribution for the non-padded tiles
-        attention_weights = attention_weights / attention_weights.sum(
-            dim=1, keepdim=True
-        )  # (batch_size, num_tiles_padded, 1)
+        # TL weights (which tiles to attend to)
+        raw_attn: Tensor = self.attention(x)  # (batch_size, num_tiles_padded, 1)
+        raw_attn = raw_attn.squeeze(-1)  # (batch_size, num_tiles_padded)
+
+        raw_attn = raw_attn.masked_fill(~mask.squeeze(-1), float("-inf"))
+
+        # make it a distribution
+        attention_weights = torch.softmax(
+            raw_attn / sqrt_bag_size.squeeze(-1), dim=1
+        ).unsqueeze(-1)  # (batch_size, num_tiles_padded, 1)
 
         # TL predictions
         tl_preds_raw: Tensor = self.classifier(x)  # (batch_size, num_tiles_padded, 1)
@@ -141,9 +140,12 @@ class ProstateCancerAttentionMIL(LightningModule):
         bags, tl_labels, sl_labels, _ = batch
 
         sl_outputs, tl_outputs, mask, _ = self(bags)
-        sl_loss = self.sl_criterion(sl_outputs, sl_labels)
-        tl_loss_all = self.tl_criterion(tl_outputs, tl_labels)
-        tl_loss = (tl_loss_all * mask).sum() / mask.sum()
+        sl_loss = self.sl_criterion(sl_outputs, sl_labels)  # scalar
+        tl_loss_all = self.tl_criterion(
+            tl_outputs, tl_labels
+        )  # (batch_size, num_tiles_padded)
+        per_bag_tl_loss = (tl_loss_all * mask).sum(dim=1) / mask.sum(dim=1).clamp(min=1)
+        tl_loss = per_bag_tl_loss.mean()
         loss = sl_loss + tl_loss
 
         self.log("train/loss", loss, on_step=True, prog_bar=True, batch_size=len(bags))
