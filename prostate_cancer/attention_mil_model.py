@@ -112,7 +112,7 @@ class ProstateCancerAttentionMIL(LightningModule):
         raw_attn: Tensor = self.attention(x)  # (batch_size, num_tiles_padded, 1)
         raw_attn = raw_attn.squeeze(-1)  # (batch_size, num_tiles_padded)
 
-        raw_attn = raw_attn.masked_fill(~mask.squeeze(-1), float("-inf"))
+        raw_attn = raw_attn.masked_fill(~mask.bool().squeeze(-1), float("-inf"))
 
         # make it a distribution
         attention_weights = torch.softmax(
