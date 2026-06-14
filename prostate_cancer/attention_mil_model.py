@@ -113,7 +113,7 @@ class ProstateCancerAttentionMIL(LightningModule):
 
         # make it a distribution
         attention_weights = torch.softmax(
-            raw_attn / self.input_dim_sqrt, dim=1
+            raw_attn, dim=1
         )  # (batch_size, num_tiles_padded, 1)
 
         # TL predictions
