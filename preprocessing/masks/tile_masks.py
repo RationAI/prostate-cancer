@@ -65,9 +65,9 @@ def process_slide(
     # ---
 
     # --- survival binary masks
-    mask_path = output_path / "filled" / filename
+    save_dir = output_path / "filled"
     builder = ScalarMaskBuilder(
-        output_path,
+        save_dir,
         filename,
         slide.extent_x,
         slide.extent_y,

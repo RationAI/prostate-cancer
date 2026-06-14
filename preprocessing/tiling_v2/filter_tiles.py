@@ -44,14 +44,14 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
         filter_and_log(
             config.data.tiles_uri_512,
             config.data.thresholds,
-            config.data.data_name + "512",
+            config.data.data_name + "_512",
         )
 
     if hasattr(config.data, "tiles_uri_224") and config.data.tiles_uri_224 is not None:
         filter_and_log(
             config.data.tiles_uri_224,
             config.data.thresholds,
-            config.data.data_name + "224",
+            config.data.data_name + "_224",
         )
 
 

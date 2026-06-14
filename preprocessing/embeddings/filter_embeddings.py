@@ -58,7 +58,7 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
             config.data.virchow2_embeddings_uri,
             config.data.tiles_uri_224,
             config.data.thresholds,
-            config.data.data_name + "virchow2 embeddings",
+            config.data.data_name + "_virchow2 embeddings",
         )
 
     if (
@@ -69,7 +69,7 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
             config.data.pgp_embeddings_uri,
             config.data.tiles_uri_224,
             config.data.thresholds,
-            config.data.data_name + "pgp embeddings",
+            config.data.data_name + "_pgp embeddings",
         )
 
 
