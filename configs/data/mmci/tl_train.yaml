@@ -4,6 +4,8 @@ defaults:
 
 tiles_uri_512: "mlflow-artifacts:/65/b587398845c54e1c84e8b60f11c42b15/artifacts/MMCI TL Train 512"
 tiles_uri_224: "mlflow-artifacts:/65/6576370c8866436a8816655bf77caf1a/artifacts/MMCI TL Train 224"
+tiles_filtered_uri_512: "mlflow-artifacts:/65/96380bd55e6343c6ba027033c592c529/artifacts/MMCI TL Train_512"
+tiles_filtered_uri_224: "mlflow-artifacts:/65/96380bd55e6343c6ba027033c592c529/artifacts/MMCI TL Train_224"
 
 pgp_embeddings_uri: "mlflow-artifacts:/65/177737375ce349ecaee630dbae50e338/artifacts/MMCI TL Train 224"
 virchow2_embeddings_uri: "mlflow-artifacts:/65/beab5f8f21f14beb85b32a3180fa1798/artifacts/MMCI TL Train 224"
