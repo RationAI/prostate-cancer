@@ -45,7 +45,7 @@ def filter_and_log(
         slide_embeddings = slide_embeddings[slide_tiles.index.tolist()]
         torch.save(slide_embeddings, (output_dir / slide_name).with_suffix(".pt"))
 
-    mlflow.log_artifacts(str(output_dir))
+    mlflow.log_artifacts(str(output_dir), artifact_path=output_name)
 
 
 @with_cli_args(["+preprocessing=filter_embeddings"])
