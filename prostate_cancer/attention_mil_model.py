@@ -31,11 +31,13 @@ class ProstateCancerAttentionMIL(LightningModule):
         super().__init__()
         match foundation:
             case "pgp":
-                input_dim = 1536
+                self.input_dim = 1536
             case "virchow2":
-                input_dim = 2560
+                self.input_dim = 2560
             case _:
                 raise ValueError(f"Unknown foundation model: {foundation}")
+
+        self.input_dim_sqrt = torch.tensor(self.input_dim).sqrt()
 
         # if we did not precompute the embeddings, we would obtain it from this module
         # (idendity replaced with foundation model)
@@ -43,13 +45,13 @@ class ProstateCancerAttentionMIL(LightningModule):
 
         # from a paper
         self.attention = nn.Sequential(
-            nn.Linear(input_dim, 512),
+            nn.Linear(self.input_dim, 512),
             nn.Tanh(),
             nn.Linear(512, 1),
         )
 
         # TL Classifier
-        self.classifier = nn.Linear(input_dim, 1)
+        self.classifier = nn.Linear(self.input_dim, 1)
 
         self.sl_criterion = nn.BCEWithLogitsLoss(reduction="mean")
         self.tl_criterion = nn.BCEWithLogitsLoss(
@@ -103,21 +105,16 @@ class ProstateCancerAttentionMIL(LightningModule):
             (x.abs() > 1e-6).any(dim=-1, keepdim=True).float()
         )  # (batch_size, num_tiles_padded, 1)
 
-        # number of non-padded tiles for each bag
-        sqrt_bag_size = (
-            mask.sum(dim=1, keepdim=True).sqrt().clamp(min=1)
-        )  # (batch_size, 1, 1)
-
         # TL weights (which tiles to attend to)
         raw_attn: Tensor = self.attention(x)  # (batch_size, num_tiles_padded, 1)
-        raw_attn = raw_attn.squeeze(-1)  # (batch_size, num_tiles_padded)
-
-        raw_attn = raw_attn.masked_fill(~mask.bool().squeeze(-1), float("-inf"))
+        raw_attn = raw_attn.masked_fill(
+            ~mask.bool(), float("-inf")
+        )  # (batch_size, num_tiles_padded, 1)
 
         # make it a distribution
         attention_weights = torch.softmax(
-            raw_attn / sqrt_bag_size.squeeze(-1), dim=1
-        ).unsqueeze(-1)  # (batch_size, num_tiles_padded, 1)
+            raw_attn / self.input_dim_sqrt, dim=1
+        )  # (batch_size, num_tiles_padded, 1)
 
         # TL predictions
         tl_preds_raw: Tensor = self.classifier(x)  # (batch_size, num_tiles_padded, 1)
