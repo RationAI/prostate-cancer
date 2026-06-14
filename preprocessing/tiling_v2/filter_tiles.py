@@ -11,13 +11,7 @@ from rationai.mlkit.lightning.loggers import MLFlowLogger
 from rationai.tiling.writers import save_mlflow_dataset
 
 
-def filter_and_log(
-    tiling_uri: str, thresholds: dict[str, int], dataset_name: str
-) -> None:
-    tiling_path = Path(mlflow.artifacts.download_artifacts(tiling_uri))
-    slides = pd.read_parquet(tiling_path / "slides.parquet")
-    tiles = pd.read_parquet(tiling_path / "tiles.parquet")
-
+def filter_tiles(tiles: pd.DataFrame, thresholds: dict[str, int]) -> pd.DataFrame:
     for col in tiles.columns:
         if col.endswith("percentage"):
             t = col.replace("percentage", "t")
@@ -29,11 +23,21 @@ def filter_and_log(
             )
             tiles = tiles[mask]
 
-    save_mlflow_dataset(slides, tiles, f"{dataset_name}_normalized")
+    return tiles
+
+
+def filter_and_log(
+    tiling_uri: str, thresholds: dict[str, int], dataset_name: str
+) -> None:
+    tiling_path = Path(mlflow.artifacts.download_artifacts(tiling_uri))
+    slides = pd.read_parquet(tiling_path / "slides.parquet")
+    tiles = pd.read_parquet(tiling_path / "tiles.parquet")
+    tiles = filter_tiles(tiles, thresholds)
+    save_mlflow_dataset(slides, tiles, dataset_name)
 
 
 @with_cli_args(["+preprocessing=filter_tiles"])
-@hydra.main(config_path="../configs", config_name="preprocessing", version_base=None)
+@hydra.main(config_path="../../configs", config_name="preprocessing", version_base=None)
 @autolog
 def main(config: DictConfig, logger: MLFlowLogger) -> None:
     if hasattr(config.data, "tiles_uri_512") and config.data.tiles_uri_512 is not None:

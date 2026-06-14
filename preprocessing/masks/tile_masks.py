@@ -86,7 +86,6 @@ def process_slide(
     # ---
 
 
-
 @with_cli_args(["+preprocessing=tile_masks"])
 @hydra.main(config_path="../../configs", config_name="preprocessing", version_base=None)
 @autolog
