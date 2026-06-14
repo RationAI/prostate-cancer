@@ -1,0 +1,5 @@
+_target_: prostate_cancer.attention_mil_model.ProstateCancerAttentionMIL
+foundation: "virchow2"
+lr: ???
+tl_threshold: ???
+sl_threshold: ???

@@ -8,7 +8,7 @@ from numpy.typing import NDArray
 from sklearn.metrics import auc, precision_recall_curve, roc_curve
 
 from postprocessing.slide_level_curves import _plot_curve
-from prostate_cancer.typing import LabeledSampleBatch
+from prostate_cancer.typing import LabeledTileSampleBatch
 
 
 class CurvesCallback(Callback):
@@ -30,7 +30,7 @@ class CurvesCallback(Callback):
         trainer: Trainer,
         pl_module: LightningModule,
         outputs: Any,
-        batch: LabeledSampleBatch,
+        batch: LabeledTileSampleBatch,
         batch_idx: int,
         dataloader_idx: int = 0,
     ) -> None:

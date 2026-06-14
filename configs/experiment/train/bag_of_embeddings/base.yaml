@@ -1,0 +1,32 @@
+# @package _global_
+
+defaults:
+  - /experiment/train/base
+  - /data/mmci/tl_train@train_data
+  - /data/mmci/tl_val@val_data
+  - /datamodule/bag_of_embeddings_datamodule@datamodule
+  - _self_
+
+model:
+  sl_threshold: 0.5
+
+callbacks:
+  checkpointing:
+    monitor: validation/loss
+    mode: min
+  early_stopping:
+    monitor: validation/loss
+    mode: min
+
+datamodule:
+  batch_size: 4
+  num_workers: 8
+
+  # both foundation models share tiles (embeddings are specified per model)
+  train:
+    uris:
+      - ${train_data.tiles_uri_224}
+
+  val:
+    uris:
+      - ${val_data.tiles_uri_224}

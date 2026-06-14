@@ -9,11 +9,11 @@ import torch
 from rationai.mlkit.lightning.callbacks import MultiloaderLifecycle
 from rationai.mlkit.metrics.aggregators import Aggregator
 
-from prostate_cancer.typing import UnlabeledSampleBatch
+from prostate_cancer.typing import UnlabeledTileSampleBatch
 
 
 if TYPE_CHECKING:
-    from prostate_cancer.datamodule import DataModule
+    from prostate_cancer.datamodule import TileDataModule
 
 
 class AggregatorCallback(MultiloaderLifecycle):
@@ -28,7 +28,7 @@ class AggregatorCallback(MultiloaderLifecycle):
             raise ValueError("Trainer should have datamodule attribute")
         # aggregator cannot be reset, thus, its original state is copied for each slide
         self.aggregator = deepcopy(self.aggregator_original)
-        datamodule = cast("DataModule", trainer.datamodule)
+        datamodule = cast("TileDataModule", trainer.datamodule)
         self.slide = cast("pd.Series", datamodule.predict.slides.iloc[dataloader_idx])
 
     def on_predict_batch_end(
@@ -36,7 +36,7 @@ class AggregatorCallback(MultiloaderLifecycle):
         trainer: pl.Trainer,
         pl_module: pl.LightningModule,
         outputs: torch.Tensor,
-        batch: UnlabeledSampleBatch,
+        batch: UnlabeledTileSampleBatch,
         batch_idx: int,
         dataloader_idx: int = 0,
     ) -> None:

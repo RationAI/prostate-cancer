@@ -7,11 +7,11 @@ import pandas as pd
 import torch
 from rationai.mlkit.lightning.callbacks import MultiloaderLifecycle
 
-from prostate_cancer.typing import UnlabeledSampleBatch
+from prostate_cancer.typing import UnlabeledTileSampleBatch
 
 
 if TYPE_CHECKING:
-    from prostate_cancer.datamodule import DataModule
+    from prostate_cancer.datamodule import TileDataModule
 
 
 class CarcinomaPredictionTableCallback(MultiloaderLifecycle):
@@ -27,7 +27,7 @@ class CarcinomaPredictionTableCallback(MultiloaderLifecycle):
         if not hasattr(trainer, "datamodule"):
             raise ValueError("Trainer should have datamodule attribute")
 
-        datamodule = cast("DataModule", trainer.datamodule)
+        datamodule = cast("TileDataModule", trainer.datamodule)
         self.slide = cast("pd.Series", datamodule.predict.slides.iloc[dataloader_idx])
         self.table: list[dict[str, Any]] = []
 
@@ -36,7 +36,7 @@ class CarcinomaPredictionTableCallback(MultiloaderLifecycle):
         trainer: pl.Trainer,
         pl_module: pl.LightningModule,
         outputs: torch.Tensor,
-        batch: UnlabeledSampleBatch,
+        batch: UnlabeledTileSampleBatch,
         batch_idx: int,
         dataloader_idx: int = 0,
     ) -> None:

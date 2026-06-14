@@ -1,10 +1,12 @@
 defaults:
-  - datasets@train: embeddings/labeled
-  - datasets@val: embeddings/labeled
-  - datasets@test: embeddings/labeled
-  - datasets@predict: embeddings/unlabeled
+  - datasets@train: embeddings/embeddings_labeled
+  - datasets@val: embeddings/embeddings_labeled
+  - datasets@test: embeddings/embeddings_labeled
+  - datasets@predict: embeddings/embeddings_unlabeled
 
-  - samplers@sampler: stratified_weighted_random
+  - samplers@sampler: tile_stratified_weighted_random
+
+_target_: prostate_cancer.datamodule.TileDataModule
 
 train:
   stratified_filter: true

@@ -1,0 +1,6 @@
+# @package _global_
+
+defaults:
+  - /experiment/predict/bag_of_embeddings/virchow2/mil_predictions/base
+  - /data/mmci/tl_val@predict_data
+  - _self_

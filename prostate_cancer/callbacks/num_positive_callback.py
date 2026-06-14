@@ -6,11 +6,11 @@ from rationai.mlkit.lightning.callbacks import MultiloaderLifecycle
 from rationai.mlkit.lightning.loggers import MLFlowLogger
 
 from prostate_cancer.datamodule.datasets.base import get_slide_name
-from prostate_cancer.typing import UnlabeledSampleBatch
+from prostate_cancer.typing import UnlabeledTileSampleBatch
 
 
 if TYPE_CHECKING:
-    from prostate_cancer.datamodule import DataModule
+    from prostate_cancer.datamodule import TileDataModule
 
 
 class NumPositiveCallback(MultiloaderLifecycle):
@@ -28,7 +28,7 @@ class NumPositiveCallback(MultiloaderLifecycle):
         trainer: pl.Trainer,
         pl_module: pl.LightningModule,
         outputs: Any,
-        batch: UnlabeledSampleBatch,
+        batch: UnlabeledTileSampleBatch,
         batch_idx: int,
         dataloader_idx: int = 0,
     ) -> None:
@@ -40,7 +40,7 @@ class NumPositiveCallback(MultiloaderLifecycle):
         if not hasattr(trainer, "datamodule"):
             raise ValueError("Trainer should have datamodule attribute")
 
-        datamodule = cast("DataModule", trainer.datamodule)
+        datamodule = cast("TileDataModule", trainer.datamodule)
         slide = cast("pd.Series", datamodule.predict.slides.iloc[dataloader_idx])
         table = {"slide": get_slide_name(slide), "num_positive": self.num_positive}
 
