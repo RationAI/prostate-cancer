@@ -76,11 +76,11 @@ def process_and_shard_tiles(
 @hydra.main(config_path="../../configs", config_name="preprocessing", version_base=None)
 @autolog
 def main(config: DictConfig, logger: MLFlowLogger) -> None:
-    tiling_path = Path(mlflow.artifacts.download_artifacts(config.data.tiles_uri_224))
+    tiling_path = Path(mlflow.artifacts.download_artifacts(config.data.tiles_filtered_uri_224))
     slides = pd.read_parquet(tiling_path / "slides.parquet")
     tiles = pd.read_parquet(tiling_path / "tiles.parquet")
 
-    embeds_dir = Path(mlflow.artifacts.download_artifacts(config.embeddings_uri))
+    embeds_dir = Path(mlflow.artifacts.download_artifacts(config.filtered_embeddings_uri))
 
     output_dir = Path(config.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)

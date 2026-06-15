@@ -9,6 +9,8 @@ tiles_filtered_uri_224: "mlflow-artifacts:/65/4c8c0a88482f4eef900a86990be51783/a
 
 pgp_embeddings_uri: "mlflow-artifacts:/65/177737375ce349ecaee630dbae50e338/artifacts/MMCI TL Train 224"
 virchow2_embeddings_uri: "mlflow-artifacts:/65/beab5f8f21f14beb85b32a3180fa1798/artifacts/MMCI TL Train 224"
+pgp_embeddings_filtered_uri: "mlflow-artifacts:/65/967cf253cbb044128afac480569fc7f1/artifacts/MMCI TL Train_pgp embeddings"
+virchow2_embeddings_filtered_uri: "mlflow-artifacts:/65/967cf253cbb044128afac480569fc7f1/artifacts/MMCI TL Train_virchow2 embeddings"
 
 metadata_table: "mlflow-artifacts:/65/612ba86ea216490db86fd3e09bacf316/artifacts/mmci_tl_train.csv"
 
