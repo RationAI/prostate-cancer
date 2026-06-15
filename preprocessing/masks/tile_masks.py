@@ -24,10 +24,10 @@ def process_slide(
     tiles: pd.DataFrame,
 ) -> None:
     slide_tiles = tiles[tiles["slide_id"] == slide.id]
+    filename = f"{Path(slide.path).stem}.tiff"
 
     # --- Percentage masks
     for percentage_col in percentage_cols:
-        filename = f"{Path(slide.path).stem}.tiff"
         save_dir = output_path / percentage_col
 
         builder = ScalarMaskBuilder(
@@ -55,13 +55,34 @@ def process_slide(
         size=(slide.extent_x, slide.extent_y),
     )
 
-    mask_path = output_path / "outlines" / f"{Path(slide.path).stem}.tiff"
+    mask_path = output_path / "outlines" / filename
     write_big_tiff(
         pyvips.Image.new_from_array(np.array(mask)),
         mask_path,
         mpp_x=slide.mpp_x,
         mpp_y=slide.mpp_y,
     )
+    # ---
+
+    # --- survival binary masks
+    save_dir = output_path / "filled"
+    builder = ScalarMaskBuilder(
+        save_dir,
+        filename,
+        slide.extent_x,
+        slide.extent_y,
+        slide.mpp_x,
+        slide.mpp_y,
+        slide.tile_extent_x,
+        slide.stride_x,
+    )
+
+    data = torch.ones(len(slide_tiles)) * 255
+    xs = torch.tensor(slide_tiles["x"].values)
+    ys = torch.tensor(slide_tiles["y"].values)
+    builder.update(data, xs, ys)
+
+    builder.save()
     # ---
 
 
@@ -79,6 +100,7 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
     for percentage_col in [
         *config.percentage_cols,
         "outlines",
+        "filled",
     ]:
         (output_path / percentage_col).mkdir(parents=True, exist_ok=True)
 
