@@ -33,7 +33,7 @@ def attach_embeddings_group(group: pd.DataFrame, embeddings_dir: Path) -> pd.Dat
             f"Mismatch: {len(group)} tiles vs {len(embeds)} embeddings for {slide_name}"
         )
 
-    group = group.copy()
+    group = group.copy().sort_values("_row_order").reset_index(drop=True)
     group["embedding"] = embeds.tolist()
     return group
 
@@ -52,6 +52,10 @@ def process_and_shard_tiles(
         slides.set_index("id")[["path"]],
         on="slide_id",
     )
+
+    # embeddings are matched by rows order, which may be violated in parallel group processing
+    tiles_enriched["_row_order"] = range(len(tiles_enriched))
+
     ds: Dataset = ray.data.from_pandas(tiles_enriched)
 
     # batch on the level of slides to avoid opening a single embedding file multiple times
@@ -61,7 +65,7 @@ def process_and_shard_tiles(
         batch_format="pandas",
     )
 
-    ds = ds.drop_columns(["path"])
+    ds = ds.drop_columns(["path", "_row_order"])
 
     ds.write_parquet(
         str(tiles_output), max_rows_per_file=rows_per_file, mode=SaveMode.OVERWRITE
