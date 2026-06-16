@@ -170,8 +170,11 @@ class ProstateCancerAttentionMIL(LightningModule):
 
         sl_outputs, tl_outputs, mask, _ = self(bags)
         sl_loss = self.sl_criterion(sl_outputs, sl_labels)
-        tl_loss_all = self.tl_criterion(tl_outputs, tl_labels)
-        tl_loss = (tl_loss_all * mask).sum() / mask.sum()
+        tl_loss_all = self.tl_criterion(
+            tl_outputs, tl_labels
+        )  # (batch_size, num_tiles_padded)
+        per_bag_tl_loss = (tl_loss_all * mask).sum(dim=1) / mask.sum(dim=1).clamp(min=1)
+        tl_loss = per_bag_tl_loss.mean()
         loss = sl_loss + tl_loss
 
         self.log("validation/loss", loss, prog_bar=True, batch_size=len(bags))
