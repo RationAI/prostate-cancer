@@ -22,31 +22,48 @@ def get_slide_name(slide_metadata: TilingSlideMetadata) -> str:
     return Path(slide_metadata.get("path")).stem
 
 
-def download_artifacts(tiling_uris: Iterable[str]) -> tuple[HFDataset, HFDataset]:
+def download_artifacts(tiling_uris: Iterable[str]) -> Tuple[HFDataset, HFDataset]:
     slide_dsets = []
     tile_dsets = []
 
     for tiling_uri in tiling_uris:
         root = Path(mlflow.artifacts.download_artifacts(tiling_uri))
 
-        slide_files = list((root / "slides").glob("*.parquet"))
-        tile_files = list((root / "tiles").glob("*.parquet"))
+        # -------------------------------------------------------
+        # CASE 1: FLAT FILES in root
+        # -------------------------------------------------------
+        flat_slides = root / "slides.parquet"
+        flat_tiles = root / "tiles.parquet"
+
+        if flat_slides.exists():
+            slide_dsets.append(HFDataset.from_parquet(str(flat_slides)))
+
+        if flat_tiles.exists():
+            tile_dsets.append(HFDataset.from_parquet(str(flat_tiles)))
+
+        slide_folder = root / "slides"
+        tile_folder = root / "tiles"
+
+        slide_files = list(slide_folder.glob("*.parquet")) if slide_folder.exists() else []
+        tile_files = list(tile_folder.glob("*.parquet")) if tile_folder.exists() else []
 
         if slide_files:
-            slide_dsets.append(HFDataset.from_parquet([str(f) for f in slide_files]))
+            slide_dsets.append(HFDataset.from_parquet([str(p) for p in slide_files]))
 
         if tile_files:
-            tile_dsets.append(HFDataset.from_parquet([str(f) for f in tile_files]))
+            tile_dsets.append(HFDataset.from_parquet([str(p) for p in tile_files]))
 
-    if not slide_dsets or not tile_dsets:
-        raise ValueError("No parquet files found in MLflow artifacts")
+    if not slide_dsets:
+        raise ValueError("No slide parquet files found in MLflow artifacts")
+
+    if not tile_dsets:
+        raise ValueError("No tile parquet files found in MLflow artifacts")
 
     slides = concatenate_datasets(slide_dsets)
     tiles = concatenate_datasets(tile_dsets)
 
     return slides, tiles
 
-    return slides, tiles
 
 
 class BaseSingleSlideDataset(Dataset[LabeledTileSample | UnlabeledTileSample], ABC):
