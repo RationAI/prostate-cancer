@@ -22,7 +22,7 @@ def get_slide_name(slide_metadata: TilingSlideMetadata) -> str:
     return Path(slide_metadata.get("path")).stem
 
 
-def download_artifacts(tiling_uris: Iterable[str]) -> Tuple[HFDataset, HFDataset]:
+def download_artifacts(tiling_uris: Iterable[str]) -> tuple[HFDataset, HFDataset]:
     slide_dsets = []
     tile_dsets = []
 
