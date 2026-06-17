@@ -6,7 +6,8 @@ from typing import TypeVar, cast
 import mlflow
 from albumentations.core.composition import TransformType
 from datasets import Dataset as HFDataset, concatenate_datasets
-from torch.utils.data import Dataset, ConcatDataset
+from torch.utils.data import Dataset
+from rationai.mlkit.data.datasets import MetaTiledSlides
 
 from prostate_cancer.typing import (
     LabeledTileSample,
@@ -41,7 +42,9 @@ def download_artifacts(tiling_uris: Iterable[str]) -> tuple[HFDataset, HFDataset
         slide_folder = root / "slides"
         tile_folder = root / "tiles"
 
-        slide_files = list(slide_folder.glob("*.parquet")) if slide_folder.exists() else []
+        slide_files = (
+            list(slide_folder.glob("*.parquet")) if slide_folder.exists() else []
+        )
         tile_files = list(tile_folder.glob("*.parquet")) if tile_folder.exists() else []
 
         if slide_files:
@@ -62,7 +65,6 @@ def download_artifacts(tiling_uris: Iterable[str]) -> tuple[HFDataset, HFDataset
     return slides, tiles
 
 
-
 class BaseSingleSlideDataset(Dataset[LabeledTileSample | UnlabeledTileSample], ABC):
     def __init__(
         self,
@@ -80,11 +82,8 @@ class BaseSingleSlideDataset(Dataset[LabeledTileSample | UnlabeledTileSample], A
             )
 
 
-class BaseTileDataset(ConcatDataset[T]):
+class BaseTileDataset(MetaTiledSlides[T]):
     """This class abstracts the functionality shared across embedding and image datasets."""
-
-    slides: HFDataset
-    tiles: HFDataset
 
     def __init__(
         self,
@@ -100,12 +99,7 @@ class BaseTileDataset(ConcatDataset[T]):
         self.transforms = transforms
         self.single_slide_ds_cls = single_slide_ds_cls
 
-        self.slides, self.tiles = download_artifacts(uris)
-        self.tiles_by_slide: dict[bytes, list[int]] = {}
-        for i, sid in enumerate(self.tiles["slide_id"]):
-            self.tiles_by_slide.setdefault(sid, []).append(i)
-
-        super().__init__(self.generate_datasets())
+        super().__init__(uris=uris)
 
     def filter_non_carcinoma(self, tiles: HFDataset) -> HFDataset:
         assert self.labeled, "Only allowed for labeled dataset"
@@ -123,11 +117,6 @@ class BaseTileDataset(ConcatDataset[T]):
                 not (slide_carcinoma[row["slide_id"]] == 1 and row["carcinoma"] == 0)
             )
         )
-
-    def filter_tiles_by_slide(self, id: bytes) -> HFDataset:
-        tile_indices = self.tiles_by_slide[id]
-        slide_tiles = self.tiles.select(tile_indices)
-        return slide_tiles
 
     def generate_datasets(self) -> Iterable[Dataset[T]]:
 

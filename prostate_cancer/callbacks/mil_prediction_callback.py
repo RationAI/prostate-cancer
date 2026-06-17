@@ -20,7 +20,9 @@ def min_max_normalization(tensor: torch.Tensor) -> torch.Tensor:
 
 
 class MILPredictionCallback(Callback):
-    def setup(self, trainer: Trainer, pl_module: LightningModule, stage: str | None=None) -> None:
+    def setup(
+        self, trainer: Trainer, pl_module: LightningModule, stage: str | None = None
+    ) -> None:
         if not hasattr(trainer, "datamodule"):
             raise ValueError("Trainer should have datamodule attribute")
 
