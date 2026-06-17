@@ -26,10 +26,6 @@ class BaseSingleSlideDataset(Dataset[LabeledTileSample | UnlabeledTileSample], A
         include_label: bool,
     ) -> None:
         super().__init__()
-        assert "embedding" in tiles.column_names, (
-            "Embeddings Dataset requires embedding column"
-        )
-
         self.include_label = include_label
         self.slide_metadata = slide_metadata
         self.tiles = tiles
