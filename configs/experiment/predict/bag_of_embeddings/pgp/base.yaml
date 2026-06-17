@@ -8,4 +8,5 @@ defaults:
 
 datamodule:
   predict:
-    embeddings_uri: ${predict_data.pgp_embeddings_uri}
+    uris:
+      - ${predict_data.tiles_filtered_w_pgp_uri_224}

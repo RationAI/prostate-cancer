@@ -1,17 +1,15 @@
 from collections.abc import Iterable
-from typing import TypeVar, cast
+from typing import TypeVar
 
 import pandas as pd
 import torch
 from albumentations.core.composition import TransformType
 from albumentations.pytorch import ToTensorV2
 from rationai.mlkit.data.datasets import OpenSlideTilesDataset
-from torch.utils.data import Dataset
 
 from prostate_cancer.datamodule.datasets.base import (
-    FilterableDataset,
-    filter_tiles_by_thresholds,
-    get_slide_name,
+    BaseSingleSlideDataset,
+    BaseTileDataset,
 )
 from prostate_cancer.typing import LabeledTileSample, TileMetadata, UnlabeledTileSample
 
@@ -19,11 +17,10 @@ from prostate_cancer.typing import LabeledTileSample, TileMetadata, UnlabeledTil
 T = TypeVar("T", covariant=True)
 
 
-class TilesDataset(FilterableDataset[T]):
+class TilesDataset(BaseTileDataset[T]):
     def __init__(
         self,
         uris: Iterable[str],
-        thresholds: dict[str, float],
         carcinoma_roi_t: float | None = None,
         stratified_filter: bool | None = None,
         transforms: TransformType | None = None,
@@ -31,28 +28,10 @@ class TilesDataset(FilterableDataset[T]):
         self.transforms = transforms
         super().__init__(
             uris=uris,
-            thresholds=thresholds,
+            single_slide_ds_cls=SlideTiles,
             carcinoma_roi_t=carcinoma_roi_t,
             stratified_filter=stratified_filter,
-        )
-
-    def generate_datasets(self) -> Iterable[Dataset[T]]:
-        self.tiles = (
-            self.prepare_tiles(self.tiles)
-            if self.labeled
-            else filter_tiles_by_thresholds(self.tiles, self.thresholds)
-        )
-        return (
-            cast(
-                "Dataset[T]",
-                SlideTiles(
-                    slide,
-                    tiles=self.filter_tiles_by_slide(slide["id"]),
-                    include_label=self.labeled,
-                    transforms=self.transforms,
-                ),
-            )
-            for _, slide in self.slides.iterrows()
+            transforms=transforms,
         )
 
 
@@ -62,7 +41,7 @@ class LabeledTilesDataset(TilesDataset[LabeledTileSample]): ...
 class UnlabeledTilesDataset(TilesDataset[UnlabeledTileSample]): ...
 
 
-class SlideTiles(Dataset[LabeledTileSample | UnlabeledTileSample]):
+class SlideTiles(BaseSingleSlideDataset):
     def __init__(
         self,
         slide_metadata: pd.Series,
@@ -70,9 +49,11 @@ class SlideTiles(Dataset[LabeledTileSample | UnlabeledTileSample]):
         include_label: bool,
         transforms: TransformType | None = None,
     ) -> None:
-        super().__init__()
-
-        self.slide_metadata = slide_metadata
+        super().__init__(
+            slide_metadata=slide_metadata,
+            tiles=tiles,
+            include_label=include_label,
+        )
         self.slide_tiles = OpenSlideTilesDataset(
             slide_path=slide_metadata.path,
             level=slide_metadata.level,
@@ -81,13 +62,7 @@ class SlideTiles(Dataset[LabeledTileSample | UnlabeledTileSample]):
             tiles=tiles,
         )
         self.transforms = transforms
-        self.include_label = include_label
         self.to_tensor = ToTensorV2()
-
-        if len(tiles) == 0:
-            print(
-                f"Warning: No tiles found for slide {get_slide_name(slide_metadata)}."
-            )
 
     def __len__(self) -> int:
         return len(self.slide_tiles)

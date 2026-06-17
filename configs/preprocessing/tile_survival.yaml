@@ -1,6 +1,0 @@
-# @package _global_
-
-output_path: ${prostate_cancer_artifacts}/tile_survival/${data.data_name}
-max_concurrent: 5
-tile_uris: []
-use_case: Tile Survival

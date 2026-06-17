@@ -8,4 +8,5 @@ defaults:
 
 datamodule:
   test:
-    embeddings_uri: ${test_data.virchow2_embeddings_uri}
+    uris:
+      - ${test_data.tiles_filtered_w_virchow2_uri_224}

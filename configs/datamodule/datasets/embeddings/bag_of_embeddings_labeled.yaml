@@ -1,4 +1,3 @@
 _target_: prostate_cancer.datamodule.datasets.LabeledBagOfEmbeddingsDataset
 uris: ???
-thresholds: ${thresholds}
-embeddings_uri: ???
+carcinoma_roi_t: ${thresholds.carcinoma_roi_t}

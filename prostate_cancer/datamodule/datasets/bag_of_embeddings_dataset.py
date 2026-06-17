@@ -11,7 +11,6 @@ import torch
 import torch.nn.functional as F
 from torch.utils.data import Dataset
 
-from prostate_cancer.datamodule.datasets.base import filter_tiles_by_thresholds
 from prostate_cancer.typing import (
     LabeledBagOfTilesSample,
     SlideMetadata,
@@ -22,37 +21,28 @@ from prostate_cancer.typing import (
 T = TypeVar("T", bound=LabeledBagOfTilesSample | UnlabeledBagOfTilesSample)
 
 
-def get_embedding_ceiling(tiles: pd.DataFrame, thresholds: dict[str, float]) -> int:
-    filtered_tiles = filter_tiles_by_thresholds(tiles, thresholds)
-    return filtered_tiles["slide_id"].value_counts().max()
-
-
 class BagOfEmbeddingsDataset(Dataset[T], Generic[T]):
     def __init__(
         self,
-        thresholds: dict[str, float],
         uris: Iterable[str],
-        embeddings_uri: str,
         padding: bool = True,
-        include_labels: bool = True,
+        carcinoma_roi_t: float | None = None,
     ) -> None:
-        self.thresholds = thresholds
-        self.include_labels = include_labels
-        self.slides, self.tiles, self.embeddings_folder = self.download_artifacts(
-            uris, embeddings_uri
-        )
+        self.include_labels = carcinoma_roi_t is not None
+        self.carcinoma_roi_t = carcinoma_roi_t
+        self.slides, self.tiles = self.download_artifacts(uris)
 
-        if include_labels:
-            self.tiles["carcinoma"] = self.tiles[
-                "carcinoma_roi_percentage"
-            ] > self.thresholds.get("carcinoma_roi_t")
+        if self.include_labels:
+            self.tiles["carcinoma"] = (
+                self.tiles["carcinoma_roi_percentage"] > self.carcinoma_roi_t
+            )
 
         self.padding = padding
-        self.max_embeddings = get_embedding_ceiling(self.tiles, self.thresholds)
+        self.max_embeddings = self.tiles["slide_id"].value_counts().max()
 
     def download_artifacts(
-        self, tiling_uris: Iterable[str], embeddings_uri: str
-    ) -> tuple[pd.DataFrame, pd.DataFrame, Path]:
+        self, tiling_uris: Iterable[str]
+    ) -> tuple[pd.DataFrame, pd.DataFrame]:
         slide_dfs = []
         tile_dfs = []
 
@@ -61,12 +51,9 @@ class BagOfEmbeddingsDataset(Dataset[T], Generic[T]):
             slide_dfs.append(pd.read_parquet(tiling_folder / "slides.parquet"))
             tile_dfs.append(pd.read_parquet(tiling_folder / "tiles.parquet"))
 
-        embeddings_dir = Path(mlflow.artifacts.download_artifacts(embeddings_uri))
-
         return (
             pd.concat(slide_dfs, ignore_index=True),
             pd.concat(tile_dfs, ignore_index=True),
-            embeddings_dir,
         )
 
     def __len__(self) -> int:
@@ -75,17 +62,9 @@ class BagOfEmbeddingsDataset(Dataset[T], Generic[T]):
     def __getitem__(self, idx: int) -> T:
         slide_metadata = self.slides.iloc[idx]
         slide_name = Path(slide_metadata.path).stem
-        slide_embeddings = torch.load(
-            self.embeddings_folder / Path(slide_name).with_suffix(".pt"),
-            map_location="cpu",
-        )
 
-        slide_tiles = self.tiles[
-            self.tiles["slide_id"] == slide_metadata.id
-        ].reset_index(drop=True)
-        assert len(slide_embeddings) == len(slide_tiles), "Size mismatch"
-        filtered_tiles = filter_tiles_by_thresholds(slide_tiles, self.thresholds)
-        slide_embeddings = slide_embeddings[filtered_tiles.index.tolist()]
+        slide_tiles = self.tiles[self.tiles["slide_id"] == slide_metadata.id]
+        slide_embeddings = torch.tensor(slide_tiles["embedding"])
 
         pad_amount = self.max_embeddings - slide_embeddings.shape[0]
         assert pad_amount >= 0, "Invalid padding"
@@ -97,8 +76,8 @@ class BagOfEmbeddingsDataset(Dataset[T], Generic[T]):
             slide_id=slide_metadata["id"],
             slide_name=slide_name,
             slide_path=slide_metadata["path"],
-            xs=torch.from_numpy(filtered_tiles["x"].to_numpy()),
-            ys=torch.from_numpy(filtered_tiles["y"].to_numpy()),
+            xs=torch.from_numpy(slide_tiles["x"].to_numpy()),
+            ys=torch.from_numpy(slide_tiles["y"].to_numpy()),
         )
 
         if not self.include_labels:
@@ -107,8 +86,8 @@ class BagOfEmbeddingsDataset(Dataset[T], Generic[T]):
         sl_label = torch.tensor(slide_metadata["carcinoma"]).float()
 
         tl_labels = torch.zeros(len(slide_embeddings)).float()
-        tl_labels[: len(filtered_tiles)] = torch.tensor(
-            filtered_tiles["carcinoma"].to_numpy()
+        tl_labels[: len(slide_tiles)] = torch.tensor(
+            slide_tiles["carcinoma"].to_numpy()
         ).float()
 
         return slide_embeddings, tl_labels, sl_label, metadata  # type: ignore[return-value]
@@ -117,17 +96,14 @@ class BagOfEmbeddingsDataset(Dataset[T], Generic[T]):
 class LabeledBagOfEmbeddingsDataset(BagOfEmbeddingsDataset[LabeledBagOfTilesSample]):
     def __init__(
         self,
-        thresholds: dict[str, float],
         uris: Iterable[str],
-        embeddings_uri: str,
+        carcinoma_roi_t: float,
         padding: bool = True,
     ) -> None:
         super().__init__(
-            thresholds=thresholds,
             uris=uris,
-            embeddings_uri=embeddings_uri,
             padding=padding,
-            include_labels=True,
+            carcinoma_roi_t=carcinoma_roi_t,
         )
 
 
@@ -136,15 +112,10 @@ class UnlabeledBagOfEmbeddingsDataset(
 ):
     def __init__(
         self,
-        thresholds: dict[str, float],
         uris: Iterable[str],
-        embeddings_uri: str,
         padding: bool = True,
     ) -> None:
         super().__init__(
-            thresholds=thresholds,
             uris=uris,
-            embeddings_uri=embeddings_uri,
             padding=padding,
-            include_labels=False,
         )
