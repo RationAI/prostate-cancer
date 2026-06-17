@@ -23,20 +23,28 @@ def get_slide_name(slide_metadata: TilingSlideMetadata) -> str:
 
 
 def download_artifacts(tiling_uris: Iterable[str]) -> tuple[HFDataset, HFDataset]:
-
     slide_dsets = []
     tile_dsets = []
 
     for tiling_uri in tiling_uris:
         root = Path(mlflow.artifacts.download_artifacts(tiling_uri))
 
-        # Load ALL parquet files in folders
-        slide_dsets.append(HFDataset.from_parquet(str(root / "slides/*.parquet")))
+        slide_files = list((root / "slides").glob("*.parquet"))
+        tile_files = list((root / "tiles").glob("*.parquet"))
 
-        tile_dsets.append(HFDataset.from_parquet(str(root / "tiles/*.parquet")))
+        if slide_files:
+            slide_dsets.append(HFDataset.from_parquet([str(f) for f in slide_files]))
+
+        if tile_files:
+            tile_dsets.append(HFDataset.from_parquet([str(f) for f in tile_files]))
+
+    if not slide_dsets or not tile_dsets:
+        raise ValueError("No parquet files found in MLflow artifacts")
 
     slides = concatenate_datasets(slide_dsets)
     tiles = concatenate_datasets(tile_dsets)
+
+    return slides, tiles
 
     return slides, tiles
 
