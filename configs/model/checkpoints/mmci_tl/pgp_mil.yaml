@@ -1,0 +1,9 @@
+defaults:
+  - base
+  - _self_
+
+tile_threshold: 0.5
+slide_threshold: 0.5
+
+checkpoint: "mlflow-artifacts:/65/7cb992adfe4b422790becc5984ff2a6f/artifacts/checkpoints/epoch=8-step=1583/checkpoint.ckpt"
+model_name: "PGP (Hybrid-MIL)"

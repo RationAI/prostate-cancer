@@ -13,11 +13,11 @@ from rationai.mlkit.lightning.callbacks import MultiloaderLifecycle
 from torchvision.transforms import Resize
 
 from prostate_cancer.cnn_model import CNNProstateModel
-from prostate_cancer.typing import LabeledSampleBatch
+from prostate_cancer.typing import LabeledTileSampleBatch
 
 
 if TYPE_CHECKING:
-    from prostate_cancer.datamodule.data_module import DataModule
+    from prostate_cancer.datamodule import TileDataModule
     from prostate_cancer.modeling.decode_head import BinaryClassifier
 
 
@@ -42,7 +42,7 @@ class CAMExplainer(MultiloaderLifecycle):
         if not hasattr(trainer, "datamodule"):
             raise ValueError("Trainer should have datamodule attribute")
 
-        datamodule = cast("DataModule", trainer.datamodule)
+        datamodule = cast("TileDataModule", trainer.datamodule)
         slide = cast("pd.Series", datamodule.test.slides.iloc[dataloader_idx])
 
         self.save_dir = "cam_explanations"
@@ -82,7 +82,7 @@ class CAMExplainer(MultiloaderLifecycle):
         trainer: pl.Trainer,
         pl_module: pl.LightningModule,
         outputs: Any,
-        batch: LabeledSampleBatch,
+        batch: LabeledTileSampleBatch,
         batch_idx: int,
         dataloader_idx: int = 0,
     ) -> None:

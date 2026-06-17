@@ -10,11 +10,11 @@ from hydra.utils import get_class
 from rationai.mlkit.lightning.callbacks import MultiloaderLifecycle
 from rationai.mlkit.metrics.aggregators import Aggregator
 
-from prostate_cancer.typing import UnlabeledSampleBatch
+from prostate_cancer.typing import UnlabeledTileSampleBatch
 
 
 if TYPE_CHECKING:
-    from prostate_cancer.datamodule import DataModule
+    from prostate_cancer.datamodule import TileDataModule
 
 
 class EstimationCallback(MultiloaderLifecycle):
@@ -47,7 +47,7 @@ class EstimationCallback(MultiloaderLifecycle):
                 )
             )
 
-        datamodule = cast("DataModule", trainer.datamodule)
+        datamodule = cast("TileDataModule", trainer.datamodule)
         self.slide = cast("pd.Series", datamodule.predict.slides.iloc[dataloader_idx])
 
     def on_predict_batch_end(
@@ -55,7 +55,7 @@ class EstimationCallback(MultiloaderLifecycle):
         trainer: pl.Trainer,
         pl_module: pl.LightningModule,
         outputs: torch.Tensor,
-        batch: UnlabeledSampleBatch,
+        batch: UnlabeledTileSampleBatch,
         batch_idx: int,
         dataloader_idx: int = 0,
     ) -> None:

@@ -10,20 +10,19 @@ from torch.utils.data import Dataset
 
 from prostate_cancer.datamodule.datasets.base import (
     FilterableDataset,
+    filter_tiles_by_thresholds,
     get_slide_name,
 )
-from prostate_cancer.typing import LabeledSample, Metadata, UnlabeledSample
+from prostate_cancer.typing import LabeledTileSample, TileMetadata, UnlabeledTileSample
 
 
-SlideMetadata: TypeAlias = pd.Series
+SlideDfMetadata: TypeAlias = pd.Series
 
 
 T = TypeVar("T", covariant=True)
 
 
 class EmbeddingsDataset(FilterableDataset[T]):
-    """This dataset class wraps labeled gigapath features for all the slides in given URIs."""
-
     def __init__(
         self,
         uris: Iterable[str],
@@ -74,7 +73,7 @@ class EmbeddingsDataset(FilterableDataset[T]):
         return datasets
 
     def _filter_tiles_embeddings_by_slide(
-        self, slide: SlideMetadata
+        self, slide: SlideDfMetadata
     ) -> tuple[pd.DataFrame, torch.Tensor]:
         slide_tiles = (
             self.tiles[self.tiles["slide_id"] == slide["id"]]
@@ -96,21 +95,20 @@ class EmbeddingsDataset(FilterableDataset[T]):
         slide_tiles = (
             self.prepare_tiles(slide_tiles)
             if self.labeled
-            else self.filter_tiles_by_thresholds(slide_tiles)
+            else filter_tiles_by_thresholds(slide_tiles, self.thresholds)
         )
         slide_embeddings = slide_embeddings[slide_tiles.index.tolist()]
         return slide_tiles, slide_embeddings
 
 
-class LabeledEmbeddingsDataset(EmbeddingsDataset[LabeledSample]): ...
+class LabeledEmbeddingsDataset(EmbeddingsDataset[LabeledTileSample]): ...
 
 
-class UnlabeledEmbeddingsDataset(EmbeddingsDataset[UnlabeledSample]): ...
+class UnlabeledEmbeddingsDataset(EmbeddingsDataset[UnlabeledTileSample]): ...
 
 
-class _TileEmbeddingsSlide(Dataset[LabeledSample | UnlabeledSample]):
-    """This dataset class provides gigapath features for given slide (and optionally includes label)."""
-
+# dataset of tile embeddings for a single slide
+class _TileEmbeddingsSlide(Dataset[LabeledTileSample | UnlabeledTileSample]):
     def __init__(
         self,
         slide_metadata: pd.Series,
@@ -123,15 +121,17 @@ class _TileEmbeddingsSlide(Dataset[LabeledSample | UnlabeledSample]):
         self.slide_metadata = slide_metadata
         self.tiles = tiles
         self.embeddings = embeddings
+        assert len(self.tiles) == len(self.embeddings), (
+            "Tiles and embeddings not aligned"
+        )
 
     def __len__(self) -> int:
-        assert len(self.tiles) == len(self.embeddings)
         return len(self.tiles)
 
-    def __getitem__(self, idx: int) -> LabeledSample | UnlabeledSample:
+    def __getitem__(self, idx: int) -> LabeledTileSample | UnlabeledTileSample:
         vector = self.embeddings[idx]
         tile = self.tiles.iloc[idx]
-        metadata = Metadata(
+        metadata = TileMetadata(
             slide=get_slide_name(self.slide_metadata), x=tile["x"], y=tile["y"]
         )
 

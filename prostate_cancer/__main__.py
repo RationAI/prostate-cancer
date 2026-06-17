@@ -8,8 +8,6 @@ from omegaconf import DictConfig, OmegaConf
 from rationai.mlkit import Trainer, autolog
 from rationai.mlkit.lightning.loggers.mlflow import MLFlowLogger
 
-from prostate_cancer.datamodule import DataModule
-
 
 OmegaConf.register_new_resolver(
     "random_seed", lambda: randint(0, 2**31), use_cache=True
@@ -30,8 +28,8 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
     data = hydra.utils.instantiate(
         config.datamodule,
         _recursive_=False,  # to avoid instantiating all the datasets
-        _target_=DataModule,
     )
+
     model = hydra.utils.instantiate(
         config.model
     )  # Model target is required in the config file

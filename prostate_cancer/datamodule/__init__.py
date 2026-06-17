@@ -1,4 +1,5 @@
-from prostate_cancer.datamodule.data_module import DataModule
+from prostate_cancer.datamodule.bag_of_tiles_data_module import BagOfTilesDataModule
+from prostate_cancer.datamodule.tile_data_module import TileDataModule
 
 
-__all__ = ["DataModule"]
+__all__ = ["BagOfTilesDataModule", "TileDataModule"]

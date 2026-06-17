@@ -6,19 +6,7 @@ from torch.utils.data import WeightedRandomSampler
 from prostate_cancer.datamodule.datasets import LabeledTilesDataset
 
 
-class StratifiedWeightedRandomSampler(WeightedRandomSampler):
-    """Weighted Random Sampler with weights based on the class distribution.
-
-    This sampler assigns weights to each sample in the dataset based on the inverse of the class frequency.
-    This ensures that classes with fewer samples are given higher weights, and classes with more samples
-    are given lower weights. This helps in balancing the dataset during sampling, especially when there
-    is a class imbalance.
-
-    Arguments:
-        dataset (ProstateCancer): ProstateCancer dataset
-        replacement (bool): If True, samples are drawn with replacement. Default is True.
-    """
-
+class TileStratifiedWeightedRandomSampler(WeightedRandomSampler):
     def __init__(
         self, dataset: LabeledTilesDataset, target_col: str, replacement: bool = True
     ) -> None:
