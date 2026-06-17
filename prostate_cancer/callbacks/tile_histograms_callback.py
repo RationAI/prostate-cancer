@@ -8,7 +8,7 @@ from lightning import Callback, LightningModule, Trainer
 from numpy.typing import NDArray
 from rationai.mlkit.lightning.loggers import MLFlowLogger
 
-from prostate_cancer.typing import LabeledSampleBatch
+from prostate_cancer.typing import LabeledTileSampleBatch
 
 
 class TileHistogramsCallback(Callback):
@@ -23,7 +23,7 @@ class TileHistogramsCallback(Callback):
         trainer: Trainer,
         pl_module: LightningModule,
         outputs: Any,
-        batch: LabeledSampleBatch,
+        batch: LabeledTileSampleBatch,
         batch_idx: int,
         dataloader_idx: int = 0,
     ) -> None:

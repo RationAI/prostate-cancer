@@ -1,0 +1,9 @@
+defaults:
+  - base
+  - _self_
+
+tile_threshold: 0.5
+slide_threshold: 0.5
+
+checkpoint: "mlflow-artifacts:/65/5e0c1d4699ca49c4938baf3c65e7f61c/artifacts/checkpoints/epoch=6-step=1176/checkpoint.ckpt"
+model_name: "Virchow2 (Hybrid-MIL)"
