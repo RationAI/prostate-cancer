@@ -1,6 +1,6 @@
 from copy import deepcopy
 from pathlib import Path
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, cast
 
 import lightning.pytorch as pl
 import mlflow
@@ -21,6 +21,18 @@ class AggregatorCallback(MultiloaderLifecycle):
         super().__init__()
         self.aggregator_original = aggregator
 
+    def setup(
+        self,
+        trainer: pl.Trainer,
+        pl_module: pl.LightningModule,
+        stage: str | None = None,
+    ) -> None:
+        self.table = {
+            "slide_name": [],
+            "prediction": [],
+            "target": [],
+        }
+
     def on_predict_dataloader_start(
         self, trainer: pl.Trainer, pl_module: pl.LightningModule, dataloader_idx: int
     ) -> None:
@@ -32,11 +44,6 @@ class AggregatorCallback(MultiloaderLifecycle):
         self.slide = cast(
             "TilingSlideMetadata", datamodule.predict.slides[dataloader_idx]
         )
-        self.table: dict[str, Any] = {
-            "slide_name": [],
-            "prediction": [],
-            "target": [],
-        }
 
     def on_predict_batch_end(
         self,
