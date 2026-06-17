@@ -1,0 +1,5 @@
+# @package _global_
+
+defaults:
+  - /data/mmci/sl_group_2@data
+  - _self_

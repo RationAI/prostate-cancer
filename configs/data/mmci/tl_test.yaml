@@ -4,9 +4,15 @@ defaults:
 
 tiles_uri_512: "mlflow-artifacts:/65/c47cd842fbf14bf399cd4aca43af3127/artifacts/MMCI TL Test 512"
 tiles_uri_224: "mlflow-artifacts:/65/74c7b6e1a10444688910b8835adf4208/artifacts/MMCI TL Test 224"
+tiles_filtered_uri_512: "mlflow-artifacts:/65/f541928fe7e3484fa40321a05745f66d/artifacts/MMCI TL Test_512"
+tiles_filtered_uri_224: "mlflow-artifacts:/65/f541928fe7e3484fa40321a05745f66d/artifacts/MMCI TL Test_224"
+tiles_filtered_w_virchow2_uri_224: "mlflow-artifacts:/65/20ceeaf225294dbe98b554e678dce688/artifacts/MMCI TL Test_sharded"
+tiles_filtered_w_pgp_uri_224: "mlflow-artifacts:/65/e6f6a9738d9349b5ba256ae5cf4668fa/artifacts/MMCI TL Test_sharded"
 
 pgp_embeddings_uri: "mlflow-artifacts:/65/177737375ce349ecaee630dbae50e338/artifacts/MMCI TL Test 224"
 virchow2_embeddings_uri: "mlflow-artifacts:/65/beab5f8f21f14beb85b32a3180fa1798/artifacts/MMCI TL Test 224"
+pgp_embeddings_filtered_uri: "mlflow-artifacts:/65/552ebf9c337a44abaf5d3ded4f501622/artifacts/MMCI TL Test_pgp embeddings"
+virchow2_embeddings_filtered_uri: "mlflow-artifacts:/65/552ebf9c337a44abaf5d3ded4f501622/artifacts/MMCI TL Test_virchow2 embeddings"
 
 metadata_table: "mlflow-artifacts:/65/bfc694d7d3234720bfb699a6504ae7b2/artifacts/mmci_tl_test_data.csv"
 

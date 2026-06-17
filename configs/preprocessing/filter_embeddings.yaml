@@ -1,0 +1,5 @@
+# @package _global_
+
+data: ??? # instance from data/ directory
+
+use_case: "Filter Embeddings"
