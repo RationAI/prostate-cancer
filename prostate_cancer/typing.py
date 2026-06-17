@@ -4,15 +4,18 @@ from torch import Tensor
 
 
 class TilingSlideMetadata(TypedDict):
-    tile_x: int
-    tile_y: int
+    id: bytes
     path: str
-    slide_id: bytes
-    level: int
+    extent_x: int
+    extent_y: int
     tile_extent_x: int
     tile_extent_y: int
+    stride_x: int
+    stride_y: int
     mpp_x: float
     mpp_y: float
+    level: int
+    downsample: float
     carcinoma: bool
 
 

@@ -7,7 +7,7 @@ import pandas as pd
 import torch
 from rationai.mlkit.lightning.callbacks import MultiloaderLifecycle
 
-from prostate_cancer.typing import UnlabeledTileSampleBatch
+from prostate_cancer.typing import TilingSlideMetadata, UnlabeledTileSampleBatch
 
 
 if TYPE_CHECKING:
@@ -28,7 +28,9 @@ class CarcinomaPredictionTableCallback(MultiloaderLifecycle):
             raise ValueError("Trainer should have datamodule attribute")
 
         datamodule = cast("TileDataModule", trainer.datamodule)
-        self.slide = cast("pd.Series", datamodule.predict.slides.iloc[dataloader_idx])
+        self.slide = cast(
+            "TilingSlideMetadata", datamodule.predict.slides[dataloader_idx]
+        )
         self.table: list[dict[str, Any]] = []
 
     def on_predict_batch_end(
@@ -45,7 +47,7 @@ class CarcinomaPredictionTableCallback(MultiloaderLifecycle):
         for i, prediction in enumerate(outputs):
             self.table.append(
                 {
-                    "slide": Path(self.slide.path).stem,
+                    "slide": Path(self.slide["path"]).stem,
                     "x": metadata["x"][i].item(),
                     "y": metadata["y"][i].item(),
                     "prediction": prediction.item(),

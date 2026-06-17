@@ -49,7 +49,6 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
         for uri in uris:
             dataset = UnlabeledTilesDataset(
                 uris=(uri,),
-                thresholds=config.thresholds,
                 transforms=A.Compose(
                     [
                         A.Normalize(

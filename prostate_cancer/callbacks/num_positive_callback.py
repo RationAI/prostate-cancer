@@ -1,12 +1,11 @@
 from typing import TYPE_CHECKING, Any, cast
 
 import lightning.pytorch as pl
-import pandas as pd
 from rationai.mlkit.lightning.callbacks import MultiloaderLifecycle
 from rationai.mlkit.lightning.loggers import MLFlowLogger
 
 from prostate_cancer.datamodule.datasets.base import get_slide_name
-from prostate_cancer.typing import UnlabeledTileSampleBatch
+from prostate_cancer.typing import TilingSlideMetadata, UnlabeledTileSampleBatch
 
 
 if TYPE_CHECKING:
@@ -41,7 +40,7 @@ class NumPositiveCallback(MultiloaderLifecycle):
             raise ValueError("Trainer should have datamodule attribute")
 
         datamodule = cast("TileDataModule", trainer.datamodule)
-        slide = cast("pd.Series", datamodule.predict.slides.iloc[dataloader_idx])
+        slide = cast("TilingSlideMetadata", datamodule.predict.slides[dataloader_idx])
         table = {"slide": get_slide_name(slide), "num_positive": self.num_positive}
 
         assert trainer.logger is not None

@@ -8,7 +8,11 @@ from datasets import Dataset as HFDataset
 from rationai.mlkit.data.datasets import MetaTiledSlides
 from torch.utils.data import Dataset
 
-from prostate_cancer.typing import LabeledTileSample, UnlabeledTileSample, TilingSlideMetadata
+from prostate_cancer.typing import (
+    LabeledTileSample,
+    TilingSlideMetadata,
+    UnlabeledTileSample,
+)
 
 
 T = TypeVar("T", covariant=True)

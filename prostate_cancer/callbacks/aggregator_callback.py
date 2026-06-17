@@ -4,12 +4,11 @@ from typing import TYPE_CHECKING, Any, cast
 
 import lightning.pytorch as pl
 import mlflow
-import pandas as pd
 import torch
 from rationai.mlkit.lightning.callbacks import MultiloaderLifecycle
 from rationai.mlkit.metrics.aggregators import Aggregator
 
-from prostate_cancer.typing import UnlabeledTileSampleBatch
+from prostate_cancer.typing import TilingSlideMetadata, UnlabeledTileSampleBatch
 
 
 if TYPE_CHECKING:
@@ -29,7 +28,9 @@ class AggregatorCallback(MultiloaderLifecycle):
         # aggregator cannot be reset, thus, its original state is copied for each slide
         self.aggregator = deepcopy(self.aggregator_original)
         datamodule = cast("TileDataModule", trainer.datamodule)
-        self.slide = cast("pd.Series", datamodule.predict.slides.iloc[dataloader_idx])
+        self.slide = cast(
+            "TilingSlideMetadata", datamodule.predict.slides[dataloader_idx]
+        )
 
     def on_predict_batch_end(
         self,
@@ -57,7 +58,7 @@ class AggregatorCallback(MultiloaderLifecycle):
         # Compute the aggregated results
         pred, _ = self.aggregator.compute()
         table: dict[str, Any] = {
-            "slide_name": Path(self.slide.path).stem,
+            "slide_name": Path(self.slide["path"]).stem,
             "prediction": pred.item(),
         }
 

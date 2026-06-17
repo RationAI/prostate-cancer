@@ -11,7 +11,12 @@ from prostate_cancer.datamodule.datasets.base import (
     BaseSingleSlideDataset,
     BaseTileDataset,
 )
-from prostate_cancer.typing import LabeledTileSample, TileMetadata, UnlabeledTileSample, TilingSlideMetadata
+from prostate_cancer.typing import (
+    LabeledTileSample,
+    TileMetadata,
+    TilingSlideMetadata,
+    UnlabeledTileSample,
+)
 
 
 T = TypeVar("T", covariant=True)

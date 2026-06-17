@@ -3,11 +3,14 @@ from typing import TYPE_CHECKING, Any, cast
 
 import lightning.pytorch as pl
 import mlflow
-import pandas as pd
 from rationai.masks.mask_builders import ScalarMaskBuilder
 from rationai.mlkit.lightning.callbacks import MultiloaderLifecycle
 
-from prostate_cancer.typing import LabeledTileSampleBatch, UnlabeledTileSampleBatch
+from prostate_cancer.typing import (
+    LabeledTileSampleBatch,
+    TilingSlideMetadata,
+    UnlabeledTileSampleBatch,
+)
 
 
 if TYPE_CHECKING:
@@ -30,7 +33,9 @@ class HeatmapCallback(MultiloaderLifecycle):
             raise ValueError("Trainer should have datamodule attribute")
 
         datamodule = cast("TileDataModule", trainer.datamodule)
-        slide = cast("pd.Series", getattr(datamodule, mode).slides.iloc[dataloader_idx])
+        slide = cast(
+            "TilingSlideMetadata", getattr(datamodule, mode).slides[dataloader_idx]
+        )
 
         # Create temporary directory
         tmp_dir = Path("tmp_dir")
@@ -39,13 +44,13 @@ class HeatmapCallback(MultiloaderLifecycle):
         # Initialize the mask builder
         self.mask_builder: ScalarMaskBuilder = ScalarMaskBuilder(
             save_dir=tmp_dir,
-            filename=Path(slide.path).stem,
-            extent_x=slide.extent_x,
-            extent_y=slide.extent_y,
-            mpp_x=slide.mpp_x,
-            mpp_y=slide.mpp_y,
-            extent_tile=slide.tile_extent_x,
-            stride=slide.stride_x,
+            filename=Path(slide["path"]).stem,
+            extent_x=slide["extent_x"],
+            extent_y=slide["extent_y"],
+            mpp_x=slide["mpp_x"],
+            mpp_y=slide["mpp_y"],
+            extent_tile=slide["tile_extent_x"],
+            stride=slide["stride_x"],
         )
 
     def on_test_dataloader_start(

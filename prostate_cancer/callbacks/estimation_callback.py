@@ -4,13 +4,12 @@ from typing import TYPE_CHECKING, Any, cast
 
 import lightning.pytorch as pl
 import mlflow
-import pandas as pd
 import torch
 from hydra.utils import get_class
 from rationai.mlkit.lightning.callbacks import MultiloaderLifecycle
 from rationai.mlkit.metrics.aggregators import Aggregator
 
-from prostate_cancer.typing import UnlabeledTileSampleBatch
+from prostate_cancer.typing import TilingSlideMetadata, UnlabeledTileSampleBatch
 
 
 if TYPE_CHECKING:
@@ -48,7 +47,9 @@ class EstimationCallback(MultiloaderLifecycle):
             )
 
         datamodule = cast("TileDataModule", trainer.datamodule)
-        self.slide = cast("pd.Series", datamodule.predict.slides.iloc[dataloader_idx])
+        self.slide = cast(
+            "TilingSlideMetadata", datamodule.predict.slides[dataloader_idx]
+        )
 
     def on_predict_batch_end(
         self,
@@ -74,7 +75,7 @@ class EstimationCallback(MultiloaderLifecycle):
         self, trainer: pl.Trainer, pl_module: pl.LightningModule, dataloader_idx: int
     ) -> None:
         # Compute the aggregated results for each kernel
-        table: dict[str, Any] = {"slide_name": Path(self.slide.path).stem}
+        table: dict[str, Any] = {"slide_name": Path(self.slide["path"]).stem}
 
         for values, aggregator in zip(
             self.values_product, self.aggregators, strict=True

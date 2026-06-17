@@ -4,7 +4,6 @@ from typing import TYPE_CHECKING, Any, cast
 import lightning
 import lightning.pytorch as pl
 import mlflow
-import pandas as pd
 import pyvips
 import torch
 from rationai.masks import write_big_tiff
@@ -13,7 +12,7 @@ from rationai.mlkit.lightning.callbacks import MultiloaderLifecycle
 from torchvision.transforms import Resize
 
 from prostate_cancer.cnn_model import CNNProstateModel
-from prostate_cancer.typing import LabeledTileSampleBatch
+from prostate_cancer.typing import LabeledTileSampleBatch, TilingSlideMetadata
 
 
 if TYPE_CHECKING:
@@ -43,16 +42,16 @@ class CAMExplainer(MultiloaderLifecycle):
             raise ValueError("Trainer should have datamodule attribute")
 
         datamodule = cast("TileDataModule", trainer.datamodule)
-        slide = cast("pd.Series", datamodule.test.slides.iloc[dataloader_idx])
+        slide = cast("TilingSlideMetadata", datamodule.test.slides[dataloader_idx])
 
         self.save_dir = "cam_explanations"
         self.mask_builder = TileMaskBuilder(
             save_dir=self.save_dir,
-            filename=Path(slide.path).stem,
-            extent_x=slide.extent_x,
-            extent_y=slide.extent_y,
-            mpp_x=slide.mpp_x,
-            mpp_y=slide.mpp_y,
+            filename=Path(slide["path"]).stem,
+            extent_x=slide["extent_x"],
+            extent_y=slide["extent_y"],
+            mpp_x=slide["mpp_x"],
+            mpp_y=slide["mpp_y"],
         )
 
     def on_test_dataloader_end(
