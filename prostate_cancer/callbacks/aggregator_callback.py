@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Any, cast
 
 import lightning.pytorch as pl
 import mlflow
+import pandas as pd
 import torch
 from rationai.mlkit.lightning.callbacks import MultiloaderLifecycle
 from rationai.mlkit.metrics.aggregators import Aggregator
@@ -31,6 +32,11 @@ class AggregatorCallback(MultiloaderLifecycle):
         self.slide = cast(
             "TilingSlideMetadata", datamodule.predict.slides[dataloader_idx]
         )
+        self.table: dict[str, Any] = {
+            "slide_name": [],
+            "prediction": [],
+            "target": [],
+        }
 
     def on_predict_batch_end(
         self,
@@ -57,15 +63,18 @@ class AggregatorCallback(MultiloaderLifecycle):
     ) -> None:
         # Compute the aggregated results
         pred, _ = self.aggregator.compute()
-        table: dict[str, Any] = {
-            "slide_name": Path(self.slide["path"]).stem,
-            "prediction": pred.item(),
-        }
 
+        self.table["slide_name"].append(Path(self.slide["path"]).stem)
+        self.table["prediction"].append(pred.item())
         if "carcinoma" in self.slide:
-            table["target"] = self.slide["carcinoma"]
+            self.table["target"].append(self.slide["carcinoma"])
 
-        mlflow.log_table(
-            table,
-            artifact_file="tables/aggregated_predictions.json",
+    def on_predict_epoch_end(
+        self, trainer: pl.Trainer, pl_module: pl.LightningModule
+    ) -> None:
+        df = pd.DataFrame(self.table)
+        df.to_json("aggregated_predictions.json", orient="split")
+        mlflow.log_artifact(
+            "aggregated_predictions.json",
+            artifact_path="tables",
         )

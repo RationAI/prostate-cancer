@@ -7,16 +7,14 @@ from typing import Generic, TypeVar
 
 import torch
 import torch.nn.functional as F
-
 from torch.utils.data import Dataset
 
+from prostate_cancer.datamodule.datasets.base import download_artifacts
 from prostate_cancer.typing import (
     LabeledBagOfTilesSample,
     SlideMetadata,
     UnlabeledBagOfTilesSample,
 )
-
-from prostate_cancer.datamodule.datasets.base import download_artifacts
 
 
 T = TypeVar("T", bound=LabeledBagOfTilesSample | UnlabeledBagOfTilesSample)
