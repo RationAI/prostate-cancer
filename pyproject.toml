@@ -41,6 +41,7 @@ dependencies = [
     "transformers>=5.7.0",
     "ray[data]>=2.52.1",
     "ipykernel>=7.2.0",
+    "datasets==4.0.0",
 ]
 
 [dependency-groups]
