@@ -29,9 +29,6 @@ def download_artifacts(tiling_uris: Iterable[str]) -> tuple[HFDataset, HFDataset
     for tiling_uri in tiling_uris:
         root = Path(mlflow.artifacts.download_artifacts(tiling_uri))
 
-        # -------------------------------------------------------
-        # CASE 1: FLAT FILES in root
-        # -------------------------------------------------------
         flat_slides = root / "slides.parquet"
         flat_tiles = root / "tiles.parquet"
 
