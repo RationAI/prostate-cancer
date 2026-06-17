@@ -5,12 +5,9 @@ from collections.abc import Iterable
 from pathlib import Path
 from typing import Generic, TypeVar
 
-import mlflow
-import mlflow.artifacts
 import torch
 import torch.nn.functional as F
-from datasets import Dataset as HFDataset
-from datasets import concatenate_datasets
+
 from torch.utils.data import Dataset
 
 from prostate_cancer.typing import (
@@ -18,6 +15,8 @@ from prostate_cancer.typing import (
     SlideMetadata,
     UnlabeledBagOfTilesSample,
 )
+
+from prostate_cancer.datamodule.datasets.base import download_artifacts
 
 
 T = TypeVar("T", bound=LabeledBagOfTilesSample | UnlabeledBagOfTilesSample)
@@ -33,7 +32,7 @@ class BagOfEmbeddingsDataset(Dataset[T], Generic[T]):
         self.include_labels = carcinoma_roi_t is not None
         self.carcinoma_roi_t = carcinoma_roi_t
 
-        self.slides, self.tiles = self.download_artifacts(uris)
+        self.slides, self.tiles = download_artifacts(uris)
 
         if self.include_labels:
             self.tiles = self.tiles.map(
@@ -53,26 +52,6 @@ class BagOfEmbeddingsDataset(Dataset[T], Generic[T]):
 
         for i, sid in enumerate(self.tiles["slide_id"]):
             self.tiles_by_slide.setdefault(sid, []).append(i)
-
-    def download_artifacts(
-        self, tiling_uris: Iterable[str]
-    ) -> tuple[HFDataset, HFDataset]:
-
-        slide_dsets = []
-        tile_dsets = []
-
-        for tiling_uri in tiling_uris:
-            root = Path(mlflow.artifacts.download_artifacts(tiling_uri))
-
-            # Load ALL parquet files in folders
-            slide_dsets.append(HFDataset.from_parquet(str(root / "slides/*.parquet")))
-
-            tile_dsets.append(HFDataset.from_parquet(str(root / "tiles/*.parquet")))
-
-        slides = concatenate_datasets(slide_dsets)
-        tiles = concatenate_datasets(tile_dsets)
-
-        return slides, tiles
 
     def __len__(self) -> int:
         return len(self.slides)
