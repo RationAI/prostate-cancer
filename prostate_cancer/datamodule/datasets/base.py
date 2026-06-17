@@ -3,32 +3,33 @@ from collections.abc import Iterable
 from pathlib import Path
 from typing import TypeVar, cast
 
-import pandas as pd
 from albumentations.core.composition import TransformType
+from datasets import Dataset as HFDataset
 from rationai.mlkit.data.datasets import MetaTiledSlides
 from torch.utils.data import Dataset
 
-from prostate_cancer.typing import LabeledTileSample, UnlabeledTileSample
+from prostate_cancer.typing import LabeledTileSample, UnlabeledTileSample, TilingSlideMetadata
 
 
 T = TypeVar("T", covariant=True)
 
 
-def get_slide_name(slide_metadata: pd.Series) -> str:
-    return Path(slide_metadata.path).stem
+def get_slide_name(slide_metadata: TilingSlideMetadata) -> str:
+    return Path(slide_metadata.get("path")).stem
 
 
 class BaseSingleSlideDataset(Dataset[LabeledTileSample | UnlabeledTileSample], ABC):
     def __init__(
         self,
-        slide_metadata: pd.Series,
-        tiles: pd.DataFrame,
+        slide_metadata: TilingSlideMetadata,
+        tiles: HFDataset,
         include_label: bool,
     ) -> None:
         super().__init__()
-        assert "embedding" in tiles.column, (
+        assert "embedding" in tiles.column_names, (
             "Embeddings Dataset requires embedding column"
         )
+
         self.include_label = include_label
         self.slide_metadata = slide_metadata
         self.tiles = tiles
@@ -40,6 +41,9 @@ class BaseSingleSlideDataset(Dataset[LabeledTileSample | UnlabeledTileSample], A
 
 class BaseTileDataset(MetaTiledSlides[T]):
     """This class abstracts the functionality shared across embedding and image datasets."""
+
+    slides: HFDataset
+    tiles: HFDataset
 
     def __init__(
         self,
@@ -56,22 +60,34 @@ class BaseTileDataset(MetaTiledSlides[T]):
         self.single_slide_ds_cls = single_slide_ds_cls
         super().__init__(uris=uris)
 
-    def filter_non_carcinoma(self, tiles: pd.DataFrame) -> pd.DataFrame:
+    def filter_non_carcinoma(self, tiles: HFDataset) -> HFDataset:
         assert self.labeled, "Only allowed for labeled dataset"
-        tiles_slide_cancer = (
-            tiles["slide_id"]
-            .map(dict(zip(self.slides["id"], self.slides["carcinoma"], strict=True)))
-            .astype(int)
+
+        slide_carcinoma = dict(
+            zip(
+                self.slides["id"],
+                self.slides["carcinoma"],
+                strict=True,
+            )
         )
 
-        return tiles[~((tiles_slide_cancer == 1) & (tiles["carcinoma"] == 0))]
+        return tiles.filter(
+            lambda row: (
+                not (slide_carcinoma[row["slide_id"]] == 1 and row["carcinoma"] == 0)
+            )
+        )
 
     def generate_datasets(self) -> Iterable[Dataset[T]]:
 
         if self.labeled:
-            self.tiles["carcinoma"] = (
-                self.tiles["carcinoma_roi_percentage"] > self.carcinoma_roi_t
+            self.tiles = self.tiles.map(
+                lambda row: {
+                    "carcinoma": (
+                        row["carcinoma_roi_percentage"] > self.carcinoma_roi_t
+                    )
+                }
             )
+
             if self.stratified_filter:
                 self.tiles = self.filter_non_carcinoma(self.tiles)
 
@@ -86,8 +102,8 @@ class BaseTileDataset(MetaTiledSlides[T]):
                         {"transforms": self.transforms}
                         if self.transforms is not None
                         else {}
-                    ),  # avoid sending transforms arg to embeddings dataset
+                    ),
                 ),
             )
-            for _, slide in self.slides.iterrows()
+            for slide in self.slides
         )

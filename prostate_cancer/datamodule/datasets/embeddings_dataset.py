@@ -1,18 +1,15 @@
 from collections.abc import Iterable
-from typing import TypeAlias, TypeVar
+from typing import TypeVar
 
-import pandas as pd
 import torch
+from datasets import Dataset as HFDataset
 
 from prostate_cancer.datamodule.datasets.base import (
     BaseSingleSlideDataset,
     BaseTileDataset,
     get_slide_name,
 )
-from prostate_cancer.typing import LabeledTileSample, TileMetadata, UnlabeledTileSample
-
-
-SlideDfMetadata: TypeAlias = pd.Series
+from prostate_cancer.typing import LabeledTileSample, TileMetadata, UnlabeledTileSample, TilingSlideMetadata
 
 
 T = TypeVar("T", covariant=True)
@@ -42,8 +39,8 @@ class UnlabeledEmbeddingsDataset(EmbeddingsDataset[UnlabeledTileSample]): ...
 class TileEmbeddingsSlide(BaseSingleSlideDataset):
     def __init__(
         self,
-        slide_metadata: pd.Series,
-        tiles: pd.DataFrame,
+        slide_metadata: TilingSlideMetadata,
+        tiles: HFDataset,
         include_label: bool,
     ) -> None:
         super().__init__(
@@ -51,7 +48,7 @@ class TileEmbeddingsSlide(BaseSingleSlideDataset):
             tiles=tiles,
             include_label=include_label,
         )
-        assert "embedding" in tiles.column, (
+        assert "embedding" in tiles.column_names, (
             "Embeddings Dataset requires embedding column"
         )
 
@@ -59,14 +56,18 @@ class TileEmbeddingsSlide(BaseSingleSlideDataset):
         return len(self.tiles)
 
     def __getitem__(self, idx: int) -> LabeledTileSample | UnlabeledTileSample:
-        tile = self.tiles.iloc[idx]
+        tile = self.tiles[idx]
+
         vector = torch.tensor(tile["embedding"])
+
         metadata = TileMetadata(
-            slide=get_slide_name(self.slide_metadata), x=tile["x"], y=tile["y"]
+            slide=get_slide_name(self.slide_metadata),
+            x=tile["x"],
+            y=tile["y"],
         )
 
         if not self.include_label:
             return vector, metadata
 
-        label = torch.tensor([self.tiles.iloc[idx]["carcinoma"]]).float()
+        label = torch.tensor([tile["carcinoma"]]).float()
         return vector, label, metadata
