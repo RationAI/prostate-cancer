@@ -106,6 +106,14 @@ class BaseTileDataset(MetaTiledSlides[T]):
 
         super().__init__(uris=uris)
 
+    def _build_slide_index(self, tiles: HFDataset) -> dict[bytes, list[int]]:
+        index: dict[bytes, list[int]] = defaultdict(list)
+
+        for i, slide_id in enumerate(tiles["slide_id"]):
+            index[slide_id].append(i)
+
+        return dict(index)
+    
     def filter_non_carcinoma(self, tiles: HFDataset) -> HFDataset:
         assert self.labeled, "Only allowed for labeled dataset"
 
@@ -139,14 +147,21 @@ class BaseTileDataset(MetaTiledSlides[T]):
         # after this, global tiles are enhanced with carcinoma and possibly filtered (if labeled stratified case)
         self.tiles = tiles
         self._meta.tiles = tiles
+        slide_index = self._build_slide_index(tiles)
 
         for slide in self.slides:
+            slide_tiles = tiles.select(slide_index.get(slide["id"], []))
+    
             yield cast(
                 "Dataset[T]",
                 self.single_slide_ds_cls(
                     slide,
-                    tiles=filter_tiles(self.tiles, slide["id"]),
+                    tiles=slide_tiles,
                     include_label=self.labeled,
-                    **({"transforms": self.transforms} if self.transforms else {}),
+                    **(
+                        {"transforms": self.transforms}
+                        if self.transforms is not None
+                        else {}
+                    ),
                 ),
             )
