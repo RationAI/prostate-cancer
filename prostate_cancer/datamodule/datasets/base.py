@@ -129,9 +129,15 @@ class BaseTileDataset(MetaTiledSlides[T]):
                     )
                 }
             )
+            self._meta.tiles = self.tiles
+            self._meta._slide_id_to_indices = self._meta._build_tile_index(self.tiles)
 
             if self.stratified_filter:
                 self.tiles = self.filter_non_carcinoma(self.tiles)
+                self._meta.tiles = self.tiles
+                self._meta._slide_id_to_indices = self._meta._build_tile_index(
+                    self.tiles
+                )
 
         return (
             cast(
