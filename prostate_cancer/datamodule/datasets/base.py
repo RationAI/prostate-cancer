@@ -102,49 +102,42 @@ class BaseTileDataset(MetaTiledSlides[T]):
 
         super().__init__(uris=uris)
 
-    def filter_non_carcinoma(self, tiles: HFDataset) -> HFDataset:
+    def filter_non_carcinoma(self, tiles: HFDataset, carcinoma: bool) -> HFDataset:
         assert self.labeled, "Only allowed for labeled dataset"
 
-        slide_carcinoma = dict(
-            zip(
-                self.slides["id"],
-                self.slides["carcinoma"],
-                strict=True,
-            )
-        )
+        # from negative slides, take all tiles
+        if not carcinoma:
+            return tiles
 
-        return tiles.filter(
-            lambda row: (
-                not (slide_carcinoma[row["slide_id"]] == 1 and row["carcinoma"] == 0)
-            )
-        )
+        # from positive slides, take only positive tiles
+        indices = [i for i, row in enumerate(tiles) if row["carcinoma"] == 1]
+
+        return tiles.select(indices)
 
     def generate_datasets(self) -> Iterable[Dataset[T]]:
 
-        if self.labeled:
-            self.tiles = self.tiles.map(
-                lambda row: {
-                    "carcinoma": (
-                        row["carcinoma_roi_percentage"] > self.carcinoma_roi_t
-                    )
-                }
-            )
-            self._meta.tiles = self.tiles
-            self._meta._slide_id_to_indices = self._meta._build_tile_index(self.tiles)
+        for slide in self.slides:
+            slide_tiles = self.filter_tiles_by_slide(slide["id"])
 
-            if self.stratified_filter:
-                self.tiles = self.filter_non_carcinoma(self.tiles)
-                self._meta.tiles = self.tiles
-                self._meta._slide_id_to_indices = self._meta._build_tile_index(
-                    self.tiles
+            if self.labeled:
+                slide_tiles = slide_tiles.map(
+                    lambda row: {
+                        "carcinoma": (
+                            row["carcinoma_roi_percentage"] > self.carcinoma_roi_t
+                        )
+                    }
                 )
 
-        return (
-            cast(
+                if self.stratified_filter:
+                    slide_tiles = self.filter_non_carcinoma(
+                        slide_tiles, slide["carcinoma"]
+                    )
+
+            yield cast(
                 "Dataset[T]",
                 self.single_slide_ds_cls(
                     slide,
-                    tiles=self.filter_tiles_by_slide(slide["id"]),
+                    tiles=slide_tiles,
                     include_label=self.labeled,
                     **(
                         {"transforms": self.transforms}
@@ -153,5 +146,3 @@ class BaseTileDataset(MetaTiledSlides[T]):
                     ),
                 ),
             )
-            for slide in self.slides
-        )
