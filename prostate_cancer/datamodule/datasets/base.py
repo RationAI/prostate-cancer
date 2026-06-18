@@ -83,6 +83,10 @@ class BaseSingleSlideDataset(Dataset[LabeledTileSample | UnlabeledTileSample], A
             )
 
 
+def filter_tiles(tiles: HFDataset, slide_id: bytes) -> HFDataset:
+    return tiles.filter(lambda r: r["slide_id"] == slide_id)
+
+
 class BaseTileDataset(MetaTiledSlides[T]):
     """This class abstracts the functionality shared across embedding and image datasets."""
 
@@ -132,19 +136,17 @@ class BaseTileDataset(MetaTiledSlides[T]):
             if self.stratified_filter:
                 tiles = self.filter_non_carcinoma(tiles)
 
+        # after this, global tiles are enhanced with carcinoma and possibly filtered (if labeled stratified case)
         self.tiles = tiles
         self._meta.tiles = tiles
-        self._meta._slide_id_to_indices = self._meta._build_tile_index(tiles)
 
-        return (
-            cast(
+        for slide in self.slides:
+            yield cast(
                 "Dataset[T]",
                 self.single_slide_ds_cls(
                     slide,
-                    tiles=self.filter_tiles_by_slide(slide["id"]),
+                    tiles=filter_tiles(self.tiles, slide["id"]),
                     include_label=self.labeled,
                     **({"transforms": self.transforms} if self.transforms else {}),
                 ),
             )
-            for slide in self.slides
-        )
