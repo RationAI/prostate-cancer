@@ -4,12 +4,12 @@ import hydra
 import ray
 import torch
 from omegaconf import DictConfig
-from prostate_cancer.datamodule.datasets.tile_dataset import SlideTiles
 from rationai.masks import process_items
 from rationai.mlkit import autolog, with_cli_args
 from rationai.mlkit.lightning.loggers import MLFlowLogger
 
 from prostate_cancer.datamodule.datasets import UnlabeledTilesDataset
+from prostate_cancer.datamodule.datasets.tile_dataset import SlideTiles
 
 
 @ray.remote

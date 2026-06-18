@@ -103,8 +103,7 @@ class EstimationCallback(MultiloaderLifecycle):
             key_str = "_".join(keys)
             self.table[f"pred_{key_str}"].append(pred.item())
 
-        if "carcinoma" in self.slide:
-            self.table["target"].append(self.slide["carcinoma"])
+        self.table["target"].append(self.slide.get("carcinoma", None))
 
     def on_predict_epoch_end(
         self, trainer: pl.Trainer, pl_module: pl.LightningModule

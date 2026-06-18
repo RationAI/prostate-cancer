@@ -73,8 +73,7 @@ class AggregatorCallback(MultiloaderLifecycle):
 
         self.table["slide_name"].append(Path(self.slide["path"]).stem)
         self.table["prediction"].append(pred.item())
-        if "carcinoma" in self.slide:
-            self.table["target"].append(self.slide["carcinoma"])
+        self.table["target"].append(self.slide.get("carcinoma", None))
 
     def on_predict_epoch_end(
         self, trainer: pl.Trainer, pl_module: pl.LightningModule
