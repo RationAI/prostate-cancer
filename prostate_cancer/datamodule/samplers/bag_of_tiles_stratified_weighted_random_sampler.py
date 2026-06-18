@@ -22,7 +22,7 @@ class BagOfTilesStratifiedWeightedRandomSampler(WeightedRandomSampler):
     def _get_weights(self, ds: HFDataset, target_col: str) -> Sequence[float]:
         labels = ds[target_col]
 
-        counts = {}
+        counts: dict[bool, int] = {}
         for v in labels:
             counts[v] = counts.get(v, 0) + 1
 

@@ -45,4 +45,8 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = ["mypy", "ruff", "pre-commit"]
+dev = [
+    "mypy",
+    "ruff",
+    "pre-commit",
+]
