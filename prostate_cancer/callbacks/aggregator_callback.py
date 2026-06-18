@@ -1,6 +1,6 @@
 from copy import deepcopy
 from pathlib import Path
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import lightning.pytorch as pl
 import mlflow
@@ -27,7 +27,7 @@ class AggregatorCallback(MultiloaderLifecycle):
         pl_module: pl.LightningModule,
         stage: str | None = None,
     ) -> None:
-        self.table = {
+        self.table: dict[str, Any] = {
             "slide_name": [],
             "prediction": [],
             "target": [],

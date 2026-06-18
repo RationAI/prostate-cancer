@@ -4,6 +4,7 @@ from typing import TYPE_CHECKING, Any, cast
 
 import lightning.pytorch as pl
 import mlflow
+import pandas as pd
 import torch
 from hydra.utils import get_class
 from rationai.mlkit.lightning.callbacks import MultiloaderLifecycle
@@ -29,6 +30,20 @@ class EstimationCallback(MultiloaderLifecycle):
         self.static = static
         self.param_names = list(to_estimate.keys())
         self.values_product = list(product(*self.to_estimate.values()))
+
+        self.table: dict[str, Any] = {
+            "slide_name": [],
+            "target": [],
+        }
+
+        for values in self.values_product:
+            keys = [
+                f"{self.param_names[i]}={values[i]}"
+                for i in range(len(self.to_estimate))
+            ]
+
+            key_str = "_".join(keys)
+            self.table[f"pred_{key_str}"] = []
 
     def on_predict_dataloader_start(
         self, trainer: pl.Trainer, pl_module: pl.LightningModule, dataloader_idx: int
@@ -75,7 +90,7 @@ class EstimationCallback(MultiloaderLifecycle):
         self, trainer: pl.Trainer, pl_module: pl.LightningModule, dataloader_idx: int
     ) -> None:
         # Compute the aggregated results for each kernel
-        table: dict[str, Any] = {"slide_name": Path(self.slide["path"]).stem}
+        self.table["slide_name"].append(Path(self.slide["path"]).stem)
 
         for values, aggregator in zip(
             self.values_product, self.aggregators, strict=True
@@ -86,12 +101,17 @@ class EstimationCallback(MultiloaderLifecycle):
                 for i in range(len(self.to_estimate))
             ]
             key_str = "_".join(keys)
-            table[f"pred_{key_str}"] = pred.item()
+            self.table[f"pred_{key_str}"].append(pred.item())
 
         if "carcinoma" in self.slide:
-            table["target"] = self.slide["carcinoma"]
+            self.table["target"].append(self.slide["carcinoma"])
 
-        mlflow.log_table(
-            table,
-            artifact_file="tables/aggregated_predictions.json",
+    def on_predict_epoch_end(
+        self, trainer: pl.Trainer, pl_module: pl.LightningModule
+    ) -> None:
+        df = pd.DataFrame(self.table)
+        df.to_json("aggregated_predictions.json", orient="split")
+        mlflow.log_artifact(
+            "aggregated_predictions.json",
+            artifact_path="tables",
         )

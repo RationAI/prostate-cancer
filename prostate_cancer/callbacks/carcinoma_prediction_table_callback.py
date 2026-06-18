@@ -21,6 +21,19 @@ class CarcinomaPredictionTableCallback(MultiloaderLifecycle):
         super().__init__()
         self.threshold = threshold
 
+    def setup(
+        self,
+        trainer: pl.Trainer,
+        pl_module: pl.LightningModule,
+        stage: str | None = None,
+    ) -> None:
+        self.table: dict[str, Any] = {
+            "slide": [],
+            "x": [],
+            "y": [],
+            "prediction": [],
+        }
+
     def on_predict_dataloader_start(
         self, trainer: pl.Trainer, pl_module: pl.LightningModule, dataloader_idx: int
     ) -> None:
@@ -31,7 +44,6 @@ class CarcinomaPredictionTableCallback(MultiloaderLifecycle):
         self.slide = cast(
             "TilingSlideMetadata", datamodule.predict.slides[dataloader_idx]
         )
-        self.table: list[dict[str, Any]] = []
 
     def on_predict_batch_end(
         self,
@@ -45,18 +57,17 @@ class CarcinomaPredictionTableCallback(MultiloaderLifecycle):
         _, metadata = batch
 
         for i, prediction in enumerate(outputs):
-            self.table.append(
-                {
-                    "slide": Path(self.slide["path"]).stem,
-                    "x": metadata["x"][i].item(),
-                    "y": metadata["y"][i].item(),
-                    "prediction": prediction.item(),
-                    "binary_prediction": prediction.item() >= self.threshold,
-                }
-            )
+            self.table["slide"].append(Path(self.slide["path"]).stem)
+            self.table["x"].append(metadata["x"][i].item())
+            self.table["y"].append(metadata["y"][i].item())
+            self.table["prediction"].append(prediction.item())
 
-    def on_predict_dataloader_end(
-        self, trainer: pl.Trainer, pl_module: pl.LightningModule, dataloader_idx: int
+    def on_predict_epoch_end(
+        self, trainer: pl.Trainer, pl_module: pl.LightningModule
     ) -> None:
-        table = pd.DataFrame(self.table)
-        mlflow.log_table(table, "tables/carcinoma_prediction_table.json")
+        df = pd.DataFrame(self.table)
+        df.to_json("carcinoma_prediction_table.json", orient="split")
+        mlflow.log_artifact(
+            "carcinoma_prediction_table.json",
+            artifact_path="tables",
+        )

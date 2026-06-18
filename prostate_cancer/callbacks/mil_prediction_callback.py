@@ -1,7 +1,8 @@
 from pathlib import Path
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import mlflow
+import pandas as pd
 import torch
 from datasets import Dataset as HFDataset
 from lightning import Callback, LightningModule, Trainer
@@ -34,6 +35,11 @@ class MILPredictionCallback(Callback):
         }
 
         self._slides = slides
+
+        self.table: dict[str, Any] = {
+            "slide": [],
+            "sl_prediction": [],
+        }
 
     def get_mask_builder(
         self,
@@ -76,13 +82,8 @@ class MILPredictionCallback(Callback):
         sl_preds, tl_preds, batch_mask, batch_attention = outputs
         _, metadata_batch = batch
 
-        trainer.logger.log_table(
-            {
-                "slide": [m["slide_name"] for m in metadata_batch],
-                "sl_prediction": sl_preds.tolist(),
-            },
-            artifact_file="tables/sl_predictions.json",
-        )
+        self.table["slide"].extend([m["slide_name"] for m in metadata_batch])
+        self.table["sl_prediction"].extend(sl_preds.tolist())
 
         for metadata, tl_preds_slide, mask_slide, attention_slide in zip(
             metadata_batch,
@@ -115,3 +116,13 @@ class MILPredictionCallback(Callback):
                     str(mask_builder.save()),
                     artifact_path=str(mask_builder.save_dir),
                 )
+
+    def on_predict_epoch_end(
+        self, trainer: Trainer, pl_module: LightningModule
+    ) -> None:
+        df = pd.DataFrame(self.table)
+        df.to_json("sl_predictions.json", orient="split")
+        mlflow.log_artifact(
+            "sl_predictions.json",
+            artifact_path="tables",
+        )

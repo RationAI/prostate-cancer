@@ -87,6 +87,9 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
         mp_path = os.path.join(tmpdir, "mispredictions.csv")
         store_mispredictions(df, mp_path)
         logger.log_artifact(mp_path, artifact_path="tables")
+        sm_path = os.path.join(tmpdir, "slide_metrics.json")
+        pd.DataFrame(results).to_json(sm_path, orient="split")
+        logger.log_artifact(sm_path)
 
 
 if __name__ == "__main__":

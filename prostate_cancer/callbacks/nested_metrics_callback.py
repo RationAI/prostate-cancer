@@ -1,6 +1,8 @@
 from typing import Any
 
 import lightning.pytorch as pl
+import mlflow
+import pandas as pd
 from lightning import Callback
 from rationai.mlkit.lightning.loggers import MLFlowLogger
 from rationai.mlkit.metrics import NestedMetricCollection
@@ -53,9 +55,7 @@ class NestedMetricsCallback(Callback):
     ) -> None:
         assert isinstance(trainer.logger, MLFlowLogger)
 
-        # Compute slide-level test metrics and log them
-        trainer.logger.log_table(
-            self.nested_test_metrics.compute(), "nested_metrics.json"
-        )
-
+        metrics = self.nested_test_metrics.compute()
+        pd.DataFrame(metrics).to_json("nested_metrics.json", orient="split")
+        mlflow.log_artifact("nested_metrics.json")
         self.nested_test_metrics.reset()
