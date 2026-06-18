@@ -1,8 +1,8 @@
 from abc import ABC
+from collections import defaultdict
 from collections.abc import Iterable
 from pathlib import Path
 from typing import TypeVar, cast
-from collections import defaultdict
 
 import mlflow
 from albumentations.core.composition import TransformType
@@ -114,7 +114,7 @@ class BaseTileDataset(MetaTiledSlides[T]):
             index[slide_id].append(i)
 
         return dict(index)
-    
+
     def filter_non_carcinoma(self, tiles: HFDataset) -> HFDataset:
         assert self.labeled, "Only allowed for labeled dataset"
 
@@ -152,7 +152,7 @@ class BaseTileDataset(MetaTiledSlides[T]):
 
         for slide in self.slides:
             slide_tiles = tiles.select(slide_index.get(slide["id"], []))
-    
+
             yield cast(
                 "Dataset[T]",
                 self.single_slide_ds_cls(
