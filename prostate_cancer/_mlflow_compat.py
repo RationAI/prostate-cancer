@@ -32,6 +32,5 @@ def apply_mlflow_compat_patch() -> None:
             _log.debug("Skipping logged-model listing (MLflow server < 3.0): %s", exc)
             return []
 
-    RunsArtifactRepository._list_model_artifacts = _safe_list_model_artifacts # type: ignore[method-assign]
-    RunsArtifactRepository._list_model_artifacts_patched = True # type: ignore[attr-defined]
-
+    RunsArtifactRepository._list_model_artifacts = _safe_list_model_artifacts  # type: ignore[method-assign]
+    RunsArtifactRepository._list_model_artifacts_patched = True  # type: ignore[attr-defined]
