@@ -151,7 +151,7 @@ class BaseTileDataset(MetaTiledSlides[T]):
         self._meta._slide_id_to_indices = self._meta._build_tile_index(tiles)
 
         for slide in self.slides:
-            slide_tiles = self._meta.filter_tiles_by_slide(slide)
+            slide_tiles = self._meta.filter_tiles_by_slide(slide["id"])
 
             yield cast(
                 "Dataset[T]",
