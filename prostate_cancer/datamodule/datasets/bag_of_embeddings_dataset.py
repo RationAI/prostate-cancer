@@ -46,7 +46,7 @@ class BagOfEmbeddingsDataset(Dataset[T], Generic[T]):
 
         self.max_embeddings = max(Counter(slide_ids).values())
 
-        self.tiles_by_slide: dict[bytes, list[int]] = {}
+        self.tiles_by_slide: dict[str, list[int]] = {}
 
         for i, sid in enumerate(self.tiles["slide_id"]):
             self.tiles_by_slide.setdefault(sid, []).append(i)

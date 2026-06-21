@@ -22,7 +22,7 @@ T = TypeVar("T", covariant=True)
 
 
 def get_slide_name(slide_metadata: TilingSlideMetadata) -> str:
-    return Path(slide_metadata.get("path")).stem
+    return Path(slide_metadata["path"]).stem
 
 
 def download_artifacts(tiling_uris: Iterable[str]) -> tuple[HFDataset, HFDataset]:
@@ -84,7 +84,7 @@ class BaseSingleSlideDataset(Dataset[LabeledTileSample | UnlabeledTileSample], A
             )
 
 
-def filter_tiles(tiles: HFDataset, slide_id: bytes) -> HFDataset:
+def filter_tiles(tiles: HFDataset, slide_id: str) -> HFDataset:
     return tiles.filter(lambda r: r["slide_id"] == slide_id)
 
 
@@ -107,8 +107,8 @@ class BaseTileDataset(MetaTiledSlides[T]):
 
         super().__init__(uris=uris)
 
-    def _build_slide_index(self, tiles: HFDataset) -> dict[bytes, list[int]]:
-        index: dict[bytes, list[int]] = defaultdict(list)
+    def _build_slide_index(self, tiles: HFDataset) -> dict[str, list[int]]:
+        index: dict[str, list[int]] = defaultdict(list)
 
         for i, slide_id in enumerate(tiles["slide_id"]):
             index[slide_id].append(i)

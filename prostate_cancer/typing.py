@@ -4,7 +4,7 @@ from torch import Tensor
 
 
 class TilingSlideMetadata(TypedDict):
-    id: bytes
+    id: str
     path: str
     extent_x: int
     extent_y: int
