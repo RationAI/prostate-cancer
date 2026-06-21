@@ -1,5 +1,4 @@
 from abc import ABC
-from collections import defaultdict
 from collections.abc import Iterable
 from pathlib import Path
 from typing import TypeVar, cast
@@ -84,10 +83,6 @@ class BaseSingleSlideDataset(Dataset[LabeledTileSample | UnlabeledTileSample], A
             )
 
 
-def filter_tiles(tiles: HFDataset, slide_id: str) -> HFDataset:
-    return tiles.filter(lambda r: r["slide_id"] == slide_id)
-
-
 class BaseTileDataset(MetaTiledSlides[T]):
     """This class abstracts the functionality shared across embedding and image datasets."""
 
@@ -106,14 +101,6 @@ class BaseTileDataset(MetaTiledSlides[T]):
         self.single_slide_ds_cls = single_slide_ds_cls
 
         super().__init__(uris=uris)
-
-    def _build_slide_index(self, tiles: HFDataset) -> dict[str, list[int]]:
-        index: dict[str, list[int]] = defaultdict(list)
-
-        for i, slide_id in enumerate(tiles["slide_id"]):
-            index[slide_id].append(i)
-
-        return dict(index)
 
     def filter_non_carcinoma(self, tiles: HFDataset) -> HFDataset:
         assert self.labeled, "Only allowed for labeled dataset"
@@ -150,19 +137,15 @@ class BaseTileDataset(MetaTiledSlides[T]):
         self._meta.tiles = tiles
         self._meta._slide_id_to_indices = self._meta._build_tile_index(tiles)
 
-        for slide in self.slides:
-            slide_tiles = self._meta.filter_tiles_by_slide(slide["id"])
-
-            yield cast(
+        return (
+            cast(
                 "Dataset[T]",
                 self.single_slide_ds_cls(
                     slide,
-                    tiles=slide_tiles,
+                    tiles=self.filter_tiles_by_slide(slide["id"]),
                     include_label=self.labeled,
-                    **(
-                        {"transforms": self.transforms}
-                        if self.transforms is not None
-                        else {}
-                    ),
+                    **({"transforms": self.transforms} if self.transforms else {}),
                 ),
             )
+            for slide in self.slides
+        )
