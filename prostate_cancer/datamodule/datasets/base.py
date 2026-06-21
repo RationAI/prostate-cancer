@@ -148,10 +148,10 @@ class BaseTileDataset(MetaTiledSlides[T]):
         # after this, global tiles are enhanced with carcinoma and possibly filtered (if labeled stratified case)
         self.tiles = tiles
         self._meta.tiles = tiles
-        slide_index = self._build_slide_index(tiles)
+        self._meta._slide_id_to_indices = self._meta._build_tile_index(tiles)
 
         for slide in self.slides:
-            slide_tiles = tiles.select(slide_index.get(slide["id"], []))
+            slide_tiles = self._meta.filter_tiles_by_slide(slide)
 
             yield cast(
                 "Dataset[T]",
