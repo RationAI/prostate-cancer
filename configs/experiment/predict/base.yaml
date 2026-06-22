@@ -6,6 +6,7 @@ model:
 
 checkpoint: ${model_data.checkpoint}
 model_name: ${model_data.model_name}
+carcinoma_roi_t: ${predict_data.thresholds.carcinoma_roi_t}
 tile_threshold: ${model_data.tile_threshold}
 mean: ${model_data.stats.mean}
 std: ${model_data.stats.std}
