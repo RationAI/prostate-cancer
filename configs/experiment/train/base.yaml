@@ -3,7 +3,7 @@ defaults:
   - /callbacks/train@callbacks
   - _self_
 
-
+carcinoma_roi_t: ${train_data.thresholds.carcinoma_roi_t}
 mean: ${train_data.mean}
 std: ${train_data.std}
 stains: ${train_data.stains}
