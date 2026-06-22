@@ -142,7 +142,7 @@ class BaseTileDataset(MetaTiledSlides[T]):
                 "Dataset[T]",
                 self.single_slide_ds_cls(
                     slide,
-                    tiles=self.filter_tiles_by_slide(slide["id"]),
+                    tiles=self._meta.filter_tiles_by_slide(slide["id"]),
                     include_label=self.labeled,
                     **({"transforms": self.transforms} if self.transforms else {}),
                 ),
