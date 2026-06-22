@@ -4,8 +4,6 @@ defaults:
   - /default
   - _self_
 
-thresholds: ${data.thresholds}
-
 data: ???
 use_case: ???
 

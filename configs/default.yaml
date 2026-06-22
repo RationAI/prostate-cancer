@@ -6,8 +6,6 @@ defaults:
 
 prostate_cancer_artifacts: /mnt/projects/prostate_cancer/cancer
 
-thresholds: ???
-
 metadata:
   experiment_name: Prostate
   run_name: ???

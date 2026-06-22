@@ -7,7 +7,6 @@ model:
 checkpoint: ${model_data.checkpoint}
 model_name: ${model_data.model_name}
 tile_threshold: ${model_data.tile_threshold}
-thresholds: ${predict_data.thresholds}
 mean: ${model_data.stats.mean}
 std: ${model_data.stats.std}
 data_name: ${predict_data.data_name}

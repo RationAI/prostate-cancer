@@ -4,8 +4,6 @@ defaults:
   - _self_
 
 
-thresholds: ${train_data.thresholds}
-
 mean: ${train_data.mean}
 std: ${train_data.std}
 stains: ${train_data.stains}
