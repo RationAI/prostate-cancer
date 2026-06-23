@@ -1,6 +1,6 @@
 defaults:
   - decode_head: embedding_classifier
-  - backbone: ProvGigaPath
+  - backbone: pgp
   - _self_
 
 decode_head:
