@@ -24,6 +24,10 @@ class FoundationProstateModel(ProstateCancerModel):
                 p.requires_grad = False
             self.backbone.module.eval()
 
+    # prevent unintentional train mode
+    def on_fit_start(self) -> None:
+        self.model.backbone.eval()
+
     def forward(self, x: Tensor) -> Tensor:
         features = self.backbone(x)
         logits = self.decode_head(features)
