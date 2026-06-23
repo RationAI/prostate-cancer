@@ -1,13 +1,14 @@
 from torch import Tensor, nn
 
 from prostate_cancer.base_model import ProstateCancerModel
+from prostate_cancer.modeling.decode_head import BinaryCNNClassifier
 
 
 class CNNProstateModel(ProstateCancerModel):
     def __init__(
         self,
         backbone: nn.Module,
-        decode_head: nn.Module,
+        decode_head: BinaryCNNClassifier,
         lr: float,
         tl_threshold: float,
     ) -> None:

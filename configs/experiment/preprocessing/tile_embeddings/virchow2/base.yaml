@@ -1,5 +1,5 @@
 # @package _global_
 
 tile_encoder:
-  _target_: preprocessing.embeddings.encoders.Virchow2
+  _target_: prostate_cancer.modeling.backbone.virchow2.Virchow2
   name: Virchow2

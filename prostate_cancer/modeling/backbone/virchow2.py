@@ -1,28 +1,8 @@
 import timm
 import torch
-
-# taken from HuggingFace of Virchow2
 from timm.layers import SwiGLUPacked  # type: ignore[attr-defined]
 
-
-class FoundationModel(torch.nn.Module):
-    def __init__(self, name: str, embed_dim: int) -> None:
-        """Wrapper for a foundation model - forward and dimension differ depending on the model."""
-        super().__init__()
-        self.name = name
-        self.embed_dim = embed_dim
-
-
-class ProvGigaPath(FoundationModel):
-    def __init__(self, name: str) -> None:
-        super().__init__(name, 1536)
-        # For this, you need to setup HF_TOKEN=<X> env.variable.
-        self.module = timm.create_model(
-            "hf_hub:prov-gigapath/prov-gigapath", pretrained=True
-        ).eval()
-
-    def forward(self, x: torch.Tensor) -> torch.Tensor:
-        return self.module(x)
+from prostate_cancer.modeling.backbone.foundation_base import FoundationModel
 
 
 class Virchow2(FoundationModel):
