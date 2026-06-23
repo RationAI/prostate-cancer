@@ -1,4 +1,4 @@
-from torch import Tensor
+import torch
 
 from prostate_cancer.base_model import ProstateCancerModel
 from prostate_cancer.modeling.backbone.foundation_base import FoundationModel
@@ -26,12 +26,17 @@ class FoundationProstateModel(ProstateCancerModel):
                 p.requires_grad = False
             self.backbone.module.eval()
 
-    def on_fit_start(self) -> None:
+    def on_train_epoch_start(self) -> None:
         # prevent unintentional train mode
         if self.frozen_backbone:
-            self.model.backbone.eval()
+            self.backbone.module.eval()
 
-    def forward(self, x: Tensor) -> Tensor:
-        features = self.backbone(x)
+    def forward(self, x: torch.Tensor) -> torch.Tensor:
+        if self.frozen_backbone:
+            with torch.no_grad():
+                features = self.backbone(x)
+        else:
+            features = self.backbone(x)
+
         logits = self.decode_head(features)
         return logits
