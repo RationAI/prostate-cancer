@@ -18,15 +18,18 @@ class FoundationProstateModel(ProstateCancerModel):
         self.backbone = backbone
         self.decode_head = decode_head
 
+        self.frozen_backbone = freeze_backbone
+
         # stay consistent with embedding training
         if freeze_backbone:
             for p in self.backbone.module.parameters():
                 p.requires_grad = False
             self.backbone.module.eval()
 
-    # prevent unintentional train mode
     def on_fit_start(self) -> None:
-        self.model.backbone.eval()
+        # prevent unintentional train mode
+        if self.frozen_backbone:
+            self.model.backbone.eval()
 
     def forward(self, x: Tensor) -> Tensor:
         features = self.backbone(x)
