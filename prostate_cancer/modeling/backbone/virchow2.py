@@ -9,8 +9,9 @@ class Virchow2(FoundationModel):
     def __init__(self, name: str) -> None:
         super().__init__(name, 2560)
 
+    def get_module(self) -> torch.nn.Module:
         # For this, you need to setup HF_TOKEN=<X> env.variable.
-        self.module = timm.create_model(
+        return timm.create_model(
             "hf-hub:paige-ai/Virchow2",
             pretrained=True,
             mlp_layer=SwiGLUPacked,

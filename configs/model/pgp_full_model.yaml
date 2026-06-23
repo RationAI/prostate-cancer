@@ -1,0 +1,12 @@
+defaults:
+  - decode_head: embedding_classifier
+  - backbone: ProvGigaPath
+  - _self_
+
+decode_head:
+  in_features: 1536
+
+_target_: prostate_cancer.cnn_model.FoundationProstateModel
+lr: ???
+tl_threshold: ???
+freeze_backbone: True

@@ -1,0 +1,21 @@
+# @package _global_
+
+defaults:
+  - /experiment/train/images/base
+  - /datamodule/transforms/normalize_w_stain_augments@transforms
+  - /model/pgp_full_model@model
+  - _self_
+
+model_name: "PGP (Stain)"
+
+# ImageNet stats
+mean: [123.675, 116.280, 103.530]
+std: [58.395, 57.120, 57.375]
+
+datamodule:
+  train:
+    uris:
+      - ${train_data.tiles_filtered_uri_224}
+  val:
+    uris:
+      - ${val_data.tiles_filtered_uri_224}
