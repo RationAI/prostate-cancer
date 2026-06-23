@@ -2,4 +2,3 @@
 
 tile_encoder:
   _target_: prostate_cancer.modeling.backbone.pgp.ProvGigaPath
-  name: PGP

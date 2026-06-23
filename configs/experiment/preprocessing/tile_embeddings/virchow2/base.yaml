@@ -2,4 +2,3 @@
 
 tile_encoder:
   _target_: prostate_cancer.modeling.backbone.virchow2.Virchow2
-  name: Virchow2
