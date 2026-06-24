@@ -1,3 +1,5 @@
+from typing import Any
+
 import torch
 
 from prostate_cancer.base_model import ProstateCancerModel
@@ -25,6 +27,17 @@ class FoundationProstateModel(ProstateCancerModel):
             for p in self.backbone.module.parameters():
                 p.requires_grad = False
             self.backbone.module.eval()
+
+    def on_save_checkpoint(self, checkpoint: dict[str, Any]) -> None:
+        # no need to save frozen backbone
+        state_dict: dict[str, Any] = checkpoint["state_dict"]
+
+        keys_to_remove = [
+            k for k in list(state_dict.keys()) if k.startswith("backbone.")
+        ]
+
+        for k in keys_to_remove:
+            del state_dict[k]
 
     def on_train_epoch_start(self) -> None:
         # prevent unintentional train mode
