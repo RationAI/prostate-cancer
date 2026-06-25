@@ -5,5 +5,6 @@ defaults:
 
 metadata_table: "mlflow-artifacts:/38/1a718a849be3412ab4621b6772daf049/artifacts/PANDA - Radboud_test.csv"
 tiles_uri_512: "mlflow-artifacts:/38/7bfcfeeaa29a4745943ac8556a63de4b/artifacts/PANDA - Radboud test"
+tiles_uri_224: "mlflow-artifacts:/38/71423731ba2a45099f28892733667386/artifacts/PANDA - Radboud train"
 
 data_name: "PANDA - Radboud test"
