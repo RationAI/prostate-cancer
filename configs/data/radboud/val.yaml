@@ -3,6 +3,9 @@ defaults:
   - _self_
 
 tiles_uri_512: "mlflow-artifacts:/38/4e3b31f87a8a46df9f911a69206d6a1d/artifacts/PANDA - Radboud val"
+tiles_filtered_uri_512: "mlflow-artifacts:/38/b38ca47d6fd4422a9f8d5a32fcae221c/artifacts/PANDA - Radboud val_512"
+
 tiles_uri_224: "mlflow-artifacts:/38/33ad08ab5f9845809fb48b2b7d2aa643/artifacts/PANDA - Radboud val"
+tiles_filtered_uri_224: "mlflow-artifacts:/38/b38ca47d6fd4422a9f8d5a32fcae221c/artifacts/PANDA - Radboud val_224"
 
 data_name: "PANDA - Radboud val"
