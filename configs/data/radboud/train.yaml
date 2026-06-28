@@ -5,6 +5,9 @@ defaults:
 # points to the public mlflow
 metadata_table: "mlflow-artifacts:/38/25b0e9ead22e44908f74d23b4efcaa62/artifacts/PANDA - Radboud train + val_train.csv"
 tiles_uri_512: "mlflow-artifacts:/38/02b36c4f7e544436b0bd2f81146676c5/artifacts/PANDA - Radboud train"
+tiles_filtered_uri_512: "mlflow-artifacts:/38/e1ef2698c62541e4a5e92a65ecb36fa5/artifacts/PANDA - Radboud train_512"
+
 tiles_uri_224: "mlflow-artifacts:/38/d658d0c339844eec8b425b403657f086/artifacts/PANDA - Radboud train"
+tiles_filtered_uri_224: "mlflow-artifacts:/38/e1ef2698c62541e4a5e92a65ecb36fa5/artifacts/PANDA - Radboud train_224"
 
 data_name: "PANDA - Radboud train"
