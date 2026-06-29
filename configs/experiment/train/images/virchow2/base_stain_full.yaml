@@ -1,10 +1,10 @@
 # @package _global_
 
 defaults:
-  - /experiment/train/images/pgp/base_stain
+  - /experiment/train/images/virchow2/base
   - _self_
 
-model_name: "PGP (Stain)"
+model_name: "Virchow (Stain)"
 
 model:
   freeze_backbone: False
