@@ -10,6 +10,9 @@ mean: [123.675, 116.280, 103.530]
 std: [58.395, 57.120, 57.375]
 
 datamodule:
+  batch_size: 8
+  num_workers: 4
+
   train:
     uris:
       - ${train_data.tiles_filtered_uri_224}
