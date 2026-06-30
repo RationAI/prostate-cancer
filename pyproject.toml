@@ -23,7 +23,7 @@ dependencies = [
     "triton>=3.3.0",
     "tqdm==4.67.1",
     "rationai-masks @ git+https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/masks.git",
-    "rationai-mlkit @ git+https://github.com/RationAI/mlkit.git",
+    "rationai-mlkit @ git+https://github.com/RationAI/mlkit.git@d0fab0cf8aba8f2cf3cb34be50040d6b3b4d1448",
     "rationai-tiling @ git+https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/tiling.git",
     "rationai-staining @ git+https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/staining.git",
     "rationai-sdk @git+https://github.com/RationAI/rationai-sdk-python.git@68904dfd216ce19454e08a032f7e4dd978a85707",
