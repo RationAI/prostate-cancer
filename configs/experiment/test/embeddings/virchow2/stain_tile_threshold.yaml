@@ -2,7 +2,7 @@
 
 defaults:
   - /callbacks/tile_threshold@callbacks
-  - /experiment/test/images/virchow2/stain_base
+  - /experiment/test/embeddings/virchow2/stain_base
   - /data/mmci/tl_val@test_data
   - _self_
 
@@ -10,5 +10,5 @@ datamodule:
   test:
     stratified_filter: true # tile threshold not estimated from negative tiles in positive slides
 
-tile_threshold: 0.8 # Pathologist's estimate
-use_case: "Tile Threshold Estimation"
+tile_threshold: 0.9 # Pathologist's estimate for other models
+use_case: "TL Threshold Estimation"
