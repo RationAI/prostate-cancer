@@ -8,3 +8,13 @@ model_name: "PGP (Stain & Frozen)"
 
 model:
   freeze_backbone: True
+  backbone_lr: 1e-5
+  warmup_steps: 200
+
+trainer:
+  gradient_clip_val: 1.0
+
+# full fine-tuning requires more memory
+datamodule:
+  batch_size: 16
+  num_workers: 8
