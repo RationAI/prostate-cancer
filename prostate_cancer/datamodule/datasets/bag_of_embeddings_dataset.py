@@ -7,9 +7,9 @@ from typing import Generic, TypeVar
 
 import torch
 import torch.nn.functional as F
+from rationai.mlkit.data.datasets.slides_tiles_loader import SlidesTilesLoader
 from torch.utils.data import Dataset
 
-from prostate_cancer.datamodule.datasets.base import download_artifacts
 from prostate_cancer.typing import (
     LabeledBagOfTilesSample,
     SlideMetadata,
@@ -30,14 +30,20 @@ class BagOfEmbeddingsDataset(Dataset[T], Generic[T]):
         self.include_labels = carcinoma_roi_t is not None
         self.carcinoma_roi_t = carcinoma_roi_t
 
-        self.slides, self.tiles = download_artifacts(uris)
+        self._meta = SlidesTilesLoader(uris=uris)
+        self.slides = self._meta.slides
+        tiles = self._meta.tiles
 
         if self.include_labels:
-            self.tiles = self.tiles.map(
+            tiles = tiles.map(
                 lambda r: {
                     "carcinoma": (r["carcinoma_roi_percentage"] > self.carcinoma_roi_t)
                 }
             )
+
+        self.tiles = tiles
+        self._meta.tiles = tiles
+        # no need to re-build index after .map
 
         self.padding = padding
 
@@ -46,11 +52,6 @@ class BagOfEmbeddingsDataset(Dataset[T], Generic[T]):
 
         self.max_embeddings = max(Counter(slide_ids).values())
 
-        self.tiles_by_slide: dict[str, list[int]] = {}
-
-        for i, sid in enumerate(self.tiles["slide_id"]):
-            self.tiles_by_slide.setdefault(sid, []).append(i)
-
     def __len__(self) -> int:
         return len(self.slides)
 
@@ -58,9 +59,7 @@ class BagOfEmbeddingsDataset(Dataset[T], Generic[T]):
         slide_metadata = self.slides[idx]
 
         slide_name = Path(slide_metadata["path"]).stem
-
-        tile_indices = self.tiles_by_slide[slide_metadata["id"]]
-        slide_tiles = self.tiles.select(tile_indices)
+        slide_tiles = self._meta.filter_tiles_by_slide(slide_metadata["slide_id"])
 
         slide_embeddings = torch.tensor(slide_tiles["embedding"])
 
