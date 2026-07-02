@@ -2429,7 +2429,7 @@ requires-dist = [
     { name = "pandas", specifier = ">=2.2.3" },
     { name = "pillow", specifier = "==11.3.0" },
     { name = "rationai-masks", git = "https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/masks.git" },
-    { name = "rationai-mlkit", git = "https://github.com/RationAI/mlkit.git?rev=d0fab0cf8aba8f2cf3cb34be50040d6b3b4d1448" },
+    { name = "rationai-mlkit", git = "https://github.com/RationAI/mlkit.git" },
     { name = "rationai-sdk", git = "https://github.com/RationAI/rationai-sdk-python.git?rev=68904dfd216ce19454e08a032f7e4dd978a85707" },
     { name = "rationai-staining", git = "https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/staining.git" },
     { name = "rationai-tiling", git = "https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/tiling.git" },
@@ -2910,7 +2910,7 @@ dependencies = [
 [[package]]
 name = "rationai-mlkit"
 version = "0.4.1"
-source = { git = "https://github.com/RationAI/mlkit.git?rev=d0fab0cf8aba8f2cf3cb34be50040d6b3b4d1448#d0fab0cf8aba8f2cf3cb34be50040d6b3b4d1448" }
+source = { git = "https://github.com/RationAI/mlkit.git#db38501bb363cd3d76c6a3d31bec702f16002dd1" }
 dependencies = [
     { name = "datasets" },
     { name = "gitpython" },
