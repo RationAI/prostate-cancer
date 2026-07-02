@@ -59,7 +59,7 @@ class BagOfEmbeddingsDataset(Dataset[T], Generic[T]):
         slide_metadata = self.slides[idx]
 
         slide_name = Path(slide_metadata["path"]).stem
-        slide_tiles = self._meta.filter_tiles_by_slide(slide_metadata["slide_id"])
+        slide_tiles = self._meta.filter_tiles_by_slide(slide_metadata["id"])
 
         slide_embeddings = torch.tensor(slide_tiles["embedding"])
 
