@@ -6,4 +6,14 @@ tile_threshold: 0.78
 
 checkpoint: "mlflow-artifacts:/65/4e6a272ec77c4deaa8c8b7b53a6295b2/artifacts/checkpoints/epoch=3-step=222233/checkpoint.ckpt"
 public_checkpoint: null
-model_name: "PGP (Stain)"
+model_name: "PGP (Stain & Frozen)"
+
+slide_level_prediction_uris:
+  mean_pool_max:
+    mmci_sl_group_1: null
+  max:
+    mmci_sl_group_1: "mlflow-artifacts:/65/c66862a470084ad5bd4b3a4a91808ba8/artifacts/tables/aggregated_predictions.json"
+  top_k:
+    mmci_sl_group_1: null
+  span:
+    mmci_sl_group_1: null
