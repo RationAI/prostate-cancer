@@ -4,7 +4,7 @@ defaults:
   - /experiment/train/images/virchow2/base_stain
   - _self_
 
-model_name: "Virchow (Stain)"
+model_name: "Virchow2 (Stain)"
 
 model:
   freeze_backbone: False
