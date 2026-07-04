@@ -1,0 +1,4 @@
+# @package _global_
+
+defaults:
+  - /model/checkpoints/mmci_tl/pgp_stain@model_data
