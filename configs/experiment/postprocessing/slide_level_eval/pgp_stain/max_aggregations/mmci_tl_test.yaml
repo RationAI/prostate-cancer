@@ -4,4 +4,4 @@ defaults:
   - /experiment/postprocessing/slide_level_eval/pgp_stain/max_aggregations/base
   - /data/mmci/tl_test@data
 
-preds_uri: "mlflow-artifacts:/65/001dd3914dc04fa48f9eb98784709c4d/artifacts/tables/aggregated_predictions.json"
+preds_uri: "mlflow-artifacts:/65/fd46c62186c44f599d6021bb7e394b23/artifacts/tables/aggregated_predictions.json"
