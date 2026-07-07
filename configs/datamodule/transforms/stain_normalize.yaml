@@ -1,0 +1,18 @@
+defaults:
+  - /data/mmci/base@mmci_stains
+  - _self_
+
+_target_: albumentations.Compose
+transforms:
+  - _target_: prostate_cancer.transforms.stain_normalization.build_normalize_staining_transform
+    stain1: ${stains.hematoxylin}
+    stain2: ${stains.eosin}
+    stain3: ${stains.residual}
+    target_stain1: ${mmci_stains.stains.hematoxylin}
+    target_stain2: ${mmci_stains.stains.eosin}
+    target_stain3: ${mmci_stains.stains.residual}
+
+  - _target_: albumentations.Normalize
+    mean: ${mean}
+    std: ${std}
+    max_pixel_value: 1
