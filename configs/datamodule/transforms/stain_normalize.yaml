@@ -1,10 +1,10 @@
 defaults:
-  - /data/mmci/base@mmci_stains
+  - /data/mmci/base@_global_.mmci_stains
   - _self_
 
 _target_: albumentations.Compose
 transforms:
-  - _target_: prostate_cancer.transforms.stain_normalization.build_normalize_staining_transform
+  - _target_: prostate_cancer.datamodule.transforms.stain_normalization.build_normalize_staining_transform
     stain1: ${stains.hematoxylin}
     stain2: ${stains.eosin}
     stain3: ${stains.residual}
