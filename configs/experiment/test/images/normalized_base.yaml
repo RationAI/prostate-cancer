@@ -1,0 +1,16 @@
+# @package _global_
+
+defaults:
+  - /experiment/test/base
+  - /datamodule/images_datamodule@datamodule
+  - /datamodule/transforms/stain_normalize@transforms
+  - _self_
+
+datamodule:
+  batch_size: 64
+  num_workers: 8
+
+  test:
+    transforms: ${transforms}
+    uris:
+      - ${test_data.tiles_filtered_uri_512}

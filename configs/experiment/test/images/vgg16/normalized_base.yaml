@@ -1,0 +1,8 @@
+# @package _global_
+
+defaults:
+  - /experiment/test/images/normalized_base
+  - /model/vgg16_model@model
+  - /model/checkpoints/mmci_tl/vgg16@model_data
+  - _self_
+
