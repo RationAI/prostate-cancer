@@ -9,4 +9,3 @@ decode_head:
 _target_: prostate_cancer.foundation_model.FoundationProstateModel
 lr: ???
 tl_threshold: ???
-freeze_backbone: ???
