@@ -3,8 +3,22 @@ defaults:
   - _self_
 
 tile_threshold: 0.8
+slide_max_threshold: 0.9993972778
+slide_mpm_threshold: 0.9899944067
+slide_top_k_threshold: 0.9723860025
+slide_span_threshold: 0.5 # arbitrary - span predictions are binary
 
 checkpoint: "mlflow-artifacts:/65/d39c26e7dd474d3bbdd3932f6f8bf2fb/artifacts/checkpoints/epoch=0-step=27778/checkpoint.ckpt"
 public_checkpoint: null
 
 model_name: "Virchow2 (Stain & Frozen)"
+
+slide_level_prediction_uris:
+  mean_pool_max:
+    mmci_sl_group_1: "mlflow-artifacts:/65/3f4b07e4bde34f12a4ed9461471ff9f2/artifacts/tables/aggregated_predictions.json"
+  max:
+    mmci_sl_group_1: "mlflow-artifacts:/65/0356850470b4450bb24d426a7074f224/artifacts/tables/aggregated_predictions.json"
+  top_k:
+    mmci_sl_group_1: "mlflow-artifacts:/65/5db07d221fca470e83e8af2aa1526bcd/artifacts/tables/aggregated_predictions.json"
+  span:
+    mmci_sl_group_1: "mlflow-artifacts:/65/cd2c46aecfa24d84ad023c78295caac7/artifacts/tables/aggregated_predictions.json"
