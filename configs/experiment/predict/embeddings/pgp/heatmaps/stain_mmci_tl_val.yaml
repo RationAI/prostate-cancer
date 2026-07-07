@@ -1,0 +1,6 @@
+# @package _global_
+
+defaults:
+  - /experiment/predict/embeddings/pgp/heatmaps/stain_base
+  - /data/mmci/tl_val@predict_data
+  - _self_

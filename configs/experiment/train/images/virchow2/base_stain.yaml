@@ -1,5 +1,5 @@
 # @package _global_
 
 defaults:
-  - /experiment/train/images/pgp/base
+  - /experiment/train/images/virchow2/base
   - /datamodule/transforms/normalize_w_stain_augments@transforms

@@ -1,0 +1,10 @@
+# @package _global_
+
+defaults:
+  - /experiment/train/images/pgp/base_stain
+  - _self_
+
+model_name: "PGP (Stain)"
+
+model:
+  freeze_backbone: False
