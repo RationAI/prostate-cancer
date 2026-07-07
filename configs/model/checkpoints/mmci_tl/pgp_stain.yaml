@@ -9,7 +9,8 @@ slide_top_k_threshold: 0.911498785
 slide_span_threshold: 0.5 # arbitrary - span predictions are binary
 
 checkpoint: "mlflow-artifacts:/65/4e6a272ec77c4deaa8c8b7b53a6295b2/artifacts/checkpoints/epoch=3-step=222233/checkpoint.ckpt"
-public_checkpoint: null
+public_checkpoint: "mlflow-artifacts:/38/abde571304794242be0c1630b7bd16ce/artifacts/pgp_stain_checkpoint.ckpt"
+
 model_name: "PGP (Stain & Frozen)"
 
 slide_level_prediction_uris:
