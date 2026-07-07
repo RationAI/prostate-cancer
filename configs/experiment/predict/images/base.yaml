@@ -11,5 +11,5 @@ datamodule:
 
   predict:
     uris:
-      - ${predict_data.tiles_uri_512}
+      - ${predict_data.tiles_filtered_uri_512}
 

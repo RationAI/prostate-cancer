@@ -21,12 +21,3 @@ callbacks:
 datamodule:
   batch_size: 4
   num_workers: 8
-
-  # both foundation models share tiles (embeddings are specified per model)
-  train:
-    uris:
-      - ${train_data.tiles_uri_224}
-
-  val:
-    uris:
-      - ${val_data.tiles_uri_224}

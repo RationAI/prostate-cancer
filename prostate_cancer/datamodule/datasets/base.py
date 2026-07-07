@@ -1,73 +1,107 @@
+from abc import ABC
 from collections.abc import Iterable
 from pathlib import Path
-from typing import TypeVar
+from typing import TypeVar, cast
 
-import pandas as pd
+from albumentations.core.composition import TransformType
+from datasets import Dataset as HFDataset
 from rationai.mlkit.data.datasets import MetaTiledSlides
+from torch.utils.data import Dataset
+
+from prostate_cancer.typing import (
+    LabeledTileSample,
+    TilingSlideMetadata,
+    UnlabeledTileSample,
+)
 
 
 T = TypeVar("T", covariant=True)
 
 
-def get_slide_name(slide: pd.Series) -> str:
-    return Path(slide.path).stem
+def get_slide_name(slide_metadata: TilingSlideMetadata) -> str:
+    return Path(slide_metadata["path"]).stem
 
 
-def filter_tiles_by_thresholds(
-    tiles: pd.DataFrame, thresholds: dict[str, float]
-) -> pd.DataFrame:
-    for percentage in [
-        "tissue_roi_percentage",
-        "exclude_percentage",
-        "another_pathology_percentage",
-        "residual_percentage",
-        "blur_percentage",
-        "folding_percentage",
-    ]:
-        if percentage in tiles.columns:
-            t = percentage.replace("percentage", "t")
-            assert t in thresholds, f"{t} for {percentage}"
-            mask = (
-                tiles[percentage] > thresholds[t]
-                if "tissue" in percentage
-                else tiles[percentage] <= thresholds[t]
+class BaseSingleSlideDataset(Dataset[LabeledTileSample | UnlabeledTileSample], ABC):
+    def __init__(
+        self,
+        slide_metadata: TilingSlideMetadata,
+        tiles: HFDataset,
+        include_label: bool,
+    ) -> None:
+        super().__init__()
+        self.include_label = include_label
+        self.slide_metadata = slide_metadata
+        self.tiles = tiles
+        if len(tiles) == 0:
+            print(
+                f"Warning: No tiles found for slide {get_slide_name(slide_metadata)}."
             )
-            tiles = tiles[mask]
-
-    return tiles
 
 
-class FilterableDataset(MetaTiledSlides[T]):
-    """This class abstracts the filtering which is needed for all the datasets."""
+class BaseTileDataset(MetaTiledSlides[T]):
+    """This class abstracts the functionality shared across embedding and image datasets."""
 
     def __init__(
         self,
         uris: Iterable[str],
-        thresholds: dict[str, float],
+        single_slide_ds_cls: type[BaseSingleSlideDataset],
         carcinoma_roi_t: float | None = None,  # only for labeled
         stratified_filter: bool | None = None,  # only for labeled
+        transforms: TransformType | None = None,
     ) -> None:
         self.labeled = carcinoma_roi_t is not None and stratified_filter is not None
         self.stratified_filter = stratified_filter
         self.carcinoma_roi_t = carcinoma_roi_t
-        self.thresholds = thresholds
+        self.transforms = transforms
+        self.single_slide_ds_cls = single_slide_ds_cls
+
         super().__init__(uris=uris)
 
-    def prepare_tiles(self, tiles: pd.DataFrame) -> pd.DataFrame:
+    def filter_non_carcinoma(self, tiles: HFDataset) -> HFDataset:
         assert self.labeled, "Only allowed for labeled dataset"
-        tiles = filter_tiles_by_thresholds(tiles, self.thresholds)
-        tiles["carcinoma"] = tiles["carcinoma_roi_percentage"] > self.carcinoma_roi_t
-        if self.stratified_filter:
-            tiles = self.filter_non_carcinoma(tiles)
 
-        return tiles
-
-    def filter_non_carcinoma(self, tiles: pd.DataFrame) -> pd.DataFrame:
-        assert self.labeled, "Only allowed for labeled dataset"
-        tiles_slide_cancer = (
-            tiles["slide_id"]
-            .map(dict(zip(self.slides["id"], self.slides["carcinoma"], strict=True)))
-            .astype(int)
+        slide_carcinoma = dict(
+            zip(
+                self.slides["id"],
+                self.slides["carcinoma"],
+                strict=True,
+            )
         )
 
-        return tiles[~((tiles_slide_cancer == 1) & (tiles["carcinoma"] == 0))]
+        return tiles.filter(
+            lambda row: (
+                not (slide_carcinoma[row["slide_id"]] and (not row["carcinoma"]))
+            )
+        )
+
+    def generate_datasets(self) -> Iterable[Dataset[T]]:
+        tiles = self.tiles
+
+        if self.labeled:
+            tiles = tiles.map(
+                lambda row: {
+                    "carcinoma": row["carcinoma_roi_percentage"] > self.carcinoma_roi_t
+                }
+            )
+
+            if self.stratified_filter:
+                tiles = self.filter_non_carcinoma(tiles)
+
+        # after this, global tiles are enhanced with carcinoma and possibly filtered (if labeled stratified case)
+        self.tiles = tiles
+        self._meta.tiles = tiles
+        self._meta._slide_id_to_indices = self._meta._build_tile_index(tiles)
+
+        return (
+            cast(
+                "Dataset[T]",
+                self.single_slide_ds_cls(
+                    slide,
+                    tiles=self._meta.filter_tiles_by_slide(slide["id"]),
+                    include_label=self.labeled,
+                    **({"transforms": self.transforms} if self.transforms else {}),
+                ),
+            )
+            for slide in self.slides
+        )

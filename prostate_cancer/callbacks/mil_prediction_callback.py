@@ -1,9 +1,10 @@
 from pathlib import Path
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import mlflow
 import pandas as pd
 import torch
+from datasets import Dataset as HFDataset
 from lightning import Callback, LightningModule, Trainer
 from rationai.masks.mask_builders import ScalarMaskBuilder
 from rationai.mlkit.lightning.loggers.mlflow import MLFlowLogger
@@ -16,38 +17,55 @@ if TYPE_CHECKING:
 
 
 def min_max_normalization(tensor: torch.Tensor) -> torch.Tensor:
-    weights_max = tensor.max()
-    weights_min = tensor.min()
-    return (tensor - weights_min) / (weights_max - weights_min)
+    return (tensor - tensor.min()) / (tensor.max() - tensor.min())
 
 
 class MILPredictionCallback(Callback):
-    def get_mask_builder(
-        self, slide_name: str, trainer: Trainer, save_dir: str
-    ) -> ScalarMaskBuilder:
+    def setup(
+        self, trainer: Trainer, pl_module: LightningModule, stage: str | None = None
+    ) -> None:
         if not hasattr(trainer, "datamodule"):
             raise ValueError("Trainer should have datamodule attribute")
 
         datamodule = cast("BagOfTilesDataModule", trainer.datamodule)
-        slides = cast("pd.DataFrame", datamodule.predict.slides)
-        slides["name"] = slides["path"].apply(lambda x: Path(x).stem)
+        slides = cast("HFDataset", datamodule.predict.slides)
 
-        _slide = slides[slides["name"] == slide_name]
-        assert len(_slide) == 1
-        slide = _slide.iloc[0]
-
-        kwargs = {
-            "save_dir": Path(save_dir),
-            "filename": Path(slide.path).stem,
-            "extent_x": slide.extent_x,
-            "extent_y": slide.extent_y,
-            "mpp_x": slide.mpp_x,
-            "mpp_y": slide.mpp_y,
-            "extent_tile": slide.tile_extent_x,
-            "stride": slide.stride_x,
+        self._slide_index = {
+            Path(path).stem: i for i, path in enumerate(slides["path"])
         }
 
-        return ScalarMaskBuilder(**kwargs)
+        self._slides = slides
+
+        self.table: dict[str, Any] = {
+            "slide": [],
+            "sl_prediction": [],
+        }
+
+    def get_mask_builder(
+        self,
+        slide_name: str,
+        trainer: Trainer,
+        save_dir: str,
+    ) -> ScalarMaskBuilder:
+
+        if not hasattr(trainer, "datamodule"):
+            raise ValueError("Trainer should have datamodule attribute")
+
+        slides = self._slides
+
+        slide_idx = self._slide_index[slide_name]
+        slide = slides[slide_idx]
+
+        return ScalarMaskBuilder(
+            save_dir=Path(save_dir),
+            filename=Path(slide["path"]).stem,
+            extent_x=slide["extent_x"],
+            extent_y=slide["extent_y"],
+            mpp_x=slide["mpp_x"],
+            mpp_y=slide["mpp_y"],
+            extent_tile=slide["tile_extent_x"],
+            stride=slide["stride_x"],
+        )
 
     def on_predict_batch_end(
         self,
@@ -58,22 +76,21 @@ class MILPredictionCallback(Callback):
         batch_idx: int,
         dataloader_idx: int = 0,
     ) -> None:
+
         assert isinstance(trainer.logger, MLFlowLogger)
+
         sl_preds, tl_preds, batch_mask, batch_attention = outputs
         _, metadata_batch = batch
 
-        # Log SL predictions
-        trainer.logger.log_table(
-            {
-                "slide": [metadata["slide_name"] for metadata in metadata_batch],
-                "sl_prediction": sl_preds.tolist(),
-            },
-            artifact_file="tables/sl_predictions.json",
-        )
+        self.table["slide"].extend([m["slide_name"] for m in metadata_batch])
+        self.table["sl_prediction"].extend(sl_preds.tolist())
 
-        # Log TL predictions and Attention Map
         for metadata, tl_preds_slide, mask_slide, attention_slide in zip(
-            metadata_batch, tl_preds, batch_mask, batch_attention, strict=True
+            metadata_batch,
+            tl_preds,
+            batch_mask,
+            batch_attention,
+            strict=True,
         ):
             for mask_type, data in zip(
                 ["heatmaps", "attention_rescaled"],
@@ -81,12 +98,31 @@ class MILPredictionCallback(Callback):
                 strict=True,
             ):
                 mask_builder = self.get_mask_builder(
-                    metadata["slide_name"], trainer, mask_type
+                    metadata["slide_name"],
+                    trainer,
+                    mask_type,
                 )
-                data = data[mask_slide.bool()]  # take only real tiles (not padding)
+
+                # remove padded tiles
+                data = data[mask_slide.bool()]
+
                 mask_builder.update(
-                    min_max_normalization(data).cpu(), metadata["xs"], metadata["ys"]
+                    min_max_normalization(data).cpu(),
+                    metadata["xs"],
+                    metadata["ys"],
                 )
+
                 mlflow.log_artifact(
-                    str(mask_builder.save()), artifact_path=str(mask_builder.save_dir)
+                    str(mask_builder.save()),
+                    artifact_path=str(mask_builder.save_dir),
                 )
+
+    def on_predict_epoch_end(
+        self, trainer: Trainer, pl_module: LightningModule
+    ) -> None:
+        df = pd.DataFrame(self.table)
+        df.to_json("sl_predictions.json", orient="split")
+        mlflow.log_artifact(
+            "sl_predictions.json",
+            artifact_path="tables",
+        )

@@ -43,7 +43,9 @@ class EmbedTiles:
 @hydra.main(config_path="../../configs", config_name="preprocessing", version_base=None)
 @autolog
 def main(config: DictConfig, logger: MLFlowLogger) -> None:
-    folder = Path(mlflow.artifacts.download_artifacts(config.data.tiles_uri_224))
+    folder = Path(
+        mlflow.artifacts.download_artifacts(config.data.tiles_filtered_uri_224)
+    )
     slides = pd.read_parquet(folder / "slides.parquet")
     tiles = pd.read_parquet(folder / "tiles.parquet")
 

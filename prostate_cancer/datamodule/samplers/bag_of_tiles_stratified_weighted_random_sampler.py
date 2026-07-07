@@ -1,6 +1,6 @@
 from collections.abc import Sequence
 
-import pandas as pd
+from datasets import Dataset as HFDataset
 from torch.utils.data import WeightedRandomSampler
 
 from prostate_cancer.datamodule.datasets import LabeledBagOfEmbeddingsDataset
@@ -19,7 +19,12 @@ class BagOfTilesStratifiedWeightedRandomSampler(WeightedRandomSampler):
             replacement=replacement,
         )
 
-    def _get_weights(self, df: pd.DataFrame, target_col: str) -> Sequence[float]:
-        value_counts = df[target_col].value_counts()
-        weights = 1 / df[target_col].map(value_counts)
-        return weights.tolist()
+    def _get_weights(self, ds: HFDataset, target_col: str) -> Sequence[float]:
+        labels = ds[target_col]
+
+        counts: dict[bool, int] = {}
+        for v in labels:
+            counts[v] = counts.get(v, 0) + 1
+
+        weights = [1.0 / counts[v] for v in labels]
+        return weights

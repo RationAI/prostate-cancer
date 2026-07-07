@@ -1,12 +1,12 @@
 from typing import TYPE_CHECKING, Any, cast
 
 import lightning.pytorch as pl
+import mlflow
 import pandas as pd
 from rationai.mlkit.lightning.callbacks import MultiloaderLifecycle
-from rationai.mlkit.lightning.loggers import MLFlowLogger
 
 from prostate_cancer.datamodule.datasets.base import get_slide_name
-from prostate_cancer.typing import UnlabeledTileSampleBatch
+from prostate_cancer.typing import TilingSlideMetadata, UnlabeledTileSampleBatch
 
 
 if TYPE_CHECKING:
@@ -17,6 +17,10 @@ class NumPositiveCallback(MultiloaderLifecycle):
     def __init__(self, threshold: float) -> None:
         super().__init__()
         self.threshold = threshold
+        self.table: dict[str, Any] = {
+            "slide": [],
+            "num_positive": [],
+        }
 
     def on_predict_dataloader_start(
         self, trainer: pl.Trainer, pl_module: pl.LightningModule, dataloader_idx: int
@@ -41,9 +45,16 @@ class NumPositiveCallback(MultiloaderLifecycle):
             raise ValueError("Trainer should have datamodule attribute")
 
         datamodule = cast("TileDataModule", trainer.datamodule)
-        slide = cast("pd.Series", datamodule.predict.slides.iloc[dataloader_idx])
-        table = {"slide": get_slide_name(slide), "num_positive": self.num_positive}
+        slide = cast("TilingSlideMetadata", datamodule.predict.slides[dataloader_idx])
+        self.table["slide"].append(get_slide_name(slide))
+        self.table["num_positive"].append(self.num_positive)
 
-        assert trainer.logger is not None
-        assert isinstance(trainer.logger, MLFlowLogger)
-        trainer.logger.log_table(table, artifact_file="num_positive_preds.json")
+    def on_predict_epoch_end(
+        self, trainer: pl.Trainer, pl_module: pl.LightningModule
+    ) -> None:
+        df = pd.DataFrame(self.table)
+        df.to_json("num_positive_preds.json", orient="split")
+        mlflow.log_artifact(
+            "num_positive_preds.json",
+            artifact_path="tables",
+        )

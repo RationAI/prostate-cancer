@@ -7,8 +7,10 @@ defaults:
 
 datamodule:
   train:
-    embeddings_uri: ${train_data.pgp_embeddings_uri}
+    uris:
+      - ${train_data.tiles_filtered_w_pgp_uri_224}
   val:
-    embeddings_uri: ${val_data.pgp_embeddings_uri}
+    uris:
+      - ${val_data.tiles_filtered_w_pgp_uri_224}
 
 model_name: "PGP (Hybrid-MIL)"

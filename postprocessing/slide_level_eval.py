@@ -77,7 +77,6 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
     df = read_json_table(config.preds_uri)
     df["pred_binary"] = df[config.pred_column] >= config.t
     results, cm = evaluate(df)
-    logger.log_table(results, "slide_metrics.json")
     logger.log_metrics(results)
 
     with tempfile.TemporaryDirectory() as tmpdir:
@@ -87,6 +86,9 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
         mp_path = os.path.join(tmpdir, "mispredictions.csv")
         store_mispredictions(df, mp_path)
         logger.log_artifact(mp_path, artifact_path="tables")
+        sm_path = os.path.join(tmpdir, "slide_metrics.json")
+        pd.DataFrame([results]).to_json(sm_path, orient="split")
+        logger.log_artifact(sm_path)
 
 
 if __name__ == "__main__":

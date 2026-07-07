@@ -8,6 +8,8 @@ from omegaconf import DictConfig, OmegaConf
 from rationai.mlkit import Trainer, autolog
 from rationai.mlkit.lightning.loggers.mlflow import MLFlowLogger
 
+from prostate_cancer._mlflow_compat import apply_mlflow_compat_patch
+
 
 OmegaConf.register_new_resolver(
     "random_seed", lambda: randint(0, 2**31), use_cache=True
@@ -21,6 +23,7 @@ logging.basicConfig(
 @hydra.main(config_path="../configs", config_name="ml", version_base=None)
 @autolog
 def main(config: DictConfig, logger: MLFlowLogger) -> None:
+    apply_mlflow_compat_patch()
     seed_everything(config.seed, workers=True)
 
     torch.set_float32_matmul_precision(precision="medium")

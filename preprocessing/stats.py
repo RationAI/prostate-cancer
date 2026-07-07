@@ -67,7 +67,6 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
     logger.experiment.log_param(logger.run_id, "dataset_uris", config.uris)
     dataset = UnlabeledTilesDataset(
         uris=config.uris,
-        thresholds=config.thresholds,
     )
 
     slides = cast("list[SlideTiles]", dataset.datasets)

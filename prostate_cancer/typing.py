@@ -3,6 +3,22 @@ from typing import TypeAlias, TypedDict
 from torch import Tensor
 
 
+class TilingSlideMetadata(TypedDict):
+    id: str
+    path: str
+    extent_x: int
+    extent_y: int
+    tile_extent_x: int
+    tile_extent_y: int
+    stride_x: int
+    stride_y: int
+    mpp_x: float
+    mpp_y: float
+    level: int
+    downsample: float
+    carcinoma: bool
+
+
 class TileMetadata(TypedDict):
     slide: str
     x: int

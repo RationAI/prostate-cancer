@@ -1,5 +1,4 @@
 _target_: prostate_cancer.datamodule.datasets.LabeledTilesDataset
 uris: ???
-thresholds: ${thresholds}
-carcinoma_roi_t: ${thresholds.carcinoma_roi_t}
+carcinoma_roi_t: ${carcinoma_roi_t}
 stratified_filter: ???
