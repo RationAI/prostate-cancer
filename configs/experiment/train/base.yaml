@@ -22,6 +22,12 @@ data_name: ${train_data.data_name}
 datamodule:
   batch_size: ???
   num_workers: ???
+  train:
+    uris:
+      - ${train_data.tiles_filtered_uri_224}
+  val:
+    uris:
+      - ${val_data.tiles_filtered_uri_224}
 
 model:
   lr: 1e-4
