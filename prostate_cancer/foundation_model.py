@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Mapping
 
 import torch
 
@@ -25,7 +25,7 @@ class FoundationProstateModel(ProstateCancerModel):
         self.backbone.module.eval()
 
     def load_state_dict(
-        self, state_dict: dict[str, Any], strict: bool = False, assign: bool = False
+        self, state_dict: Mapping[str, Any], strict: bool = False, assign: bool = False
     ) -> Any:
         return super().load_state_dict(
             state_dict, strict=False, assign=assign
