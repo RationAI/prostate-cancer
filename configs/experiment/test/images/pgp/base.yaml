@@ -2,7 +2,7 @@
 
 defaults:
   - /experiment/test/images/base
-  - /model/pgp@model
+  - /model/pgp_full_model@model
   - /model/checkpoints/mmci_tl/pgp@model_data
   - _self_
 

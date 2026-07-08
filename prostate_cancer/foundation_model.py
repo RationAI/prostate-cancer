@@ -24,9 +24,11 @@ class FoundationProstateModel(ProstateCancerModel):
             p.requires_grad = False
         self.backbone.module.eval()
 
-    def load_state_dict(self, state_dict: dict[str, Any], strict: bool = False) -> Any:
+    def load_state_dict(
+        self, state_dict: dict[str, Any], strict: bool = False, assign: bool = False
+    ) -> Any:
         return super().load_state_dict(
-            state_dict, strict=False
+            state_dict, strict=False, assign=assign
         )  # frozen backbone is not stored
 
     def on_save_checkpoint(self, checkpoint: dict[str, Any]) -> None:
