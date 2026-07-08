@@ -5,14 +5,14 @@ import torch
 
 from prostate_cancer.base_model import ProstateCancerModel
 from prostate_cancer.modeling.backbone.foundation_base import FoundationModel
-from prostate_cancer.modeling.decode_head import BinaryCNNClassifier
+from prostate_cancer.modeling.decode_head import BinaryEmbeddingClassifier
 
 
 class FoundationProstateModel(ProstateCancerModel):
     def __init__(
         self,
         backbone: FoundationModel,
-        decode_head: BinaryCNNClassifier,
+        decode_head: BinaryEmbeddingClassifier,
         lr: float,
         tl_threshold: float,
     ) -> None:
