@@ -26,7 +26,7 @@ dependencies = [
     "rationai-mlkit @ git+https://github.com/RationAI/mlkit.git",
     "rationai-tiling @ git+https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/tiling.git",
     "rationai-staining @ git+https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/staining.git",
-    "rationai-sdk @git+https://github.com/RationAI/rationai-sdk-python.git@68904dfd216ce19454e08a032f7e4dd978a85707",
+    "rationai-sdk @git+https://github.com/RationAI/rationai-sdk-python.git",
     "numpy>=2.3.2",
     "timm==1.0.15",
     "matplotlib==3.10.1",
