@@ -1,0 +1,10 @@
+defaults:
+  - base_foundation
+  - _self_
+
+tile_threshold: 0.8
+
+checkpoint: "mlflow-artifacts:/65/d39c26e7dd474d3bbdd3932f6f8bf2fb/artifacts/checkpoints/epoch=0-step=27778/checkpoint.ckpt"
+public_checkpoint: null
+
+model_name: "Virchow2 (Stain & Frozen)"

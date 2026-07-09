@@ -1,0 +1,12 @@
+# @package _global_
+
+defaults:
+  - /experiment/predict/embeddings/base
+  - /model/pgp_model@model
+  - /model/checkpoints/mmci_tl/pgp_stain@model_data
+  - _self_
+
+datamodule:
+  predict:
+    uris:
+      - ${predict_data.tiles_filtered_w_pgp_uri_224}
