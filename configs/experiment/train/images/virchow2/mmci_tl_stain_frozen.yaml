@@ -1,7 +1,0 @@
-# @package _global_
-
-defaults:
-  - /experiment/train/images/virchow2/base_stain_frozen
-  - /data/mmci/tl_train@train_data
-  - /data/mmci/tl_val@val_data
-  - _self_
