@@ -5,4 +5,4 @@ defaults:
   - /data/mmci/sl_group_1@data
   - _self_
 
-preds_uri: ${model_data.slide_level_prediction_uris.max.mmci_sl_group_1
+preds_uri: ${model_data.slide_level_prediction_uris.max.mmci_sl_group_1}
