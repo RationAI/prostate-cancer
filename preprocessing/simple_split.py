@@ -17,6 +17,12 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
     slides_df_path = mlflow.artifacts.download_artifacts(config.data.metadata_table)
     slides_df = pd.read_csv(slides_df_path)
 
+    split_names = {"train": "train", "test": "test"} # default
+    if hasattr(config, "split_names") and config.split_names is not None:
+        assert "train" in config.split_names and "test" in config.split_names
+        split_names["train"] = config.split_names["train"]
+        split_names["test"] = config.split_names["test"]
+
     train_slides, test_slides = train_test_split(
         slides_df,
         test_size=config.test_size,
@@ -25,11 +31,11 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
     )
 
     with tempfile.TemporaryDirectory() as tmpdir:
-        train_out = Path(tmpdir) / f"{config.data.data_name}_train.csv"
+        train_out = Path(tmpdir) / f"{config.data.data_name}_{split_names["train"]}.csv"
         train_slides.to_csv(train_out, index=False)
         logger.log_artifact(str(train_out))
 
-        test_out = Path(tmpdir) / f"{config.data.data_name}_test.csv"
+        test_out = Path(tmpdir) / f"{config.data.data_name}_{split_names["test"]}.csv"
         test_slides.to_csv(test_out, index=False)
         logger.log_artifact(str(test_out))
 
