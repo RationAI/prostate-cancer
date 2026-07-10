@@ -1,5 +1,4 @@
 # @package _global_
 
 tile_encoder:
-  _target_: preprocessing.embeddings.encoders.ProvGigaPath
-  name: PGP
+  _target_: prostate_cancer.modeling.backbone.pgp.ProvGigaPath

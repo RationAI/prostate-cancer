@@ -1,5 +1,5 @@
 defaults:
-  - base
+  - base_foundation
   - _self_
 
 tile_threshold: 0.5

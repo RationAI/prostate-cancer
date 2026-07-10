@@ -1,0 +1,11 @@
+defaults:
+  - decode_head: embedding_classifier
+  - backbone: pgp
+  - _self_
+
+decode_head:
+  in_features: 1536
+
+_target_: prostate_cancer.foundation_model.FoundationProstateModel
+lr: ???
+tl_threshold: ???

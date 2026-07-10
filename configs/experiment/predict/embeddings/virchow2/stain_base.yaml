@@ -1,0 +1,12 @@
+# @package _global_
+
+defaults:
+  - /experiment/predict/embeddings/base
+  - /model/virchow2_model@model
+  - /model/checkpoints/mmci_tl/virchow2_stain@model_data
+  - _self_
+
+datamodule:
+  predict:
+    uris:
+      - ${predict_data.tiles_filtered_w_virchow2_uri_224}

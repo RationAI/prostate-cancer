@@ -16,7 +16,7 @@ from prostate_cancer.datamodule.datasets import UnlabeledTilesDataset
 
 
 if TYPE_CHECKING:
-    from preprocessing.embeddings.encoders import FoundationModel
+    from prostate_cancer.modeling.backbone.foundation_base import FoundationModel
 
 
 def save_embeddings(

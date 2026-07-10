@@ -1,0 +1,9 @@
+defaults:
+  - base_foundation
+  - _self_
+
+tile_threshold: 0.78
+
+checkpoint: "mlflow-artifacts:/65/4e6a272ec77c4deaa8c8b7b53a6295b2/artifacts/checkpoints/epoch=3-step=222233/checkpoint.ckpt"
+public_checkpoint: null
+model_name: "PGP (Stain)"
