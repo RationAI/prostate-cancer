@@ -10,4 +10,4 @@ tissue_masks_uri: "mlflow-artifacts:/65/bcf9a7749e3a455dbfbbb2918758f8a6/artifac
 qc_masks_uri: null
 annotation_masks_uri: null
 
-data_name: "Graz Sample"
+data_name: "MUG 400"
