@@ -19,18 +19,23 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
     client = MlflowClient()
     run = client.get_run(config.sl_annotations_run_id)
     annotations = run.data.metrics  # SL metrics were stored as metrics
-    annotations = {key.split("_")[-1]: val for key, val in annotations.items()}
+    annotations = {
+        key.split("_")[-1].replace(".svs", ""): val for key, val in annotations.items()
+    }
+    annotations["MUGGRZ-PATH-SCAN-SS7525-1018579"] = (
+        1  # is missing in the metrics (was obtained via Slack)
+    )
 
-    slides = Path(config.data_dir).glob("*.svs")
+    slides = Path(config.data_dir).glob("*.tiff")
     slides_filtered = []
     sl_carcinoma = []
     for slide in slides:
         if (
-            slide.name not in config.blacklist
+            slide.stem not in config.blacklist
         ):  # not HE stained, or otherwise corrupted slides
             slides_filtered.append(slide)
-            assert slide.name in annotations
-            sl_carcinoma.append(annotations[slide.name] == 1)
+            assert slide.stem in annotations
+            sl_carcinoma.append(annotations[slide.stem] == 1)
 
     explored = pd.DataFrame({"slide_path": slides_filtered, "carcinoma": sl_carcinoma})
 

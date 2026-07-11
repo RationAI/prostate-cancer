@@ -1,5 +1,7 @@
 # @package _global_
 
 defaults:
-  - /data/graz/graz_sample@data
+  - /data/mug/mug_400@data
   - _self_
+
+level: 2
