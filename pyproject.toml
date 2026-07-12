@@ -25,7 +25,7 @@ dependencies = [
     "rationai-masks @ git+https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/masks.git",
     "rationai-mlkit @ git+https://github.com/RationAI/mlkit.git",
     "rationai-tiling @ git+https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/tiling.git",
-    "rationai-staining @ git+https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/staining.git",
+    "rationai-staining @ git+https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/staining.git@2437ec9af319731f3e32aa79c4bf9e6fef5a5711",
     "rationai-sdk @git+https://github.com/RationAI/rationai-sdk-python.git",
     "numpy>=2.3.2",
     "timm==1.0.15",

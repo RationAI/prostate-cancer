@@ -2430,8 +2430,8 @@ requires-dist = [
     { name = "pillow", specifier = "==11.3.0" },
     { name = "rationai-masks", git = "https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/masks.git" },
     { name = "rationai-mlkit", git = "https://github.com/RationAI/mlkit.git" },
-    { name = "rationai-sdk", git = "https://github.com/RationAI/rationai-sdk-python.git?rev=68904dfd216ce19454e08a032f7e4dd978a85707" },
-    { name = "rationai-staining", git = "https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/staining.git" },
+    { name = "rationai-sdk", git = "https://github.com/RationAI/rationai-sdk-python.git" },
+    { name = "rationai-staining", git = "https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/staining.git?rev=2437ec9af319731f3e32aa79c4bf9e6fef5a5711" },
     { name = "rationai-tiling", git = "https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/tiling.git" },
     { name = "ratiopath", specifier = ">=1.1.2" },
     { name = "ray", extras = ["data"], specifier = ">=2.52.1" },
@@ -2927,7 +2927,7 @@ dependencies = [
 [[package]]
 name = "rationai-sdk"
 version = "0.1.0"
-source = { git = "https://github.com/RationAI/rationai-sdk-python.git?rev=68904dfd216ce19454e08a032f7e4dd978a85707#68904dfd216ce19454e08a032f7e4dd978a85707" }
+source = { git = "https://github.com/RationAI/rationai-sdk-python.git#3fb74c0f867432422dacde29ec5c0a4584af4830" }
 dependencies = [
     { name = "httpx" },
     { name = "lz4" },
@@ -2938,8 +2938,8 @@ dependencies = [
 
 [[package]]
 name = "rationai-staining"
-version = "0.3.0"
-source = { git = "https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/staining.git#c48d216e910df11f3e6891aa071ebb8d04635727" }
+version = "0.4.0"
+source = { git = "https://gitlab.ics.muni.cz/rationai/digital-pathology/libraries/staining.git?rev=2437ec9af319731f3e32aa79c4bf9e6fef5a5711#2437ec9af319731f3e32aa79c4bf9e6fef5a5711" }
 dependencies = [
     { name = "albumentations" },
     { name = "numpy" },
