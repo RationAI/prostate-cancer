@@ -21,7 +21,10 @@ def process_slide(slide_path: Path, level: int, output_path: Path) -> None:
     with OpenSlide(slide_path) as slide:
         mpp_x, mpp_y = slide_resolution(slide, level=level)
 
-    slide = cast("pyvips.Image", pyvips.Image.new_from_file(slide_path, level=level))
+    level_arg = (
+        {"page": level} if slide_path.suffix in [".tiff", ".tif"] else {"level": level}
+    )
+    slide = cast("pyvips.Image", pyvips.Image.new_from_file(slide_path, **level_arg))
     mask = tissue_mask(slide, mpp=mpp_x)
     mask_path = output_path / slide_path.with_suffix(".tiff").name
 
