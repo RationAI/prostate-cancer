@@ -1,0 +1,5 @@
+# @package _global_
+
+defaults:
+  - /experiment/preprocessing/tile_embeddings_v2/pgp/base
+  - /data/radboud/test@data
