@@ -81,7 +81,7 @@ async def qc_main(
 
         # Merge generated csv files
         csvs = list(Path(output_path).rglob("*.csv"))
-        if len(csvs) > 0:
+        if len(csvs) > 1:  # if only one, keep it
             pd.concat([pd.read_csv(f) for f in csvs]).to_csv(
                 Path(output_path, "qc_metrics.csv"), index=False
             )
