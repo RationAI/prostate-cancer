@@ -1,0 +1,5 @@
+# @package _global_
+
+defaults:
+  - /data/fn_brno/full@data
+  - _self_
