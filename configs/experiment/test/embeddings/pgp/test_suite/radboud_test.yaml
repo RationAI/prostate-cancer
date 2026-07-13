@@ -4,3 +4,5 @@ defaults:
   - /experiment/test/embeddings/pgp/test_suite/base
   - /data/radboud/test@test_data
   - _self_
+
+checkpoint: ${model_data.public_checkpoint}
