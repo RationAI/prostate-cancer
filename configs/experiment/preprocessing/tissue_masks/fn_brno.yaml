@@ -3,3 +3,5 @@
 defaults:
   - /data/fn_brno/full@data
   - _self_
+
+level: 3
