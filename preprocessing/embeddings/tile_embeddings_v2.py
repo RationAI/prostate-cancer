@@ -86,7 +86,7 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
     if tiles_parquet_dir.exists():
         shutil.rmtree(tiles_parquet_dir)
 
-    slides_parquet_dir = (output_path / "slides")
+    slides_parquet_dir = output_path / "slides"
     if slides_parquet_dir.exists():
         shutil.rmtree(slides_parquet_dir)
 

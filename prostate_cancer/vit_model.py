@@ -1,3 +1,6 @@
+from collections.abc import Mapping
+from typing import Any
+
 from torch import Tensor, nn
 from transformers import ViTModel
 
@@ -16,3 +19,10 @@ class ViTProstateModel(ProstateCancerModel):
         features = self.backbone(x).last_hidden_state
         logits = self.decode_head(features)
         return logits
+
+    def load_state_dict(
+        self, state_dict: Mapping[str, Any], strict: bool = False, assign: bool = False
+    ) -> Any:
+        return super().load_state_dict(
+            state_dict, strict=False, assign=assign
+        )  # we have one ViT model containing pooler (unused, but present in the checkpoint)

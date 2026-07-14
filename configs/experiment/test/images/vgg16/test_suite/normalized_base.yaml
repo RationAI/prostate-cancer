@@ -1,8 +1,0 @@
-# @package _global_
-
-defaults:
-  - /callbacks/combined_test_suite@callbacks
-  - /experiment/test/images/vgg16/normalized_base
-  - _self_
-
-use_case: "TL Test"
