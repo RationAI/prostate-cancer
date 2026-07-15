@@ -3,6 +3,6 @@ defaults:
   - _self_
 
 # point to the public mlflow
-metadata_table: "mlflow-artifacts:/38/53aa1150ec7a4df8a90351f54585ba99/artifacts/PANDA - Karolinska_test.csv"
+metadata_table: "mlflow-artifacts:/38/e4a50769ac414476be3cad04d65998f5/artifacts/PANDA - Karolinska_test.csv"
 
 data_name: "PANDA - Karolinska Test"
