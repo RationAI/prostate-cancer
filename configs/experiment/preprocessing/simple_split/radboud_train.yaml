@@ -1,0 +1,12 @@
+# @package _global_
+
+defaults:
+  - /data/radboud/train@data
+  - _self_
+
+target_column: gleason_score
+test_size: 0.95
+
+split_names:
+  train: fine_tune
+  test: public_train
