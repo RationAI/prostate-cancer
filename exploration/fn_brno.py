@@ -206,6 +206,11 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
     annot_table["ranges"] = [p["ranges"] for p in parsed]
 
     explored = create_df(slides, annot_table)
+    qc_exclude = pd.read_csv(config.qc_exclude_table_path)
+    stems_to_exclude = set(qc_exclude["slide_stem"])
+    explored = explored[
+        ~(explored["slide_path"].map(lambda x: Path(x).stem).isin(stems_to_exclude))
+    ]
 
     with tempfile.TemporaryDirectory() as temp_dir:
         target = Path(temp_dir) / "fn_brno_prostate.csv"

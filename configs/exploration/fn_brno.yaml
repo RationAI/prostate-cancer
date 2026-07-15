@@ -6,6 +6,7 @@ defaults:
 
 data_dir: "/mnt/data/FNBrno/prostate/AI-prostata"
 annot_table_path: "/mnt/data/FNBrno/prostate/AI-prostata/AI-Prostaty-11.03.2024-unprotected.xlsx"
+qc_exclude_table_path: "/mnt/projects/prostate_cancer/cancer/fn_brno_qc_exclude.csv"
 
 metadata:
   run_name: FN Brno Data
