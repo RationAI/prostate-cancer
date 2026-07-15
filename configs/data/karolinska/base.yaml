@@ -1,6 +1,10 @@
 thresholds:
-  tissue_roi_t: 0.5
-  residual_t: 0.25
-  blur_t: 0.25
-  folding_t: 0.25
-  carcinoma_roi_t: 0.5
+  tissue_roi_t: 0
+  residual_t: 0
+  blur_t: 0
+  folding_t: 0
+  carcinoma_roi_t: 0
+
+qc_masks_uri: "mlflow-artifacts:/38/140e950917c5432f8b8d53e83ef6b1e6/artifacts"
+tissue_masks_uri: "mlflow-artifacts:/38/25c1a70a17d142fdaa12d399939c52a8/artifacts/tissue_mask"
+carcinoma_masks_uri: "mlflow-artifacts:/38/25c1a70a17d142fdaa12d399939c52a8/artifacts/carcinoma_mask"
