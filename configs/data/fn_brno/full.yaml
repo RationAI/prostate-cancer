@@ -2,6 +2,6 @@ defaults:
   - base
   - _self_
 
-metadata_table: "mlflow-artifacts:/65/92bd6fb26cba4a5fb3f65902871cf863/artifacts/fn_brno_prostate.csv"
+metadata_table: "mlflow-artifacts:/65/dfd7448227de44b0a4ee43a5c6890604/artifacts/fn_brno_prostate.csv"
 
 data_name: "FN Brno"
