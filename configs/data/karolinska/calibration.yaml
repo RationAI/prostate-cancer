@@ -1,0 +1,8 @@
+defaults:
+  - base
+  - _self_
+
+# point to the public mlflow
+metadata_table: "mlflow-artifacts:/38/53aa1150ec7a4df8a90351f54585ba99/artifacts/PANDA - Karolinska_calibration.csv"
+
+data_name: "PANDA - Karolinska Calibration"

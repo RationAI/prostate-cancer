@@ -1,0 +1,12 @@
+# @package _global_
+
+defaults:
+  - /data/karolinska/calibration@data
+  - _self_
+
+target_column: gleason_score
+test_size: 0.7
+
+split_names:
+  train: fine_tune
+  test: val
