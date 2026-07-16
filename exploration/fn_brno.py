@@ -118,7 +118,7 @@ def parse_slide(
             s.strip() for s in str(record["Cancer_in_slides"]).split(",")
         ]
         slide_label = slide_no in cancerous_slides
-    else
+    else:
         slide_label = False
 
     return record, slide_label, case_is_cancer
