@@ -1,0 +1,10 @@
+# @package _global_
+
+defaults:
+  - /experiment/test/base
+  - /datamodule/bag_of_embeddings_datamodule@datamodule
+  - _self_
+
+datamodule:
+  batch_size: 4
+  num_workers: 8

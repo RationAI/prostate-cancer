@@ -1,0 +1,10 @@
+# @package _global_
+
+defaults:
+  - /callbacks/tile_threshold_mil@callbacks
+  - /experiment/test/bag_of_embeddings/pgp/base
+  - /data/mmci/tl_val@test_data
+  - _self_
+
+tile_threshold: 0.9 # Pathologist's estimate for other models
+use_case: "TL Threshold Estimation"

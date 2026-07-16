@@ -2,7 +2,7 @@
 
 defaults:
   - /experiment/train/bag_of_embeddings/base
-  - /model/virchow2_mil_model@model
+  - /model/virchow2_hybrid_mil_model@model
   - _self_
 
 datamodule:
