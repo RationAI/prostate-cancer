@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from pathlib import Path
 from typing import Any
 
@@ -8,31 +9,24 @@ from lightning import Callback, LightningModule, Trainer
 from numpy.typing import NDArray
 from rationai.mlkit.lightning.loggers import MLFlowLogger
 
-from prostate_cancer.typing import LabeledTileSampleBatch
 
-
-class TileHistogramsCallback(Callback):
+class TileHistogramsCallbackBase(Callback, ABC):
     def __init__(self) -> None:
         """This callback creates prediction histograms for both negative and positive distribution of tiles."""
         super().__init__()
         self.all_preds: list[NDArray[np.floating]] = []
         self.all_labels: list[NDArray[np.floating]] = []
 
+    @abstractmethod
     def on_test_batch_end(
         self,
         trainer: Trainer,
         pl_module: LightningModule,
         outputs: Any,
-        batch: LabeledTileSampleBatch,
+        batch: Any,
         batch_idx: int,
         dataloader_idx: int = 0,
-    ) -> None:
-        _, y, _ = batch
-        preds = outputs.detach().cpu().numpy().flatten()
-        labels = y.detach().cpu().numpy().flatten()
-
-        self.all_preds.append(preds)
-        self.all_labels.append(labels)
+    ) -> None: ...
 
     def on_test_epoch_end(self, trainer: Trainer, pl_module: LightningModule) -> None:
         assert isinstance(trainer.logger, MLFlowLogger)

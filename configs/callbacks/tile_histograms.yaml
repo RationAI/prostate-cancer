@@ -1,2 +1,2 @@
 tile_histograms_callback:
-  _target_: prostate_cancer.callbacks.TileHistogramsCallback
+  _target_: prostate_cancer.callbacks.TileHistogramsCallbackTile

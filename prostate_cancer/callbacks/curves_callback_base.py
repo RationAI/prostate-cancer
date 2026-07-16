@@ -1,3 +1,4 @@
+from abc import ABC, abstractmethod
 from typing import Any
 
 import mlflow
@@ -8,10 +9,9 @@ from numpy.typing import NDArray
 from sklearn.metrics import auc, precision_recall_curve, roc_curve
 
 from postprocessing.slide_level_curves import _plot_curve
-from prostate_cancer.typing import LabeledTileSampleBatch
 
 
-class CurvesCallback(Callback):
+class CurvesCallbackBase(Callback, ABC):
     def __init__(self, threshold: float, optimal_seek: bool = True) -> None:
         """This callback creates tile-level ROC curve and Precision-Recall curve and marks selected + optimized thresholds used for metric computation.
 
@@ -25,18 +25,16 @@ class CurvesCallback(Callback):
         self.preds: list[torch.Tensor] = []
         self.targets: list[torch.Tensor] = []
 
+    @abstractmethod
     def on_test_batch_end(
         self,
         trainer: Trainer,
         pl_module: LightningModule,
         outputs: Any,
-        batch: LabeledTileSampleBatch,
+        batch: Any,
         batch_idx: int,
         dataloader_idx: int = 0,
-    ) -> None:
-        targets = batch[1]
-        self.preds.append(outputs.cpu())
-        self.targets.append(targets.cpu())
+    ) -> None: ...
 
     def _plot_roc(
         self, y_pred: NDArray[np.float32], y_true: NDArray[np.float32]
