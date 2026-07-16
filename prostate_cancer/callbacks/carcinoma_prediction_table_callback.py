@@ -65,6 +65,7 @@ class CarcinomaPredictionTableCallback(MultiloaderLifecycle):
     def on_predict_epoch_end(
         self, trainer: pl.Trainer, pl_module: pl.LightningModule
     ) -> None:
+        super().on_predict_epoch_end(trainer, pl_module)
         df = pd.DataFrame(self.table)
         df.to_json("carcinoma_prediction_table.json", orient="split")
         mlflow.log_artifact(
