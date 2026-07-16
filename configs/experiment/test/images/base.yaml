@@ -11,4 +11,4 @@ datamodule:
 
   test:
     uris:
-      - ${test_data.tiles_filtered_uri_512}
+      - ${test_data.tiles_filtered_uri_224}
