@@ -2,7 +2,7 @@ defaults:
   - base
   - _self_
 
-tile_threshold: 0.73
+tile_threshold: 0.93
 slide_max_threshold: 0.9859181643
 slide_mpm_threshold: 0.9827958941
 slide_top_k_threshold: 0.9819370508
