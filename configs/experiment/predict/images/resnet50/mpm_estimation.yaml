@@ -11,8 +11,8 @@ callbacks:
     aggregator_cls_path: rationai.mlkit.metrics.MeanPoolMaxAggregator
 
     static:
-      extent_tile: 512
-      stride_tile: 256
+      extent_tile: 224
+      stride_tile: 112
     to_estimate:
       kernel_size: [1, 2, 3, 4, 5, 6, 7]
 
