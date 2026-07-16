@@ -91,14 +91,12 @@ def parse_slide(
 ) -> tuple[pd.Series, bool, bool] | None:
     match = SLIDE_NAME_PATTERN.match(slide_name)
     if not match:
-        # Filename doesn't follow the expected naming convention.
         return None
 
     patient_id, slide_no = match.groups()
     record = find_record(table, int(patient_id), int(slide_no))
 
     if len(record) == 0:
-        # Slide number isn't described in the table
         return None
 
     assert len(record) == 1, (
@@ -114,17 +112,13 @@ def parse_slide(
     )
 
     if not case_is_cancer:
-        # Whole case is benign (or unlabeled) -> every slide is
-        # automatically non-carcinoma.
         slide_label = False
     elif not pd.isna(record["Cancer_in_slides"]):
-        # Case is malignant; carcinoma is present only on the listed slides.
         cancerous_slides = [
             s.strip() for s in str(record["Cancer_in_slides"]).split(",")
         ]
         slide_label = slide_no in cancerous_slides
-    else:
-        # Case is malignant but no specific slide list was given.
+    else
         slide_label = False
 
     return record, slide_label, case_is_cancer
@@ -155,7 +149,6 @@ def create_df(slides: list[Path], annot_table: pd.DataFrame) -> pd.DataFrame:
         record, slide_label, case_label = parsed
 
         info["slide_path"].append(str(slide))
-        # Downstream scripts expect the slide-level annotation to be called "carcinoma"
         info["carcinoma"].append(slide_label)
         info["case_carcinoma"].append(case_label)
         info["case_id"].append(str(record["Biopsy_No"]).strip())
