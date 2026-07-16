@@ -3,7 +3,21 @@ defaults:
   - _self_
 
 tile_threshold: 0.78
+slide_max_threshold: 0.9951838851
+slide_mpm_threshold: 0.8654243946
+slide_top_k_threshold: 0.911498785
+slide_span_threshold: 0.5 # arbitrary - span predictions are binary
 
 checkpoint: "mlflow-artifacts:/65/4e6a272ec77c4deaa8c8b7b53a6295b2/artifacts/checkpoints/epoch=3-step=222233/checkpoint.ckpt"
 public_checkpoint: null
-model_name: "PGP (Stain)"
+model_name: "PGP (Stain & Frozen)"
+
+slide_level_prediction_uris:
+  mean_pool_max:
+    mmci_sl_group_1: "mlflow-artifacts:/65/38dce5a3317544768fa85e8e1597b8fc/artifacts/tables/aggregated_predictions.json"
+  max:
+    mmci_sl_group_1: "mlflow-artifacts:/65/c66862a470084ad5bd4b3a4a91808ba8/artifacts/tables/aggregated_predictions.json"
+  top_k:
+    mmci_sl_group_1: "mlflow-artifacts:/65/4b9ecc7d18904d8b89a053b7422102d0/artifacts/tables/aggregated_predictions.json"
+  span:
+    mmci_sl_group_1: "mlflow-artifacts:/65/f9a3a966368e4c0197bf60d80aa7ea8d/artifacts/tables/aggregated_predictions.json"
