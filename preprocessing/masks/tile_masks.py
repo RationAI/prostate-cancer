@@ -16,7 +16,7 @@ from rationai.mlkit import autolog, with_cli_args
 from rationai.mlkit.lightning.loggers import MLFlowLogger
 
 
-@ray.remote
+@ray.remote(num_cpus=1)
 def process_slide(
     slide: pd.Series,
     percentage_cols: list[str],

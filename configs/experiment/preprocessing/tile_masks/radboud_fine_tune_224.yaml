@@ -1,0 +1,12 @@
+# @package _global_
+
+defaults:
+  - /data/radboud/fine_tune@data
+  - _self_
+
+tile_uris:
+  - ${data.tiles_filtered_uri_224}
+
+percentage_cols:
+  - "tissue_roi_percentage"
+  - "carcinoma_roi_percentage"

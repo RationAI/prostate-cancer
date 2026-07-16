@@ -4,5 +4,7 @@ defaults:
 
 # points to the public mlflow
 metadata_table: "mlflow-artifacts:/38/0f0580757f8b45099687d0a3621c0fef/artifacts/PANDA - Radboud train_fine_tune.csv"
+tiles_uri_224: "mlflow-artifacts:/38/10cdcbc2cec5423394240c5a2b1716bf/artifacts/PANDA - Radboud fine-tune"
+tiles_filtered_uri_224: "mlflow-artifacts:/38/6d4a3bae5720402dbe2809a3d99d9365/artifacts/PANDA - Radboud fine-tune_224"
 
 data_name: "PANDA - Radboud fine-tune"
