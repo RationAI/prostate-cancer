@@ -7,3 +7,11 @@ defaults:
   - _self_
 
 model_name: "VGG-16 Stain"
+
+datamodule:
+  train:
+    uris:
+      - ${train_data.tiles_filtered_uri_512}
+  val:
+    uris:
+      - ${val_data.tiles_filtered_uri_512}

@@ -8,3 +8,11 @@ defaults:
 # ImageNet stats
 mean: [123.675, 116.280, 103.530]
 std: [58.395, 57.120, 57.375]
+
+datamodule:
+  train:
+    uris:
+      - ${train_data.tiles_filtered_uri_224}
+  val:
+    uris:
+      - ${val_data.tiles_filtered_uri_224}
