@@ -58,18 +58,6 @@ def parse_ranges(range_str: str) -> list[tuple[int, int]]:
     return ranges
 
 
-def parse_index(idx: str) -> dict[str, Any] | None:
-    m = INDEX_PATTERN.match(idx)
-    if not m:
-        return None
-    d = m.groupdict()
-    return {
-        "patient_no": int(d["patient_no"]),
-        "year": int(d["year"]),
-        "ranges": parse_ranges(d["ranges"]),
-    }
-
-
 def slide_in_ranges(slide_no: int, ranges: list[tuple[int, int]]) -> bool:
     return any(start <= slide_no <= end for start, end in ranges)
 
@@ -186,17 +174,15 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
 
     # Parse the "<patient_no>/<year> - <ranges>" index strings into
     # structured columns used by find_record().
-    parsed = annot_table.index.map(parse_index)
+    extracted = annot_table.index.to_series().str.extract(INDEX_PATTERN)
 
-    bad_rows = [
-        idx for idx, p in zip(annot_table.index, parsed, strict=True) if p is None
-    ]
+    bad_rows = annot_table.index[extracted.isna().any(axis=1)].tolist()
     if bad_rows:
         raise ValueError(f"Could not parse annotation index for: {bad_rows}")
 
-    annot_table["patient_no"] = [p["patient_no"] for p in parsed]
-    annot_table["year"] = [p["year"] for p in parsed]
-    annot_table["ranges"] = [p["ranges"] for p in parsed]
+    annot_table["patient_no"] = extracted["patient_no"].astype(int)
+    annot_table["year"] = extracted["year"].astype(int)
+    annot_table["ranges"] = extracted["ranges"].map(parse_ranges)
 
     explored = create_df(slides, annot_table)
     qc_exclude = pd.read_csv(config.qc_exclude_table_path)
