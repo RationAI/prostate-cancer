@@ -8,12 +8,13 @@ defaults:
 
 callbacks:
   estimation_callback:
-    aggregator_cls_path: prostate_cancer.aggregators.span.SpanAggregator
-    static:
-      extent_tile: 224
-      stride_tile: 112
-      cell_threshold: ${model_data.tile_threshold}
-    to_estimate:
-      k: [2, 3, 4, 5]
+    aggregator_cls_path: rationai.mlkit.metrics.MeanPoolMaxAggregator
 
-use_case: "K Estimation (Span Aggregator)"
+    static:
+      extent_tile: 512
+      stride_tile: 256
+    to_estimate:
+      kernel_size: [1, 2, 3, 4, 5, 6, 7]
+
+use_case: "Kernel Size Estimation (MPM Aggregator)"
+

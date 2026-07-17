@@ -2,7 +2,7 @@
 
 defaults:
   - /callbacks/aggregator_estimation@callbacks
-  - /experiment/predict/images/resnet50/stain_base
+  - /experiment/predict/images/vgg16/base_224
   - /data/mmci/sl_group_1@predict_data
   - _self_
 
