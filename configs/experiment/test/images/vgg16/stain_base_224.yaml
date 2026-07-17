@@ -3,10 +3,10 @@
 defaults:
   - /experiment/test/images/base
   - /model/vgg16_model@model
-  - /model/checkpoints/mmci_tl/vgg16@model_data
+  - /model/checkpoints/mmci_tl/vgg16_stain_224@model_data
   - _self_
 
 datamodule:
   test:
     uris:
-      - ${test_data.tiles_filtered_uri_512}
+      - ${test_data.tiles_filtered_uri_224}

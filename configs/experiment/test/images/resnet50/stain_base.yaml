@@ -5,3 +5,8 @@ defaults:
   - /model/resnet50_model@model
   - /model/checkpoints/mmci_tl/resnet50_stain@model_data
   - _self_
+
+datamodule:
+  test:
+    uris:
+      - ${test_data.tiles_filtered_uri_512}
