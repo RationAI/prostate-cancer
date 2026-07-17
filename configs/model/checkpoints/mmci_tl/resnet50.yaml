@@ -14,10 +14,10 @@ public_checkpoint: "mlflow-artifacts:/38/abde571304794242be0c1630b7bd16ce/artifa
 model_name: "ResNet50"
 slide_level_prediction_uris:
   mean_pool_max:
-    mmci_sl_group_1: "mlflow-artifacts:/65/46a594a334ef4bbe9fdc7ba73250b12a/artifacts/tables/aggregated_predictions_corrected.json"
+    mmci_sl_group_1: "mlflow-artifacts:/65/e87e9b41dfaf4a878069af2045f164ef/artifacts/tables/aggregated_predictions.json"
   max:
-    mmci_sl_group_1: "mlflow-artifacts:/65/94561b6417ea4f888495fdcb799555e2/artifacts/tables/aggregated_predictions_corrected.json"
+    mmci_sl_group_1: "mlflow-artifacts:/65/098f0fb5aad246389e39bfd2265247a4/artifacts/tables/aggregated_predictions.json"
   top_k:
-    mmci_sl_group_1: "mlflow-artifacts:/65/bcf0312c738c460381bde996e5cb93d8/artifacts/tables/aggregated_predictions_corrected.json"
+    mmci_sl_group_1: "mlflow-artifacts:/65/f79c58db2f9f48148a61c9948bd04541/artifacts/tables/aggregated_predictions.json"
   span:
-    mmci_sl_group_1: "mlflow-artifacts:/65/ccd4a8001874439f8c860eefa5d41fbe/artifacts/tables/aggregated_predictions_corrected.json"
+    mmci_sl_group_1: "mlflow-artifacts:/65/423dd217a0b94fbabaee1e1bdda156d8/artifacts/tables/aggregated_predictions.json"

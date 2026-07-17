@@ -15,10 +15,10 @@ public_checkpoint: "mlflow-artifacts:/38/abde571304794242be0c1630b7bd16ce/artifa
 model_name: "VGG-16 Stain"
 slide_level_prediction_uris:
   mean_pool_max:
-    mmci_sl_group_1: "mlflow-artifacts:/65/de09807020fa4d4ca15b840692fedf82/artifacts/tables/aggregated_predictions_corrected.json"
+    mmci_sl_group_1: "mlflow-artifacts:/65/b7a34bdffb2b4f729b5c8ce98d9921ce/artifacts/tables/aggregated_predictions.json"
   max:
-    mmci_sl_group_1: "mlflow-artifacts:/65/1c08494a5de648d4b7f025aa89ac1be9/artifacts/tables/aggregated_predictions_corrected.json"
+    mmci_sl_group_1: "mlflow-artifacts:/65/a7495ce0ac2b4fb99d0cc55e912a970c/artifacts/tables/aggregated_predictions.json"
   top_k:
-    mmci_sl_group_1: "mlflow-artifacts:/65/d63f6775ddf44a4c93a934298fe10d22/artifacts/tables/aggregated_predictions_corrected.json"
+    mmci_sl_group_1: "mlflow-artifacts:/65/2bf6522353e34344aed0222c346f7230/artifacts/tables/aggregated_predictions.json"
   span:
-    mmci_sl_group_1: "mlflow-artifacts:/65/8d45a014dece415bababfabda2981a3f/artifacts/tables/aggregated_predictions_corrected.json"
+    mmci_sl_group_1: "mlflow-artifacts:/65/a392285e4bde413bb8bf03e03d921d71/artifacts/tables/aggregated_predictions.json"

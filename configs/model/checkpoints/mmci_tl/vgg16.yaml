@@ -14,10 +14,10 @@ public_checkpoint: "mlflow-artifacts:/38/abde571304794242be0c1630b7bd16ce/artifa
 model_name: "VGG-16"
 slide_level_prediction_uris:
   mean_pool_max:
-    mmci_sl_group_1: "mlflow-artifacts:/65/1a1eeddaf5864f6aa8b0d9e8a7f887ec/artifacts/tables/aggregated_predictions_corrected.json"
+    mmci_sl_group_1: "mlflow-artifacts:/65/8ee0c7d3c61d46acad41262ce6a065ec/artifacts/tables/aggregated_predictions.json"
   max:
-    mmci_sl_group_1: "mlflow-artifacts:/65/4c57d5df00fb4b26baa7ae761f4824c8/artifacts/tables/aggregated_predictions_corrected.json"
+    mmci_sl_group_1: "mlflow-artifacts:/65/8b607e5204f548d28d11ac392fd4a835/artifacts/tables/aggregated_predictions.json"
   top_k:
-    mmci_sl_group_1: "mlflow-artifacts:/65/3e2d76776e2e4ce5ac25041d7b97fd7d/artifacts/tables/aggregated_predictions_corrected.json"
+    mmci_sl_group_1: "mlflow-artifacts:/65/17b3a4b3c9bc420ca4fff7c185063f36/artifacts/tables/aggregated_predictions.json"
   span:
-    mmci_sl_group_1: "mlflow-artifacts:/65/1981e514a7be46d7a1188bd93c34eefe/artifacts/tables/aggregated_predictions_corrected.json"
+    mmci_sl_group_1: "mlflow-artifacts:/65/ce1bdc240623403aa45cca7465d47b29/artifacts/tables/aggregated_predictions.json"
