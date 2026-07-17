@@ -3,15 +3,15 @@ defaults:
   - _self_
 
 tile_threshold: 0.96
-slide_max_threshold: 0.9917962551
-slide_mpm_threshold: 0.9917962551
-slide_top_k_threshold: 0.9871470928
+slide_max_threshold: 0
+slide_mpm_threshold: 0
+slide_top_k_threshold: 0
 slide_span_threshold: 0.5 # arbitrary - span predictions are binary
 
 checkpoint: "mlflow-artifacts:/65/2b4986681bb24e1abd85a9108a7a49bb/artifacts/checkpoints/epoch=1-step=97226/checkpoint.ckpt"
 public_checkpoint: "mlflow-artifacts:/38/abde571304794242be0c1630b7bd16ce/artifacts/vgg16_checkpoint.ckpt"
 
-model_name: "VGG-16"
+model_name: "VGG-16 (224x224)"
 slide_level_prediction_uris:
   mean_pool_max:
     mmci_sl_group_1: "mlflow-artifacts:/65/8ee0c7d3c61d46acad41262ce6a065ec/artifacts/tables/aggregated_predictions.json"

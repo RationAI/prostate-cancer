@@ -3,15 +3,15 @@ defaults:
   - _self_
 
 tile_threshold: 0.82
-slide_max_threshold: 0.9540096521
-slide_mpm_threshold: 0.324303627
-slide_top_k_threshold: 0.4309533238
+slide_max_threshold: 0
+slide_mpm_threshold: 0
+slide_top_k_threshold: 0
 slide_span_threshold: 0.5 # arbitrary - span predictions are binary
 
 checkpoint: "mlflow-artifacts:/65/d9bd39a0207c4b9484ad92574c50b503/artifacts/checkpoints/epoch=0-step=13889/checkpoint.ckpt"
 public_checkpoint: "mlflow-artifacts:/38/abde571304794242be0c1630b7bd16ce/artifacts/resnet50_checkpoint.ckpt"
 
-model_name: "ResNet50"
+model_name: "ResNet50 (224x224)"
 slide_level_prediction_uris:
   mean_pool_max:
     mmci_sl_group_1: "mlflow-artifacts:/65/e87e9b41dfaf4a878069af2045f164ef/artifacts/tables/aggregated_predictions.json"
