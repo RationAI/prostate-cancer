@@ -18,7 +18,7 @@ from rationai.mlkit.lightning.loggers import MLFlowLogger
 def main(config: DictConfig, logger: MLFlowLogger) -> None:
     client = MlflowClient()
     run = client.get_run(config.sl_annotations_run_id)
-    annotations = run.data.metrics  # SL metrics were stored as metrics
+    annotations = run.data.metrics  # SL annotations were stored as metrics
     annotations = {
         key.split("_")[-1].replace(".svs", ""): val for key, val in annotations.items()
     }
