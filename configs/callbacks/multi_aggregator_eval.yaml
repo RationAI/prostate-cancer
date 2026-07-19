@@ -1,0 +1,8 @@
+multi_aggregator_eval_callback:
+  _target_: prostate_cancer.callbacks.MultiAggregatorEvalCallback
+  max_aggregator: ${max_aggregator}
+  mean_pool_max_aggregator: ${mean_pool_max_aggregator}
+  top_k_aggregator: ${top_k_aggregator}
+  max_threshold: ${model_data.slide_max_threshold}
+  mean_pool_max_threshold: ${model_data.slide_mpm_threshold}
+  top_k_threshold: ${model_data.slide_top_k_threshold}
