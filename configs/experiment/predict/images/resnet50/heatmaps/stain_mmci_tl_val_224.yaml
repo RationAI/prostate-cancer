@@ -1,0 +1,6 @@
+# @package _global_
+
+defaults:
+  - /experiment/predict/images/resnet50/heatmaps/stain_base_224
+  - /data/mmci/tl_val@predict_data
+  - _self_
