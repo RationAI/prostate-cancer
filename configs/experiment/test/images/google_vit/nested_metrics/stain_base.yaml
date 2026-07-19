@@ -1,8 +1,0 @@
-# @package _global_
-
-defaults:
-  - /callbacks/nested_metrics@callbacks
-  - /experiment/test/images/google_vit/stain_base
-  - _self_
-
-use_case: "TL Per-Slide metrics"
