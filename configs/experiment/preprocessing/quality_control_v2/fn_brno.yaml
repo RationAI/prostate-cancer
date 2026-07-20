@@ -1,5 +1,5 @@
 # @package _global_
 
 defaults:
-  - /data/graz/graz_sample@data
+  - /data/fn_brno/full@data
   - _self_
