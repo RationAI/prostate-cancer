@@ -3,7 +3,7 @@
 defaults:
   - /experiment/predict/bag_of_embeddings/base
   - /model/pgp_hybrid_mil_model@model
-  - /model/checkpoints/pgp_hybrid_mil@model_data
+  - /model/checkpoints/mmci_tl/pgp_hybrid_mil@model_data
   - _self_
 
 datamodule:
