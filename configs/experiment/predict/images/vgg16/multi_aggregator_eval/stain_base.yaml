@@ -16,6 +16,6 @@ top_k_aggregator:
   kernel_size: 1
   extent_tile: 512
   stride_tile: 256
-  k: 4
+  k: 2
 
 use_case: "Multi-Aggregator SL Evaluation"
