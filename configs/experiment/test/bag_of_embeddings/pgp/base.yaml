@@ -2,7 +2,7 @@
 
 defaults:
   - /experiment/test/bag_of_embeddings/base
-  - /model/pgp_hybird_mil_model@model
+  - /model/pgp_hybrid_mil_model@model
   - /model/checkpoints/mmci_tl/pgp_hybrid_mil@model_data
   - _self_
 
