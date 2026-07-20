@@ -1,0 +1,11 @@
+defaults:
+  - base
+  - _self_
+
+metadata_table: "mlflow-artifacts:/65/eeefc659be104c0885ec3623ee0c405c/artifacts/mug_400.csv"
+
+tissue_masks_uri: "mlflow-artifacts:/65/b4d1bb8d3deb48fa9915934223efa8b3/artifacts/tissue_masks"
+qc_masks_uri: "mlflow-artifacts:/95/5fd4c70299d74dacad93b18ef476ad9e/artifacts/output_images/level_1"
+annotation_masks_uri: null
+
+data_name: "MUG 400"
