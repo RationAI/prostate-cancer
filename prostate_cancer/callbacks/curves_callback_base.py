@@ -1,5 +1,4 @@
-from abc import ABC, abstractmethod
-from typing import Any
+from abc import ABC
 
 import mlflow
 import numpy as np
@@ -24,17 +23,6 @@ class CurvesCallbackBase(Callback, ABC):
         self.threshold = threshold
         self.preds: list[torch.Tensor] = []
         self.targets: list[torch.Tensor] = []
-
-    @abstractmethod
-    def on_test_batch_end(
-        self,
-        trainer: Trainer,
-        pl_module: LightningModule,
-        outputs: Any,
-        batch: Any,
-        batch_idx: int,
-        dataloader_idx: int = 0,
-    ) -> None: ...
 
     def _plot_roc(
         self, y_pred: NDArray[np.float32], y_true: NDArray[np.float32]
@@ -118,7 +106,7 @@ class CurvesCallbackBase(Callback, ABC):
         )
         mlflow.log_artifact(plot_path, artifact_path="plots")
 
-    def on_test_epoch_end(self, trainer: Trainer, pl_module: LightningModule) -> None:
+    def _plot_and_clear(self) -> None:
         y_pred = torch.cat(self.preds).numpy()
         y_true = torch.cat(self.targets).numpy()
 
@@ -127,3 +115,11 @@ class CurvesCallbackBase(Callback, ABC):
 
         self.preds.clear()
         self.targets.clear()
+
+    def on_test_epoch_end(self, trainer: Trainer, pl_module: LightningModule) -> None:
+        self._plot_and_clear()
+
+    def on_predict_epoch_end(
+        self, trainer: Trainer, pl_module: LightningModule
+    ) -> None:
+        self._plot_and_clear()

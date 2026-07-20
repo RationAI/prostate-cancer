@@ -25,11 +25,6 @@ if TYPE_CHECKING:
 
 
 class MultiAggregatorEvalCallback(MultiloaderLifecycle):
-    """Aggregates TL predictions into SL predictions with the max, mean_pool_max
-    and top_k aggregators in parallel, evaluates each against the SL target and
-    a majority vote across the three, and logs SL metrics to MLflow.
-    """
-
     def __init__(
         self,
         max_aggregator: Aggregator,
@@ -143,7 +138,10 @@ class MultiAggregatorEvalCallback(MultiloaderLifecycle):
             mlflow.log_artifact(filename, artifact_path="tables")
             metrics.update(
                 self._compute_metrics(
-                    name, table["target"], table["prediction_binary"], table["prediction"]
+                    name,
+                    table["target"],
+                    table["prediction_binary"],
+                    table["prediction"],
                 )
             )
 

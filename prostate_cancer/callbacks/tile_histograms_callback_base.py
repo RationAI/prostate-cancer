@@ -1,6 +1,5 @@
-from abc import ABC, abstractmethod
+from abc import ABC
 from pathlib import Path
-from typing import Any
 
 import matplotlib.pyplot as plt
 import mlflow
@@ -17,18 +16,7 @@ class TileHistogramsCallbackBase(Callback, ABC):
         self.all_preds: list[NDArray[np.floating]] = []
         self.all_labels: list[NDArray[np.floating]] = []
 
-    @abstractmethod
-    def on_test_batch_end(
-        self,
-        trainer: Trainer,
-        pl_module: LightningModule,
-        outputs: Any,
-        batch: Any,
-        batch_idx: int,
-        dataloader_idx: int = 0,
-    ) -> None: ...
-
-    def on_test_epoch_end(self, trainer: Trainer, pl_module: LightningModule) -> None:
+    def _plot_and_clear(self, trainer: Trainer) -> None:
         assert isinstance(trainer.logger, MLFlowLogger)
 
         preds = np.concatenate(self.all_preds)
@@ -62,3 +50,11 @@ class TileHistogramsCallbackBase(Callback, ABC):
 
         self.all_preds.clear()
         self.all_labels.clear()
+
+    def on_test_epoch_end(self, trainer: Trainer, pl_module: LightningModule) -> None:
+        self._plot_and_clear(trainer)
+
+    def on_predict_epoch_end(
+        self, trainer: Trainer, pl_module: LightningModule
+    ) -> None:
+        self._plot_and_clear(trainer)

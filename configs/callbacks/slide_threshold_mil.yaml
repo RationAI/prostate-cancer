@@ -1,0 +1,7 @@
+defaults:
+  - slide_histograms_mil
+  - curves_sl
+  - _self_
+
+curves_callback:
+  optimal_seek: true

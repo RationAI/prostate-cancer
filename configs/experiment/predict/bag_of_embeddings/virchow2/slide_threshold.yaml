@@ -1,0 +1,10 @@
+# @package _global_
+
+defaults:
+  - /callbacks/slide_threshold_mil@callbacks
+  - /experiment/predict/bag_of_embeddings/virchow2/base
+  - /data/mmci/sl_group_1@predict_data
+  - _self_
+
+slide_threshold: 0.99 # My estimate for other models
+use_case: "SL Threshold Estimation"

@@ -4,6 +4,7 @@ from prostate_cancer.callbacks.carcinoma_prediction_table_callback import (
     CarcinomaPredictionTableCallback,
 )
 from prostate_cancer.callbacks.curves_callback_mil import CurvesCallbackMIL
+from prostate_cancer.callbacks.curves_callback_sl import CurvesCallbackSL
 from prostate_cancer.callbacks.curves_callback_tl import CurvesCallbackTile
 from prostate_cancer.callbacks.estimation_callback import (
     EstimationCallback,
@@ -15,6 +16,9 @@ from prostate_cancer.callbacks.multi_aggregator_eval_callback import (
 )
 from prostate_cancer.callbacks.nested_metrics_callback import NestedMetricsCallback
 from prostate_cancer.callbacks.num_positive_callback import NumPositiveCallback
+from prostate_cancer.callbacks.slide_histograms_callback_mil import (
+    SlideHistogramsCallbackMIL,
+)
 from prostate_cancer.callbacks.tile_histograms_callback_mil import (
     TileHistogramsCallbackMIL,
 )
@@ -28,6 +32,7 @@ __all__ = [
     "CAMExplainer",
     "CarcinomaPredictionTableCallback",
     "CurvesCallbackMIL",
+    "CurvesCallbackSL",
     "CurvesCallbackTile",
     "EstimationCallback",
     "HeatmapCallback",
@@ -35,7 +40,7 @@ __all__ = [
     "MultiAggregatorEvalCallback",
     "NestedMetricsCallback",
     "NumPositiveCallback",
-    "TileHistogramsCallback",
+    "SlideHistogramsCallbackMIL",
     "TileHistogramsCallbackMIL",
     "TileHistogramsCallbackTile",
 ]
