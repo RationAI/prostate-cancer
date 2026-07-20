@@ -9,11 +9,11 @@ defaults:
   - _self_
 
 mean_pool_max_aggregator:
-  kernel_size: 7
+  kernel_size: 1
   extent_tile: 224
   stride_tile: 112
 top_k_aggregator:
-  kernel_size: 5
+  kernel_size: 1
   extent_tile: 224
   stride_tile: 112
   k: 4
