@@ -4,4 +4,4 @@ defaults:
   - /experiment/train/images/pgp/base
   - /datamodule/transforms/normalize_w_stain_augments@transforms
 
-model_name: "PGP (Stain)"
+model_name: "PGP (Stain & Frozen)"

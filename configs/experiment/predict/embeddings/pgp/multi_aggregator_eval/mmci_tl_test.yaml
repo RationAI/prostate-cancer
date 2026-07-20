@@ -1,0 +1,6 @@
+# @package _global_
+
+defaults:
+  - /experiment/predict/embeddings/pgp/multi_aggregator_eval/base
+  - /data/mmci/tl_test@predict_data
+  - _self_

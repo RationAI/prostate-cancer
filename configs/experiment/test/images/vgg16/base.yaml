@@ -6,3 +6,7 @@ defaults:
   - /model/checkpoints/mmci_tl/vgg16@model_data
   - _self_
 
+datamodule:
+  test:
+    uris:
+      - ${test_data.tiles_filtered_uri_512}

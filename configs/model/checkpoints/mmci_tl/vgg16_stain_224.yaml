@@ -1,0 +1,24 @@
+defaults:
+  - base
+  - _self_
+
+tile_threshold: 0.93
+slide_max_threshold: 0.999835372
+slide_mpm_threshold: 0.999294281
+slide_top_k_threshold: 0.9988395572
+slide_span_threshold: 0.5 # arbitrary - span predictions are binary
+
+checkpoint: "mlflow-artifacts:/65/98e0d43027664084aef1beebaeac7fff/artifacts/checkpoints/epoch=1-step=111115/checkpoint.ckpt"
+public_checkpoint: "mlflow-artifacts:/38/abde571304794242be0c1630b7bd16ce/artifacts/vgg16_stain_checkpoint.ckpt"
+
+
+model_name: "VGG-16 Stain (224x224)"
+slide_level_prediction_uris:
+  mean_pool_max:
+    mmci_sl_group_1: "mlflow-artifacts:/65/b7a34bdffb2b4f729b5c8ce98d9921ce/artifacts/tables/aggregated_predictions.json"
+  max:
+    mmci_sl_group_1: "mlflow-artifacts:/65/a7495ce0ac2b4fb99d0cc55e912a970c/artifacts/tables/aggregated_predictions.json"
+  top_k:
+    mmci_sl_group_1: "mlflow-artifacts:/65/2bf6522353e34344aed0222c346f7230/artifacts/tables/aggregated_predictions.json"
+  span:
+    mmci_sl_group_1: "mlflow-artifacts:/65/a392285e4bde413bb8bf03e03d921d71/artifacts/tables/aggregated_predictions.json"

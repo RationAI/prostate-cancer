@@ -1,0 +1,6 @@
+# @package _global_
+
+defaults:
+  - /experiment/predict/images/vgg16/multi_aggregator_eval/stain_base
+  - /data/mmci/tl_test@predict_data
+  - _self_

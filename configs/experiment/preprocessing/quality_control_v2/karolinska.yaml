@@ -1,0 +1,5 @@
+# @package _global_
+
+defaults:
+  - /data/karolinska/full@data
+  - _self_

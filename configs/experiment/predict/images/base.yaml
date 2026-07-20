@@ -8,8 +8,3 @@ defaults:
 datamodule:
   batch_size: 64
   num_workers: 8
-
-  predict:
-    uris:
-      - ${predict_data.tiles_filtered_uri_512}
-
