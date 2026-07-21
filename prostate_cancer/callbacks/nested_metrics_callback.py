@@ -1,45 +1,18 @@
 from typing import Any
 
-import lightning.pytorch as pl
-import mlflow
-import pandas as pd
-from lightning import Callback
-from rationai.mlkit.lightning.loggers import MLFlowLogger
-from rationai.mlkit.metrics import NestedMetricCollection
-from torchmetrics import (
-    AUROC,
-    Accuracy,
-    NegativePredictiveValue,
-    Precision,
-    Recall,
-    Specificity,
-)
+from lightning import LightningModule, Trainer
 
+from prostate_cancer.callbacks.nested_metrics_callback_base import (
+    NestedMetricsCallbackBase,
+)
 from prostate_cancer.typing import LabeledTileSampleBatch
 
 
-class NestedMetricsCallback(Callback):
-    """Calculates metrics using the `NestedMetricCollection` in the test stage."""
-
-    def __init__(self, threshold: float) -> None:
-        # In the test mode, log metrics for each slide
-        self.nested_test_metrics = NestedMetricCollection(
-            metrics={
-                "AUC": AUROC("binary"),
-                "accuracy": Accuracy("binary", threshold),
-                "precision": Precision("binary", threshold),
-                "recall": Recall("binary", threshold),
-                "specificity": Specificity("binary", threshold),
-                "negative_predictive_value": NegativePredictiveValue(
-                    "binary", threshold
-                ),
-            }
-        )
-
+class NestedMetricsCallback(NestedMetricsCallbackBase):
     def on_test_batch_end(
         self,
-        trainer: pl.Trainer,
-        pl_module: pl.LightningModule,
+        trainer: Trainer,
+        pl_module: LightningModule,
         outputs: Any,
         batch: LabeledTileSampleBatch,
         batch_idx: int,
@@ -49,13 +22,3 @@ class NestedMetricsCallback(Callback):
 
         # Update slide-level metrics
         self.nested_test_metrics.update(outputs, targets, metadata["slide"])
-
-    def on_test_epoch_end(
-        self, trainer: pl.Trainer, pl_module: pl.LightningModule
-    ) -> None:
-        assert isinstance(trainer.logger, MLFlowLogger)
-
-        metrics = self.nested_test_metrics.compute()
-        pd.DataFrame(metrics).to_json("nested_metrics.json", orient="split")
-        mlflow.log_artifact("nested_metrics.json")
-        self.nested_test_metrics.reset()

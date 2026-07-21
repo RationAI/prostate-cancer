@@ -1,0 +1,8 @@
+# @package _global_
+
+defaults:
+  - /callbacks/combined_test_suite_mil@callbacks
+  - /experiment/test/bag_of_embeddings/pgp/base
+  - _self_
+
+use_case: "TL Test"

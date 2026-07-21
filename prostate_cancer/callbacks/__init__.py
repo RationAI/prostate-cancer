@@ -15,6 +15,9 @@ from prostate_cancer.callbacks.multi_aggregator_eval_callback import (
     MultiAggregatorEvalCallback,
 )
 from prostate_cancer.callbacks.nested_metrics_callback import NestedMetricsCallback
+from prostate_cancer.callbacks.nested_metrics_callback_mil import (
+    NestedMetricsCallbackMIL,
+)
 from prostate_cancer.callbacks.num_positive_callback import NumPositiveCallback
 from prostate_cancer.callbacks.slide_histograms_callback_mil import (
     SlideHistogramsCallbackMIL,
@@ -39,6 +42,7 @@ __all__ = [
     "MILPredictionCallback",
     "MultiAggregatorEvalCallback",
     "NestedMetricsCallback",
+    "NestedMetricsCallbackMIL",
     "NumPositiveCallback",
     "SlideHistogramsCallbackMIL",
     "TileHistogramsCallbackMIL",

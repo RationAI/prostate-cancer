@@ -1,0 +1,6 @@
+defaults:
+  - curves_mil
+  - nested_metrics_mil
+  - tile_histograms_mil
+  - mil_prediction_callback
+  - _self_
