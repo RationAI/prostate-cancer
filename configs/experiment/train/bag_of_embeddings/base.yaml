@@ -4,7 +4,6 @@ defaults:
   - /experiment/train/base
   - /data/mmci/tl_train@train_data
   - /data/mmci/tl_val@val_data
-  - /datamodule/bag_of_embeddings_datamodule@datamodule
   - _self_
 
 model:

@@ -1,0 +1,16 @@
+# @package _global_
+
+defaults:
+  - /experiment/train/bag_of_embeddings/classic_base
+  - /model/pgp_classic_mil_model@model
+  - _self_
+
+datamodule:
+  train:
+    uris:
+      - ${train_data.tiles_filtered_w_pgp_uri_224}
+  val:
+    uris:
+      - ${val_data.tiles_filtered_w_pgp_uri_224}
+
+model_name: "PGP (Classic-MIL)"

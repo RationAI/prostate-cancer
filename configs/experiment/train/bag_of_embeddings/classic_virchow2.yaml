@@ -1,8 +1,8 @@
 # @package _global_
 
 defaults:
-  - /experiment/train/bag_of_embeddings/base
-  - /model/virchow2_hybrid_mil_model@model
+  - /experiment/train/bag_of_embeddings/classic_base
+  - /model/virchow2_classic_mil_model@model
   - _self_
 
 datamodule:
@@ -13,4 +13,4 @@ datamodule:
     uris:
       - ${val_data.tiles_filtered_w_virchow2_uri_224}
 
-model_name: "Virchow2 (Hybrid-MIL)"
+model_name: "Virchow2 (Classic-MIL)"

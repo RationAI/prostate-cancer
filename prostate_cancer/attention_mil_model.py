@@ -7,7 +7,7 @@ from torch import Tensor, nn
 from torchmetrics import MetricCollection
 
 from prostate_cancer.mil_model_base import ProstateCancerMILBase, binary_metrics
-from prostate_cancer.typing import LabeledBagOfTilesSampleBatch, MILModelOutput
+from prostate_cancer.typing import LabeledBagOfTilesSampleBatch
 
 
 class ProstateCancerAttentionMIL(ProstateCancerMILBase):
@@ -16,7 +16,12 @@ class ProstateCancerAttentionMIL(ProstateCancerMILBase):
     def __init__(
         self, foundation: str, lr: float, tl_threshold: float, sl_threshold: float
     ) -> None:
-        super().__init__(foundation=foundation, lr=lr, sl_threshold=sl_threshold)
+        super().__init__(
+            foundation=foundation,
+            lr=lr,
+            sl_threshold=sl_threshold,
+            tl_threshold=tl_threshold,
+        )
 
         self.tl_criterion = nn.BCEWithLogitsLoss(
             reduction="none", pos_weight=torch.tensor([9.65])
@@ -29,7 +34,6 @@ class ProstateCancerAttentionMIL(ProstateCancerMILBase):
         self.val_metrics_tl = MetricCollection(
             deepcopy(tl_metrics), prefix="tl_validation/"
         )
-        self.test_metrics_tl = MetricCollection(deepcopy(tl_metrics), prefix="tl_test/")
 
     def training_step(self, batch: LabeledBagOfTilesSampleBatch) -> Tensor:
         # bag ~ all embeddings from a single slide
@@ -101,19 +105,3 @@ class ProstateCancerAttentionMIL(ProstateCancerMILBase):
         self.log_dict(
             self.val_metrics_tl, on_epoch=True, on_step=False, batch_size=len(bags)
         )
-
-    def test_step(self, batch: LabeledBagOfTilesSampleBatch) -> MILModelOutput:  # type: ignore[override]
-        bags, tl_labels, sl_labels, _ = batch
-
-        sl_outputs, tl_outputs, mask, attention = self(bags)
-
-        self.test_metrics_sl.update(sl_outputs, sl_labels)
-        self.test_metrics_tl.update(tl_outputs[mask.bool()], tl_labels[mask.bool()])
-
-        self.log_dict(
-            self.test_metrics_sl, on_epoch=True, on_step=False, batch_size=len(bags)
-        )
-        self.log_dict(
-            self.test_metrics_tl, on_epoch=True, on_step=False, batch_size=len(bags)
-        )
-        return sl_outputs.sigmoid(), tl_outputs.sigmoid(), mask, attention

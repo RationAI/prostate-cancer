@@ -1,7 +1,7 @@
 defaults:
   - datasets@train: embeddings/bag_of_embeddings_sl_labeled
   - datasets@val: embeddings/bag_of_embeddings_sl_labeled
-  - datasets@test: embeddings/bag_of_embeddings_sl_labeled
+  - datasets@test: embeddings/bag_of_embeddings_labeled
   - datasets@predict: embeddings/bag_of_embeddings_unlabeled
 
   - samplers@sampler: bag_of_tiles_stratified_weighted_random

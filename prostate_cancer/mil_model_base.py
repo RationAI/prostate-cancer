@@ -17,7 +17,11 @@ from torchmetrics.classification import (
     Specificity,
 )
 
-from prostate_cancer.typing import MILModelOutput, UnlabeledBagOfTilesSampleBatch
+from prostate_cancer.typing import (
+    LabeledBagOfTilesSampleBatch,
+    MILModelOutput,
+    UnlabeledBagOfTilesSampleBatch,
+)
 
 
 def binary_metrics(threshold: float) -> dict[str, Metric | MetricCollection]:
@@ -37,12 +41,17 @@ class ProstateCancerMILBase(LightningModule):
     """Attention-MIL architecture shared by hybrid (SL+TL) and classic (SL-only) models.
 
     The bag encoder/attention/classifier and the forward pass are identical
-    regardless of which labels supervise training - subclasses only differ in
-    which labels they consume in `training_step`/`validation_step`/`test_step`
-    and which losses/metrics they compute from them.
+    regardless of which labels supervise training. Both hybrid and classic
+    models are evaluated at test time against SL *and* TL ground truth (TL
+    metrics show how well the per-tile classifier localizes carcinoma even
+    when, for the classic model, it was never directly supervised on TL
+    labels) so `test_step` is shared here too. Subclasses only differ in
+    which labels drive `training_step`/`validation_step`.
     """
 
-    def __init__(self, foundation: str, lr: float, sl_threshold: float) -> None:
+    def __init__(
+        self, foundation: str, lr: float, sl_threshold: float, tl_threshold: float
+    ) -> None:
         super().__init__()
         match foundation:
             case "pgp":
@@ -79,6 +88,11 @@ class ProstateCancerMILBase(LightningModule):
             deepcopy(sl_metrics), prefix="sl_validation/"
         )
         self.test_metrics_sl = MetricCollection(deepcopy(sl_metrics), prefix="sl_test/")
+
+        # TL is only ever evaluated (not necessarily trained on) - see class docstring
+        self.test_metrics_tl = MetricCollection(
+            deepcopy(binary_metrics(tl_threshold)), prefix="tl_test/"
+        )
 
     def forward(self, x: Tensor) -> MILModelOutput:
         # x has shape (batch_size, num_tiles_padded, embedding_dim)
@@ -117,6 +131,22 @@ class ProstateCancerMILBase(LightningModule):
             mask.squeeze(-1),
             attention_weights.squeeze(-1),
         )  # (batch_size,), (batch_size, num_tiles_padded), (batch_size, num_tiles_padded), (batch_size, num_tiles_padded)
+
+    def test_step(self, batch: LabeledBagOfTilesSampleBatch) -> MILModelOutput:  # type: ignore[override]
+        bags, tl_labels, sl_labels, _ = batch
+
+        sl_outputs, tl_outputs, mask, attention = self(bags)
+
+        self.test_metrics_sl.update(sl_outputs, sl_labels)
+        self.test_metrics_tl.update(tl_outputs[mask.bool()], tl_labels[mask.bool()])
+
+        self.log_dict(
+            self.test_metrics_sl, on_epoch=True, on_step=False, batch_size=len(bags)
+        )
+        self.log_dict(
+            self.test_metrics_tl, on_epoch=True, on_step=False, batch_size=len(bags)
+        )
+        return sl_outputs.sigmoid(), tl_outputs.sigmoid(), mask, attention
 
     def predict_step(self, batch: UnlabeledBagOfTilesSampleBatch) -> MILModelOutput:
         sl_preds_raw, tl_preds_raw, mask, attention = self(batch[0])
