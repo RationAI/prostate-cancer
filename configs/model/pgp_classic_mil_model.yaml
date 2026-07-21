@@ -1,0 +1,4 @@
+_target_: prostate_cancer.classic_mil_model.ProstateCancerClassicMIL
+foundation: "pgp"
+lr: ???
+sl_threshold: ???

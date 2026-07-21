@@ -1,5 +1,6 @@
 """These Datasets were taken from Adam Kukučka Ulcerative Colitis project and modified."""
 
+from abc import ABC, abstractmethod
 from collections import Counter
 from collections.abc import Iterable
 from pathlib import Path
@@ -7,43 +8,43 @@ from typing import Generic, TypeVar
 
 import torch
 import torch.nn.functional as F
+from datasets import Dataset as HFDataset
 from rationai.mlkit.data.datasets.slides_tiles_loader import SlidesTilesLoader
 from torch.utils.data import Dataset
 
 from prostate_cancer.typing import (
     LabeledBagOfTilesSample,
     SlideMetadata,
+    SLLabeledBagOfTilesSample,
+    TilingSlideMetadata,
     UnlabeledBagOfTilesSample,
 )
 
 
-T = TypeVar("T", bound=LabeledBagOfTilesSample | UnlabeledBagOfTilesSample)
+T = TypeVar(
+    "T",
+    bound=LabeledBagOfTilesSample
+    | SLLabeledBagOfTilesSample
+    | UnlabeledBagOfTilesSample,
+)
 
 
-class BagOfEmbeddingsDataset(Dataset[T], Generic[T]):
+class BagOfEmbeddingsDataset(Dataset[T], Generic[T], ABC):
+    """Base for bag-of-embeddings (MIL) datasets: one item per slide.
+
+    Handles loading slide/tile metadata, assembling the (padded) bag of tile
+    embeddings and building the shared slide-level metadata. Subclasses only
+    decide which labels (if any) accompany the bag.
+    """
+
     def __init__(
         self,
         uris: Iterable[str],
         padding: bool = True,
-        carcinoma_roi_t: float | None = None,
     ) -> None:
-        self.include_labels = carcinoma_roi_t is not None
-        self.carcinoma_roi_t = carcinoma_roi_t
-
         self._meta = SlidesTilesLoader(uris=uris)
         self.slides = self._meta.slides
-        tiles = self._meta.tiles
-
-        if self.include_labels:
-            tiles = tiles.map(
-                lambda r: {
-                    "carcinoma": (r["carcinoma_roi_percentage"] > self.carcinoma_roi_t)
-                }
-            )
-
-        self.tiles = tiles
-        self._meta.tiles = tiles
-        # no need to re-build index after .map
+        self.tiles = self._meta.tiles
 
         self.padding = padding
 
@@ -55,7 +56,9 @@ class BagOfEmbeddingsDataset(Dataset[T], Generic[T]):
     def __len__(self) -> int:
         return len(self.slides)
 
-    def __getitem__(self, idx: int) -> T:
+    def _load_bag(
+        self, idx: int
+    ) -> tuple[TilingSlideMetadata, HFDataset, torch.Tensor, SlideMetadata]:
         slide_metadata = self.slides[idx]
 
         slide_name = Path(slide_metadata["path"]).stem
@@ -81,29 +84,10 @@ class BagOfEmbeddingsDataset(Dataset[T], Generic[T]):
             ys=torch.tensor(slide_tiles["y"]),
         )
 
-        if not self.include_labels:
-            return slide_embeddings, metadata  # type: ignore[return-value]
+        return slide_metadata, slide_tiles, slide_embeddings, metadata
 
-        sl_label = torch.tensor(slide_metadata["carcinoma"]).float()
-
-        tl_labels = torch.zeros(len(slide_embeddings)).float()
-        tl_labels[: len(slide_tiles)] = torch.tensor(slide_tiles["carcinoma"]).float()
-
-        return slide_embeddings, tl_labels, sl_label, metadata  # type: ignore[return-value]
-
-
-class LabeledBagOfEmbeddingsDataset(BagOfEmbeddingsDataset[LabeledBagOfTilesSample]):
-    def __init__(
-        self,
-        uris: Iterable[str],
-        carcinoma_roi_t: float,
-        padding: bool = True,
-    ) -> None:
-        super().__init__(
-            uris=uris,
-            padding=padding,
-            carcinoma_roi_t=carcinoma_roi_t,
-        )
+    @abstractmethod
+    def __getitem__(self, idx: int) -> T: ...
 
 
 class UnlabeledBagOfEmbeddingsDataset(
@@ -114,7 +98,64 @@ class UnlabeledBagOfEmbeddingsDataset(
         uris: Iterable[str],
         padding: bool = True,
     ) -> None:
-        super().__init__(
-            uris=uris,
-            padding=padding,
+        super().__init__(uris=uris, padding=padding)
+
+    def __getitem__(self, idx: int) -> UnlabeledBagOfTilesSample:
+        _, _, slide_embeddings, metadata = self._load_bag(idx)
+        return slide_embeddings, metadata
+
+
+class SLLabeledBagOfEmbeddingsDataset(
+    BagOfEmbeddingsDataset[SLLabeledBagOfTilesSample]
+):
+    """Bag-of-embeddings dataset carrying only slide-level (SL) labels.
+
+    Unlike `LabeledBagOfEmbeddingsDataset`, this does not require tile-level
+    (TL) carcinoma annotations, so it can be used with data that only has
+    slide-level ground truth (classic MIL, no TL supervision).
+    """
+
+    def __init__(
+        self,
+        uris: Iterable[str],
+        padding: bool = True,
+    ) -> None:
+        super().__init__(uris=uris, padding=padding)
+
+    def __getitem__(self, idx: int) -> SLLabeledBagOfTilesSample:
+        slide_metadata, _, slide_embeddings, metadata = self._load_bag(idx)
+
+        sl_label = torch.tensor(slide_metadata["carcinoma"]).float()
+
+        return slide_embeddings, sl_label, metadata
+
+
+class LabeledBagOfEmbeddingsDataset(BagOfEmbeddingsDataset[LabeledBagOfTilesSample]):
+    """Bag-of-embeddings dataset carrying both SL and TL labels (hybrid MIL)."""
+
+    def __init__(
+        self,
+        uris: Iterable[str],
+        carcinoma_roi_t: float,
+        padding: bool = True,
+    ) -> None:
+        super().__init__(uris=uris, padding=padding)
+        self.carcinoma_roi_t = carcinoma_roi_t
+
+        self.tiles = self.tiles.map(
+            lambda r: {
+                "carcinoma": (r["carcinoma_roi_percentage"] > self.carcinoma_roi_t)
+            }
         )
+        self._meta.tiles = self.tiles
+        # no need to re-build index after .map
+
+    def __getitem__(self, idx: int) -> LabeledBagOfTilesSample:
+        slide_metadata, slide_tiles, slide_embeddings, metadata = self._load_bag(idx)
+
+        sl_label = torch.tensor(slide_metadata["carcinoma"]).float()
+
+        tl_labels = torch.zeros(len(slide_embeddings)).float()
+        tl_labels[: len(slide_tiles)] = torch.tensor(slide_tiles["carcinoma"]).float()
+
+        return slide_embeddings, tl_labels, sl_label, metadata

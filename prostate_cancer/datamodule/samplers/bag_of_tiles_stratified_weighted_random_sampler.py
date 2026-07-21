@@ -1,15 +1,18 @@
 from collections.abc import Sequence
+from typing import Any
 
 from datasets import Dataset as HFDataset
 from torch.utils.data import WeightedRandomSampler
 
-from prostate_cancer.datamodule.datasets import LabeledBagOfEmbeddingsDataset
+from prostate_cancer.datamodule.datasets.bag_of_embeddings_dataset import (
+    BagOfEmbeddingsDataset,
+)
 
 
 class BagOfTilesStratifiedWeightedRandomSampler(WeightedRandomSampler):
     def __init__(
         self,
-        dataset: LabeledBagOfEmbeddingsDataset,
+        dataset: BagOfEmbeddingsDataset[Any],
         target_col: str,
         replacement: bool = True,
     ) -> None:

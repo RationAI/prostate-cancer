@@ -122,7 +122,7 @@ class MILPredictionCallback(Callback):
         self,
         trainer: Trainer,
         pl_module: LightningModule,
-        outputs: MILModelOutput,
+        outputs: MILModelOutput,  # type: ignore[override]
         batch: LabeledBagOfTilesSampleBatch,
         batch_idx: int,
         dataloader_idx: int = 0,

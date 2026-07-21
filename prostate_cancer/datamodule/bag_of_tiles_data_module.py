@@ -1,5 +1,6 @@
+from abc import ABC, abstractmethod
 from collections.abc import Iterable
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Any, cast
 
 import torch
 from hydra.utils import instantiate
@@ -10,19 +11,27 @@ from torch.utils.data import DataLoader
 
 if TYPE_CHECKING:
     from prostate_cancer.datamodule.datasets import (
-        LabeledBagOfEmbeddingsDataset,
+        BagOfEmbeddingsDataset,
         UnlabeledBagOfEmbeddingsDataset,
     )
 
 from prostate_cancer.typing import (
     LabeledBagOfTilesSample,
     LabeledBagOfTilesSampleBatch,
+    SLLabeledBagOfTilesSampleBatch,
     UnlabeledBagOfTilesSample,
     UnlabeledBagOfTilesSampleBatch,
 )
 
 
-class BagOfTilesDataModule(LightningDataModule):
+class BaseBagOfTilesDataModule(LightningDataModule, ABC):
+    """Shared plumbing for bag-of-tiles (MIL) datamodules.
+
+    Subclasses only provide the collate function for labeled samples, since
+    that is the only part that depends on which labels (SL only, or SL+TL)
+    the underlying dataset produces.
+    """
+
     def __init__(
         self,
         batch_size: int,
@@ -40,22 +49,18 @@ class BagOfTilesDataModule(LightningDataModule):
         match stage:
             case "fit":
                 self.train = cast(
-                    "LabeledBagOfEmbeddingsDataset",
-                    instantiate(self.datasets["train"]),
+                    "BagOfEmbeddingsDataset[Any]", instantiate(self.datasets["train"])
                 )
                 self.val = cast(
-                    "LabeledBagOfEmbeddingsDataset",
-                    instantiate(self.datasets["val"]),
+                    "BagOfEmbeddingsDataset[Any]", instantiate(self.datasets["val"])
                 )
             case "val":
                 self.val = cast(
-                    "LabeledBagOfEmbeddingsDataset",
-                    instantiate(self.datasets["val"]),
+                    "BagOfEmbeddingsDataset[Any]", instantiate(self.datasets["val"])
                 )
             case "test":
                 self.test = cast(
-                    "LabeledBagOfEmbeddingsDataset",
-                    instantiate(self.datasets["test"]),
+                    "BagOfEmbeddingsDataset[Any]", instantiate(self.datasets["test"])
                 )
             case "predict":
                 self.predict = cast(
@@ -63,7 +68,12 @@ class BagOfTilesDataModule(LightningDataModule):
                     instantiate(self.datasets["predict"]),
                 )
 
-    def train_dataloader(self) -> Iterable[LabeledBagOfTilesSampleBatch]:
+    @abstractmethod
+    def _collate_labeled(self, batch: list[Any]) -> Any: ...
+
+    def train_dataloader(
+        self,
+    ) -> Iterable[LabeledBagOfTilesSampleBatch | SLLabeledBagOfTilesSampleBatch]:
 
         if self.sampler_partial:
             sampler = instantiate(self.sampler_partial)(
@@ -78,27 +88,31 @@ class BagOfTilesDataModule(LightningDataModule):
             self.train,
             sampler=sampler,
             shuffle=shuffle,
-            collate_fn=collate_fn_labeled,
+            collate_fn=self._collate_labeled,
             batch_size=self.batch_size,
             num_workers=self.num_workers,
             persistent_workers=self.num_workers > 0,
             drop_last=True,
         )
 
-    def val_dataloader(self) -> Iterable[LabeledBagOfTilesSampleBatch]:
+    def val_dataloader(
+        self,
+    ) -> Iterable[LabeledBagOfTilesSampleBatch | SLLabeledBagOfTilesSampleBatch]:
         return DataLoader(
             self.val,
             batch_size=self.batch_size,
-            collate_fn=collate_fn_labeled,
+            collate_fn=self._collate_labeled,
             num_workers=self.num_workers,
             persistent_workers=self.num_workers > 0,
         )
 
-    def test_dataloader(self) -> Iterable[LabeledBagOfTilesSampleBatch]:
+    def test_dataloader(
+        self,
+    ) -> Iterable[LabeledBagOfTilesSampleBatch | SLLabeledBagOfTilesSampleBatch]:
         return DataLoader(
             self.test,
             batch_size=self.batch_size,
-            collate_fn=collate_fn_labeled,
+            collate_fn=self._collate_labeled,
             num_workers=self.num_workers,
             persistent_workers=self.num_workers > 0,
         )
@@ -111,6 +125,15 @@ class BagOfTilesDataModule(LightningDataModule):
             num_workers=self.num_workers,
             persistent_workers=self.num_workers > 0,
         )
+
+
+class BagOfTilesDataModule(BaseBagOfTilesDataModule):
+    """Datamodule for hybrid MIL: labeled samples carry both SL and TL labels."""
+
+    def _collate_labeled(
+        self, batch: list[LabeledBagOfTilesSample]
+    ) -> LabeledBagOfTilesSampleBatch:
+        return collate_fn_labeled(batch)
 
 
 def collate_fn_labeled(

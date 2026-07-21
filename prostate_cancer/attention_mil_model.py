@@ -3,134 +3,33 @@
 from copy import deepcopy
 
 import torch
-from lightning import LightningModule
 from torch import Tensor, nn
-from torch.optim.adamw import AdamW
-from torch.optim.optimizer import Optimizer
-from torchmetrics import Metric, MetricCollection
-from torchmetrics.classification import (
-    AUROC,
-    Accuracy,
-    NegativePredictiveValue,
-    Precision,
-    Recall,
-    Specificity,
-)
+from torchmetrics import MetricCollection
 
-from prostate_cancer.typing import (
-    LabeledBagOfTilesSampleBatch,
-    MILModelOutput,
-    UnlabeledBagOfTilesSampleBatch,
-)
+from prostate_cancer.mil_model_base import ProstateCancerMILBase, binary_metrics
+from prostate_cancer.typing import LabeledBagOfTilesSampleBatch, MILModelOutput
 
 
-class ProstateCancerAttentionMIL(LightningModule):
+class ProstateCancerAttentionMIL(ProstateCancerMILBase):
+    """Hybrid MIL: trained on both slide-level (SL) and tile-level (TL) labels."""
+
     def __init__(
         self, foundation: str, lr: float, tl_threshold: float, sl_threshold: float
     ) -> None:
-        super().__init__()
-        match foundation:
-            case "pgp":
-                self.input_dim = 1536
-            case "virchow2":
-                self.input_dim = 2560
-            case _:
-                raise ValueError(f"Unknown foundation model: {foundation}")
+        super().__init__(foundation=foundation, lr=lr, sl_threshold=sl_threshold)
 
-        self.input_dim_sqrt = torch.tensor(self.input_dim).sqrt()
-
-        # if we did not precompute the embeddings, we would obtain it from this module
-        # (idendity replaced with foundation model)
-        self.encoder = nn.Identity()
-
-        # from a paper
-        self.attention = nn.Sequential(
-            nn.Linear(self.input_dim, 512),
-            nn.Tanh(),
-            nn.Linear(512, 1),
-        )
-
-        # TL Classifier
-        self.classifier = nn.Linear(self.input_dim, 1)
-
-        self.sl_criterion = nn.BCEWithLogitsLoss(reduction="mean")
         self.tl_criterion = nn.BCEWithLogitsLoss(
             reduction="none", pos_weight=torch.tensor([9.65])
         )  # handle padding
-        self.lr = lr
 
-        metrics: dict[str, dict[str, Metric | MetricCollection]] = {}
-
-        # both SL and TL metrics
-        for task_type, t in [("tl", tl_threshold), ("sl", sl_threshold)]:
-            metrics[task_type] = {
-                "AUC": AUROC("binary"),
-                "accuracy": Accuracy("binary", threshold=t),
-                "precision": Precision("binary", threshold=t),
-                "recall": Recall("binary", threshold=t),
-                "specificity": Specificity("binary", threshold=t),
-                "negative_predictive_value": NegativePredictiveValue(
-                    "binary", threshold=t
-                ),
-            }
-
-        self.train_metrics_sl = MetricCollection(
-            deepcopy(metrics["sl"]), prefix="sl_train/"
-        )
-        self.val_metrics_sl = MetricCollection(
-            deepcopy(metrics["sl"]), prefix="sl_validation/"
-        )
-        self.test_metrics_sl = MetricCollection(
-            deepcopy(metrics["sl"]), prefix="sl_test/"
-        )
-
+        tl_metrics = binary_metrics(tl_threshold)
         self.train_metrics_tl = MetricCollection(
-            deepcopy(metrics["tl"]), prefix="tl_train/"
+            deepcopy(tl_metrics), prefix="tl_train/"
         )
         self.val_metrics_tl = MetricCollection(
-            deepcopy(metrics["tl"]), prefix="tl_validation/"
+            deepcopy(tl_metrics), prefix="tl_validation/"
         )
-        self.test_metrics_tl = MetricCollection(
-            deepcopy(metrics["tl"]), prefix="tl_test/"
-        )
-
-    def forward(self, x: Tensor) -> MILModelOutput:
-        # x has shape (batch_size, num_tiles_padded, embedding_dim)
-
-        # Just identity
-        x = self.encoder(x)  # (batch_size, num_tiles_padded, embedding_dim)
-
-        # Do not attend to padded tiles (true for non-padded elements)
-        mask = (
-            (x.abs() > 1e-6).any(dim=-1, keepdim=True).float()
-        )  # (batch_size, num_tiles_padded, 1)
-
-        # TL weights (which tiles to attend to)
-        raw_attn: Tensor = self.attention(x)  # (batch_size, num_tiles_padded, 1)
-        raw_attn = raw_attn.masked_fill(
-            ~mask.bool(), float("-inf")
-        )  # (batch_size, num_tiles_padded, 1)
-
-        # make it a distribution
-        attention_weights = torch.softmax(
-            raw_attn, dim=1
-        )  # (batch_size, num_tiles_padded, 1)
-
-        # TL predictions
-        tl_preds_raw: Tensor = self.classifier(x)  # (batch_size, num_tiles_padded, 1)
-        tl_preds_valid_raw = tl_preds_raw * mask
-
-        # weight TL predictions with attention
-        sl_pred_raw = torch.sum(
-            attention_weights * tl_preds_valid_raw, dim=1
-        )  # (batch_size, 1)
-
-        return (
-            sl_pred_raw.squeeze(-1),
-            tl_preds_valid_raw.squeeze(-1),
-            mask.squeeze(-1),
-            attention_weights.squeeze(-1),
-        )  # (batch_size,), (batch_size, num_tiles_padded), (batch_size, num_tiles_padded), (batch_size, num_tiles_padded)
+        self.test_metrics_tl = MetricCollection(deepcopy(tl_metrics), prefix="tl_test/")
 
     def training_step(self, batch: LabeledBagOfTilesSampleBatch) -> Tensor:
         # bag ~ all embeddings from a single slide
@@ -203,7 +102,7 @@ class ProstateCancerAttentionMIL(LightningModule):
             self.val_metrics_tl, on_epoch=True, on_step=False, batch_size=len(bags)
         )
 
-    def test_step(self, batch: LabeledBagOfTilesSampleBatch) -> MILModelOutput:
+    def test_step(self, batch: LabeledBagOfTilesSampleBatch) -> MILModelOutput:  # type: ignore[override]
         bags, tl_labels, sl_labels, _ = batch
 
         sl_outputs, tl_outputs, mask, attention = self(bags)
@@ -218,10 +117,3 @@ class ProstateCancerAttentionMIL(LightningModule):
             self.test_metrics_tl, on_epoch=True, on_step=False, batch_size=len(bags)
         )
         return sl_outputs.sigmoid(), tl_outputs.sigmoid(), mask, attention
-
-    def predict_step(self, batch: UnlabeledBagOfTilesSampleBatch) -> MILModelOutput:
-        sl_preds_raw, tl_preds_raw, mask, attention = self(batch[0])
-        return sl_preds_raw.sigmoid(), tl_preds_raw.sigmoid(), mask, attention
-
-    def configure_optimizers(self) -> Optimizer:
-        return AdamW(self.parameters(), lr=self.lr)
