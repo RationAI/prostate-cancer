@@ -6,4 +6,4 @@ defaults:
   - _self_
 
 preds_uri: ${model_data.slide_level_prediction_uris.top_k.mmci_sl_group_1}
-pred_column: "pred_kernel_size=4_k=4"
+pred_column: "pred_kernel_size=5_k=4"
