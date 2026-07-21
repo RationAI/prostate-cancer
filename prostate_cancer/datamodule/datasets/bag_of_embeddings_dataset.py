@@ -155,7 +155,7 @@ class LabeledBagOfEmbeddingsDataset(BagOfEmbeddingsDataset[LabeledBagOfTilesSamp
 
         sl_label = torch.tensor(slide_metadata["carcinoma"]).float()
 
-        tl_labels = torch.zeros(len(slide_embeddings)).float()
+        tl_labels = torch.zeros(len(slide_embeddings)).float() # pad with zero labels
         tl_labels[: len(slide_tiles)] = torch.tensor(slide_tiles["carcinoma"]).float()
 
         return slide_embeddings, tl_labels, sl_label, metadata
