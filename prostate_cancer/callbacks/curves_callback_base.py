@@ -67,6 +67,7 @@ class CurvesCallbackBase(Callback, ABC):
             "lower right",
         )
         mlflow.log_artifact(plot_path, artifact_path="plots")
+        mlflow.log_param("j_threshold", j_threshold)
 
     def _plot_precision_recall(
         self, y_pred: NDArray[np.float32], y_true: NDArray[np.float32]
@@ -105,6 +106,7 @@ class CurvesCallbackBase(Callback, ABC):
             "lower left",
         )
         mlflow.log_artifact(plot_path, artifact_path="plots")
+        mlflow.log_param("pr_threshold", best_threshold)
 
     def _plot_and_clear(self) -> None:
         y_pred = torch.cat(self.preds).numpy()
