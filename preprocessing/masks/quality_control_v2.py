@@ -70,7 +70,7 @@ async def qc_main(
             total=len(slides),
         ):
             if not result.success:
-                with open(output_path / "qc_errors.log", "a") as log_file:
+                with open(output_path / "qc_errors.log", "a") as log_file:  # noqa: ASYNC230
                     log_file.write(
                         f"Failed to process {result.wsi_path}: {result.error}\n"
                     )

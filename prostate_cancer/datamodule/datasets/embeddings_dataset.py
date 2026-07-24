@@ -17,10 +17,10 @@ from prostate_cancer.typing import (
 )
 
 
-T = TypeVar("T", covariant=True)
+T_co = TypeVar("T_co", covariant=True)
 
 
-class EmbeddingsDataset(BaseTileDataset[T]):
+class EmbeddingsDataset(BaseTileDataset[T_co]):
     def __init__(
         self,
         uris: Iterable[str],

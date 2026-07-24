@@ -29,7 +29,7 @@ class CAMExplainer(MultiloaderLifecycle):
         self, trainer: lightning.Trainer, pl_module: lightning.LightningModule
     ) -> None:
         if not isinstance(pl_module, CNNProstateModel):
-            raise ValueError("Model must be a CNNProstateModel to generate CAMs.")
+            raise TypeError("Model must be a CNNProstateModel to generate CAMs.")
 
         self.model = pl_module
         self.decode_head = cast("BinaryClassifier", self.model.decode_head)

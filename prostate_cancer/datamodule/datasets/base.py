@@ -15,7 +15,7 @@ from prostate_cancer.typing import (
 )
 
 
-T = TypeVar("T", covariant=True)
+T_co = TypeVar("T_co", covariant=True)
 
 
 def get_slide_name(slide_metadata: TilingSlideMetadata) -> str:
@@ -39,7 +39,7 @@ class BaseSingleSlideDataset(Dataset[LabeledTileSample | UnlabeledTileSample], A
             )
 
 
-class BaseTileDataset(MetaTiledSlides[T]):
+class BaseTileDataset(MetaTiledSlides[T_co]):
     """This class abstracts the functionality shared across embedding and image datasets."""
 
     def __init__(
@@ -75,7 +75,7 @@ class BaseTileDataset(MetaTiledSlides[T]):
             )
         )
 
-    def generate_datasets(self) -> Iterable[Dataset[T]]:
+    def generate_datasets(self) -> Iterable[Dataset[T_co]]:
         tiles = self.tiles
 
         if self.labeled:
@@ -95,7 +95,7 @@ class BaseTileDataset(MetaTiledSlides[T]):
 
         return (
             cast(
-                "Dataset[T]",
+                "Dataset[T_co]",
                 self.single_slide_ds_cls(
                     slide,
                     tiles=self._meta.filter_tiles_by_slide(slide["id"]),

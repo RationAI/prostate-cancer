@@ -86,7 +86,7 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
                         slide_embeddings[start:end] = embeddings
 
                     save_embeddings(slide_embeddings, partition, slide_name, dest)
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001
                     print(f"{e} occured during processing {slide_name}")
 
     logger.log_artifacts(local_dir=config.output_path)

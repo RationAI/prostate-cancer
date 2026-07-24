@@ -19,10 +19,10 @@ from prostate_cancer.typing import (
 )
 
 
-T = TypeVar("T", covariant=True)
+T_co = TypeVar("T_co", covariant=True)
 
 
-class TilesDataset(BaseTileDataset[T]):
+class TilesDataset(BaseTileDataset[T_co]):
     def __init__(
         self,
         uris: Iterable[str],
