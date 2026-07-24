@@ -1,0 +1,23 @@
+defaults:
+  - base
+  - _self_
+
+tile_threshold: 0.96
+slide_max_threshold: 0.999999999
+slide_mpm_threshold: 0.9995754957
+slide_top_k_threshold: 0.9999379516
+slide_span_threshold: 0.5 # arbitrary - span predictions are binary
+
+checkpoint: "mlflow-artifacts:/65/2b4986681bb24e1abd85a9108a7a49bb/artifacts/checkpoints/epoch=1-step=97226/checkpoint.ckpt"
+public_checkpoint: "mlflow-artifacts:/38/abde571304794242be0c1630b7bd16ce/artifacts/vgg16_checkpoint.ckpt"
+
+model_name: "VGG-16 (224x224)"
+slide_level_prediction_uris:
+  mean_pool_max:
+    mmci_sl_group_1: "mlflow-artifacts:/65/8ee0c7d3c61d46acad41262ce6a065ec/artifacts/tables/aggregated_predictions.json"
+  max:
+    mmci_sl_group_1: "mlflow-artifacts:/65/8b607e5204f548d28d11ac392fd4a835/artifacts/tables/aggregated_predictions.json"
+  top_k:
+    mmci_sl_group_1: "mlflow-artifacts:/65/17b3a4b3c9bc420ca4fff7c185063f36/artifacts/tables/aggregated_predictions.json"
+  span:
+    mmci_sl_group_1: "mlflow-artifacts:/65/ce1bdc240623403aa45cca7465d47b29/artifacts/tables/aggregated_predictions.json"

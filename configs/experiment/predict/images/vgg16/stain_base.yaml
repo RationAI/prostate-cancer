@@ -5,3 +5,8 @@ defaults:
   - /model/vgg16_model@model
   - /model/checkpoints/mmci_tl/vgg16_stain@model_data
   - _self_
+
+datamodule:
+  predict:
+    uris:
+      - ${predict_data.tiles_filtered_uri_512}

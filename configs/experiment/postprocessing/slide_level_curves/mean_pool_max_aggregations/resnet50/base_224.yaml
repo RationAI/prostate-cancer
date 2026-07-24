@@ -1,0 +1,4 @@
+# @package _global_
+
+defaults:
+  - /model/checkpoints/mmci_tl/resnet50_224@model_data

@@ -1,0 +1,17 @@
+# @package _global_
+
+defaults:
+  - /experiment/train/images/base
+  - /datamodule/transforms/normalize_w_augments@transforms
+  - /model/resnet50_model@model
+  - _self_
+
+model_name: "ResNet50 (224x224)"
+
+datamodule:
+  train:
+    uris:
+      - ${train_data.tiles_filtered_uri_224}
+  val:
+    uris:
+      - ${val_data.tiles_filtered_uri_224}
