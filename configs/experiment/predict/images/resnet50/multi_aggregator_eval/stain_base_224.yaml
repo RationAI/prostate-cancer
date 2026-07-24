@@ -1,0 +1,21 @@
+# @package _global_
+
+defaults:
+  - /callbacks/multi_aggregator_eval@callbacks
+  - /aggregator/max@max_aggregator
+  - /aggregator/mean_pool_max@mean_pool_max_aggregator
+  - /aggregator/top_k@top_k_aggregator
+  - /experiment/predict/images/resnet50/stain_base_224
+  - _self_
+
+mean_pool_max_aggregator:
+  kernel_size: 1
+  extent_tile: 224
+  stride_tile: 112
+top_k_aggregator:
+  kernel_size: 1
+  extent_tile: 224
+  stride_tile: 112
+  k: 2
+
+use_case: "Multi-Aggregator SL Evaluation"
