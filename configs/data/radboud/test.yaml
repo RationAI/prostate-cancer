@@ -4,6 +4,13 @@ defaults:
 
 
 metadata_table: "mlflow-artifacts:/38/1a718a849be3412ab4621b6772daf049/artifacts/PANDA - Radboud_test.csv"
-tiles_uri_512: "mlflow-artifacts:/38/7bfcfeeaa29a4745943ac8556a63de4b/artifacts/PANDA - Radboud test"
+
+tiles_uri_512: "mlflow-artifacts:/38/197410ccc71c443bb8b1d8eb517c53fa/artifacts/PANDA - Radboud test"
+tiles_filtered_uri_512: "mlflow-artifacts:/38/0525b745d0954fb6ace98ead20042faf/artifacts/PANDA - Radboud test_512"
+
+tiles_uri_224: "mlflow-artifacts:/38/4cab0908f7eb4d0aba64407af072f08c/artifacts/PANDA - Radboud test"
+tiles_filtered_uri_224: "mlflow-artifacts:/38/0525b745d0954fb6ace98ead20042faf/artifacts/PANDA - Radboud test_224"
+tiles_filtered_w_virchow2_uri_224: "mlflow-artifacts:/38/a63457454feb49ecb362af00ad5e2320/artifacts/PANDA - Radboud test"
+tiles_filtered_w_pgp_uri_224: "mlflow-artifacts:/38/11c6715b9d1445a9aa59e9d0e0294c4c/artifacts/PANDA - Radboud test"
 
 data_name: "PANDA - Radboud test"
