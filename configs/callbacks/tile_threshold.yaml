@@ -1,6 +1,7 @@
 defaults:
   - tile_histograms
   - curves
+  - heatmap
   - _self_
 
 curves_callback:
