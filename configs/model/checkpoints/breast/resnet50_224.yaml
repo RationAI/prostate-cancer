@@ -1,0 +1,13 @@
+defaults:
+  - base
+  - _self_
+
+tile_threshold: 0.5
+slide_max_threshold: 0.5
+slide_mpm_threshold: 0.5
+slide_top_k_threshold: 0.5
+
+checkpoint: "..."
+public_checkpoint: "..."
+
+model_name: "ResNet50 (224x224)"

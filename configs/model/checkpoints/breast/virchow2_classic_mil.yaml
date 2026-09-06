@@ -1,0 +1,11 @@
+defaults:
+  - base_foundation
+  - _self_
+
+tile_threshold: 0.5
+slide_threshold: 0.5
+
+checkpoint: "..."
+public_checkpoint: "..."
+
+model_name: "Virchow2 (Classic-MIL)"
