@@ -6,6 +6,9 @@ tiles_uri_512: "mlflow-artifacts:/61/230c412fc727466b888fb4db3625d128/artifacts/
 tiles_uri_224: "mlflow-artifacts:/61/230c412fc727466b888fb4db3625d128/artifacts/b20_24_train_224"
 tiles_filtered_uri_512: "mlflow-artifacts:/61/72b9a94ef0fa49609ea4d19d7b830329/artifacts/MMCI B20-24 Train_512"
 tiles_filtered_uri_224: "mlflow-artifacts:/61/72b9a94ef0fa49609ea4d19d7b830329/artifacts/MMCI B20-24 Train_224"
+tiles_filtered_w_virchow2_uri_224: "..."
+tiles_filtered_w_pgp_uri_224: "..."
+
 metadata_table: "mlflow-artifacts:/61/230c412fc727466b888fb4db3625d128/artifacts/b20_24_train_metadata.csv"
 
 data_name: "MMCI B20-24 Train"

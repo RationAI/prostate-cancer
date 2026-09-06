@@ -23,6 +23,9 @@ tiles_uri_512: "mlflow-artifacts:/61/605e6e530d3e48ad8c8d784627b2b1d2/artifacts/
 tiles_uri_224: "mlflow-artifacts:/61/605e6e530d3e48ad8c8d784627b2b1d2/artifacts/mammaprint_test_224"
 tiles_filtered_uri_512: "mlflow-artifacts:/61/dae5ddebc8234a449ea6ca4c42b6e927/artifacts/Mammaprint Test_512"
 tiles_filtered_uri_224: "mlflow-artifacts:/61/dae5ddebc8234a449ea6ca4c42b6e927/artifacts/Mammaprint Test_224"
+tiles_filtered_w_virchow2_uri_224: "..."
+tiles_filtered_w_pgp_uri_224: "..."
+
 metadata_table: "mlflow-artifacts:/61/605e6e530d3e48ad8c8d784627b2b1d2/artifacts/mammaprint_test_metadata.csv"
 
 data_name: "Mammaprint Test"

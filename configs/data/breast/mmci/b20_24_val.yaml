@@ -6,6 +6,8 @@ tiles_uri_512: "mlflow-artifacts:/61/230c412fc727466b888fb4db3625d128/artifacts/
 tiles_uri_224: "mlflow-artifacts:/61/230c412fc727466b888fb4db3625d128/artifacts/b20_24_val_224"
 tiles_filtered_uri_512: "mlflow-artifacts:/61/2c4f49ecb47247ca862cdc1c1868d4b2/artifacts/MMCI B20-24 Val_512"
 tiles_filtered_uri_224: "mlflow-artifacts:/61/2c4f49ecb47247ca862cdc1c1868d4b2/artifacts/MMCI B20-24 Val_224"
+tiles_filtered_w_virchow2_uri_224: "mlflow-artifacts:/61/9f5f67586fed4eb6bada14656fb27545/artifacts/MMCI B20-24 Val"
+tiles_filtered_w_pgp_uri_224: "..."
 
 metadata_table: "mlflow-artifacts:/61/230c412fc727466b888fb4db3625d128/artifacts/b20_24_val_metadata.csv"
 
