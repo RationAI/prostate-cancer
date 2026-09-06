@@ -19,4 +19,4 @@ thresholds:
   folding_t: 0.25
 
   epithelium_roi_t: 0.2
-
+  carcinoma_roi_t: 0.2 # technical duplication of the same threshold (its used to decide carcinoma)
