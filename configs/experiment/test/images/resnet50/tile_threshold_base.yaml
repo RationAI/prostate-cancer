@@ -2,8 +2,6 @@
 
 defaults:
   - /callbacks/tile_threshold@callbacks
-  - /experiment/test/images/google_vit/base
-  - /data/prostate/mmci/tl_val@test_data
   - _self_
 
 datamodule:

@@ -1,0 +1,12 @@
+# @package _global_
+
+defaults:
+  - /experiment/test/images/resnet50/base_224_breast
+  - /experiment/test/images/resnet50/tile_threshold_base
+  - /data/breast/mmci/b20_24_val@test_data
+  - _self_
+
+# breast specific constraint for train and validation dataset (malformed epithelial masks)
+datamodule:
+  test:
+    train_pos_tissue_roi_t: ${test_data.thresholds.train_pos_tissue_roi_t}

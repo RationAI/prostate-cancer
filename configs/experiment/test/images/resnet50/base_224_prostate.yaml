@@ -1,0 +1,6 @@
+# @package _global_
+
+defaults:
+  - /experiment/test/images/resnet50/base_224
+  - /model/checkpoints/prostate/resnet50_224@model_data
+  - _self_

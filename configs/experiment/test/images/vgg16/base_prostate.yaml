@@ -1,0 +1,6 @@
+# @package _global_
+
+defaults:
+  - /experiment/test/images/vgg16/base
+  - /model/checkpoints/prostate/vgg16@model_data
+  - _self_

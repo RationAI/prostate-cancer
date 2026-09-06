@@ -2,7 +2,6 @@
 
 defaults:
   - /callbacks/combined_test_suite@callbacks
-  - /experiment/test/images/vgg16/base
   - _self_
 
 use_case: "TL Test"

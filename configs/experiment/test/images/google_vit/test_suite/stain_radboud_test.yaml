@@ -1,7 +1,8 @@
 # @package _global_
 
 defaults:
-  - /experiment/test/images/google_vit/test_suite/stain_base
+  - /experiment/test/images/google_vit/test_suite/base
+  - /experiment/test/images/google_vit/stain_base_prostate
   - /data/prostate/radboud/test@test_data
   - _self_
 

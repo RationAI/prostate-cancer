@@ -1,7 +1,8 @@
 # @package _global_
 
 defaults:
-  - /experiment/test/images/vgg16/test_suite/stain_base
+  - /experiment/test/images/vgg16/test_suite/base
+  - /experiment/test/images/vgg16/stain_base_prostate
   - /data/prostate/radboud/val_heuristic_normalized@test_data
   - _self_
 

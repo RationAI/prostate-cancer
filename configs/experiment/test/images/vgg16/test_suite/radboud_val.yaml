@@ -2,6 +2,7 @@
 
 defaults:
   - /experiment/test/images/vgg16/test_suite/base
+  - /experiment/test/images/vgg16/base_prostate
   - /data/prostate/radboud/val@test_data
   - _self_
 

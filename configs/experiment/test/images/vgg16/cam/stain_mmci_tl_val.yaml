@@ -2,5 +2,6 @@
 
 defaults:
   - /experiment/test/images/vgg16/cam/stain_base
+  - /experiment/test/images/vgg16/stain_base_prostate
   - /data/prostate/mmci/tl_val@test_data
   - _self_

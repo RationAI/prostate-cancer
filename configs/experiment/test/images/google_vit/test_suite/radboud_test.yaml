@@ -2,6 +2,7 @@
 
 defaults:
   - /experiment/test/images/google_vit/test_suite/base
+  - /experiment/test/images/google_vit/base_prostate
   - /data/prostate/radboud/test@test_data
   - _self_
 

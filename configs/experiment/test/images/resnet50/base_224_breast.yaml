@@ -1,8 +1,6 @@
 # @package _global_
 
 defaults:
-  - /callbacks/combined_test_suite@callbacks
   - /experiment/test/images/resnet50/base_224
+  - /model/checkpoints/breast/resnet50_224@model_data
   - _self_
-
-use_case: "TL Test"

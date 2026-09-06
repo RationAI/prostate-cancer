@@ -2,6 +2,7 @@
 
 defaults:
   - /experiment/test/images/resnet50/test_suite/base
+  - /experiment/test/images/resnet50/base_prostate
   - /data/prostate/radboud/val_ml_normalized@test_data
   - _self_
 
