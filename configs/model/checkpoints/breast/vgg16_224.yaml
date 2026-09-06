@@ -7,7 +7,7 @@ slide_max_threshold: 0.5
 slide_mpm_threshold: 0.5
 slide_top_k_threshold: 0.5
 
-checkpoint: "..."
+checkpoint: "mlflow-artifacts:/61/2b0ed043ddf54cc299e28c37d44851a5/artifacts/checkpoints/epoch=0-step=39330/checkpoint.ckpt"
 public_checkpoint: "..."
 
 model_name: "VGG-16 (224x224)"

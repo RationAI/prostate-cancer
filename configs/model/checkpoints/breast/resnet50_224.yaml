@@ -7,7 +7,7 @@ slide_max_threshold: 0.5
 slide_mpm_threshold: 0.5
 slide_top_k_threshold: 0.5
 
-checkpoint: "..."
+checkpoint: "mlflow-artifacts:/61/3cfc9eaf98e44c63baedb74b6f38656e/artifacts/checkpoints/epoch=0-step=37512/checkpoint.ckpt"
 public_checkpoint: "..."
 
 model_name: "ResNet50 (224x224)"
