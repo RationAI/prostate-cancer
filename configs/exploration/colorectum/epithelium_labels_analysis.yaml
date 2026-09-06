@@ -1,0 +1,10 @@
+# @package _global_
+
+defaults:
+  - /exploration/colorectum/base
+  - /data/colorectum/mmci/adopt_test_w_epi@data
+  - _self_
+
+metadata:
+  run_name: Epithelium Labels Analysis
+  description: Epithelium Labels Analysis

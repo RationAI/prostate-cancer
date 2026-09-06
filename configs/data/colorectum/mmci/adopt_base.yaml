@@ -1,0 +1,21 @@
+defaults:
+  - base
+  - _self_
+
+qc_masks_uri: "mlflow-artifacts:/74/63942d5d66f142c8b8d9841543e5d801/artifacts"
+tissue_masks_uri: "mlflow-artifacts:/74/92d3c2bbc43645d6b9f1f5708ca903fd/artifacts/tissue_masks"
+carcinoma_masks_uri: "mlflow-artifacts:/74/9c8f8d108d4c48b5a7f7f55eda14f072/artifacts/annotation_masks/carcinoma"
+exclude_masks_uri: "mlflow-artifacts:/74/9c8f8d108d4c48b5a7f7f55eda14f072/artifacts/annotation_masks/exclude"
+mucosa_masks_uri: "mlflow-artifacts:/74/9c8f8d108d4c48b5a7f7f55eda14f072/artifacts/annotation_masks/mucosa"
+epithelium_masks_uri: "mlflow-artifacts:/74/bed7c8d806a14d39b24dba9b5c2e0732/artifacts/epithelium"
+
+metadata_table: "mlflow-artifacts:/74/6190bfede3794a71baa81725ffcc1a36/artifacts/adopt_metadata.csv"
+
+# were used for filtering or labeling
+thresholds:
+  tissue_roi_t: 0.5
+  exclude_t: 0.0
+  residual_t: 0.25
+  folding_t: 0.25
+
+  carcinoma_roi_t: 0.8

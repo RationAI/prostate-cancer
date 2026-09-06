@@ -1,0 +1,27 @@
+# @package _global_
+
+defaults:
+  - /data/colorectum/mmci/adopt_test@data
+  - /overlappers/classic_overlappers@overlappers
+  - /experiment/preprocessing/tiling_v2/base_224
+  - _self_
+
+# special ADOPT masks handling
+overlappers:
+  mucosa:
+    _target_: preprocessing.tiling_v2.overlappers.BinaryOverlapper
+    mask_name: mucosa
+    roi_corners: ${roi.full}
+    masks_uri: ${data.mucosa_masks_uri}
+
+  exclude:
+    _target_: preprocessing.tiling_v2.overlappers.BinaryOverlapper
+    mask_name: exclude
+    roi_corners: ${roi.full}
+    masks_uri: ${data.exclude_masks_uri}
+
+  epithelium_roi:
+    _target_: preprocessing.tiling_v2.overlappers.BinaryOverlapper
+    mask_name: epithelium_roi
+    roi_corners: ${roi.half}
+    masks_uri: ${data.epithelium_masks_uri}

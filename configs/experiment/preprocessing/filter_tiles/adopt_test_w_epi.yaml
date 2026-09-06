@@ -1,0 +1,5 @@
+# @package _global_
+
+defaults:
+  - /data/colorectum/mmci/adopt_test_w_epi@data
+  - _self_

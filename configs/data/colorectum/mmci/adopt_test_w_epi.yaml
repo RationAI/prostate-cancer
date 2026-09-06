@@ -1,0 +1,11 @@
+defaults:
+  - adopt_base
+  - _self_
+
+tiles_uri_224: "mlflow-artifacts:/74/16faeb4d0e3d481c814e67e52a07aea2/artifacts/ADOPT Test"
+tiles_filtered_uri_224: "mlflow-artifacts:/74/4e69c93bd54d490cb291a1d70debcb9e/artifacts/ADOPT Test (w epi)_224"
+
+thresholds:
+  epithelium_roi_t: 0.2
+
+data_name: "ADOPT Test (w epi)"
