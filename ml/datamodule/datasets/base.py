@@ -118,12 +118,12 @@ class BaseTileDataset(MetaTiledSlides[T_co]):
         if deterministic:
             assert self.slide_range is not None
             start, end = self.slide_range
-
-            if start < 0 or end < 0 or end < start:
-                raise ValueError("Invalid bounds")
-
             start_idx = 0 if start is None else start
             stop_idx = len(slides) if end is None else end + 1  # end is inclusive
+
+            if start_idx < 0 or stop_idx < 0 or stop_idx < start_idx:
+                raise ValueError("Invalid bounds")
+
             selected_ids = set(slides["id"][start_idx:stop_idx])
         else:
             assert self.num_slides is not None
