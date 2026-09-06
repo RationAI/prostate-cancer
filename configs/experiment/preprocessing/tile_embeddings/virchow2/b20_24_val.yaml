@@ -4,6 +4,3 @@ defaults:
   - /experiment/preprocessing/tile_embeddings/virchow2/base
   - /data/breast/mmci/b20_24_val@data
   - _self_
-
-uris:
- - ${data.tiles_filtered_uri_224}

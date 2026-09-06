@@ -3,3 +3,6 @@
 defaults:
   - /experiment/preprocessing/tile_embeddings_v2/virchow2/base
   - /data/breast/mmci/b20_24_train@data
+  - _self_
+
+end: 600

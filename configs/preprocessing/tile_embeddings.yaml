@@ -7,10 +7,16 @@ encoder_name: ??? # logging purposes
 tile_encoder:
   _target_: ???
 
-uris: ???
-use_case: Tile Embeddings ${encoder_name}
+data: ???
+
+start: null # index of slide in parquet to start with (included)
+end: null   # index of slide in parquet to end with (included)
+
+use_case: Tile Embeddings ${encoder_name} ${data.data_name}
 
 metadata:
   hyperparams:
     model: ${encoder_name}
     batch_size: ${batch_size}
+    start: ${start}
+    end: ${end}

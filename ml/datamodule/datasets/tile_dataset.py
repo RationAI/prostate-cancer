@@ -31,6 +31,7 @@ class TilesDataset(BaseTileDataset[T_co]):
         train_pos_tissue_roi_t: float | None = None,
         transforms: TransformType | None = None,
         num_slides: int | None = None,
+        slide_range: tuple[int | None, int | None] | None = None,
     ) -> None:
         self.transforms = transforms
         super().__init__(
@@ -41,6 +42,7 @@ class TilesDataset(BaseTileDataset[T_co]):
             stratified_filter=stratified_filter,
             transforms=transforms,
             num_slides=num_slides,
+            slide_range=slide_range,
         )
 
 

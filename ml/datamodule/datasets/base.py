@@ -45,22 +45,37 @@ class BaseTileDataset(MetaTiledSlides[T_co]):
 
     def __init__(
         self,
-        uris: Iterable[str],
-        single_slide_ds_cls: type[BaseSingleSlideDataset],
+        uris: Iterable[str],  # MLFlow URI(s) of tiled dataset
+        single_slide_ds_cls: type[
+            BaseSingleSlideDataset
+        ],  # dataset class for tiles of a single slide
         carcinoma_roi_t: float | None = None,  # only for labeled
         stratified_filter: bool | None = None,  # only for labeled
         train_pos_tissue_roi_t: float
         | None = None,  # epithelium based training in labeled mode,
         transforms: TransformType | None = None,
         num_slides: int | None = None,  # cap slide count for very large datasets
+        slide_range: tuple[int | None, int | None]
+        | None = None,  # (start, end) slide index range, end inclusive; None bounds mean "from first"/"to last". Should be set only if want to select specific range of slides
     ) -> None:
         self.labeled = carcinoma_roi_t is not None and stratified_filter is not None
         self.train_pos_tissue_roi_t = train_pos_tissue_roi_t
         self.stratified_filter = stratified_filter
         self.carcinoma_roi_t = carcinoma_roi_t
+        if (carcinoma_roi_t is None) ^ (stratified_filter is None):
+            raise ValueError(
+                "Either both should be None -> unlabeled mode, or both set -> labeled mode"
+            )
+
         self.transforms = transforms
         self.single_slide_ds_cls = single_slide_ds_cls
+
         self.num_slides = num_slides
+        self.slide_range = slide_range
+        if num_slides is not None and slide_range is not None:
+            raise ValueError(
+                "Cannot use both deterministsic and non-deterministic subsampling"
+            )
 
         super().__init__(uris=uris)
 
@@ -97,15 +112,28 @@ class BaseTileDataset(MetaTiledSlides[T_co]):
         return tiles.filter(keep_row)
 
     def _subset_slides(
-        self, slides: HFDataset, tiles: HFDataset
+        self, slides: HFDataset, tiles: HFDataset, deterministic: bool
     ) -> tuple[HFDataset, HFDataset]:
-        """Restricts slides/tiles to a uniform random sample of `self.num_slides`."""
-        if not self.num_slides:
-            return slides, tiles
+        """Restricts slides/tiles to a uniform random or determinisitc sample of `self.num_slides`."""
+        if deterministic:
+            assert self.slide_range is not None
+            start, end = self.slide_range
 
-        selected_ids = set(random.sample(slides["id"], self.num_slides))
+            if start < 0 or end < 0 or end < start:
+                raise ValueError("Invalid bounds")
+
+            start_idx = 0 if start is None else start
+            stop_idx = len(slides) if end is None else end + 1  # end is inclusive
+            selected_ids = set(slides["id"][start_idx:stop_idx])
+        else:
+            assert self.num_slides is not None
+            selected_ids = set(random.sample(slides["id"], self.num_slides))
+
         slides = slides.filter(lambda row: row["id"] in selected_ids)
         tiles = tiles.filter(lambda row: row["slide_id"] in selected_ids)
+
+        slides = slides.flatten_indices()
+        tiles = tiles.flatten_indices()
 
         return slides, tiles
 
@@ -127,8 +155,11 @@ class BaseTileDataset(MetaTiledSlides[T_co]):
 
         slides, tiles = self._all_slides, self._all_tiles
 
+        if self.slide_range is not None:
+            slides, tiles = self._subset_slides(slides, tiles, True)
+
         if self.num_slides is not None:
-            slides, tiles = self._subset_slides(slides, tiles)
+            slides, tiles = self._subset_slides(slides, tiles, False)
 
         self.slides = slides
 

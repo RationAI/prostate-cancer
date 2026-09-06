@@ -2,5 +2,5 @@
 
 defaults:
   - /experiment/preprocessing/tile_embeddings/pgp/base
-  - /data/graz/graz_sample@data
+  - /data/prostate/mmci/tl_train@data
   - _self_

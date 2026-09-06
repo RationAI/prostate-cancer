@@ -2,8 +2,5 @@
 
 defaults:
   - /experiment/preprocessing/tile_embeddings/virchow2/base
-  - /data/breast/mmci/b20_24_train@data
+  - /data/prostate/mmci/sl_group_2@data
   - _self_
-
-uris:
- - ${data.tiles_filtered_uri_224}

@@ -2,5 +2,7 @@
 
 defaults:
   - /experiment/preprocessing/tile_embeddings/virchow2/base
-  - /data/prostate/mmci/endoresection@data
+  - /data/breast/mmci/b20_24_train@data
   - _self_
+
+start: 1201

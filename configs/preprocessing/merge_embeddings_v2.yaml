@@ -1,0 +1,11 @@
+# @package _global_
+
+data: ???
+encoder: ???
+output_path: ${carcinoma_artifacts}/tiles_with_embeddings/${encoder}/${data.data_name}
+
+use_case: Tile Embeddings (V2) Merge
+
+metadata:
+  hyperparams:
+    encoder: ${encoder}

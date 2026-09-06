@@ -7,6 +7,9 @@ concurrency: 2048
 block_size: 128
 rows_per_file: 50000
 
+start: null # index of slide in slides.parquet to start with (included)
+end: null   # index of slide in slides.parquet to end with (included)
+
 use_case: Tile Embeddings (V2)
 
 metadata:
@@ -15,3 +18,5 @@ metadata:
     concurrency: ${concurrency}
     block_size: ${block_size}
     rows_per_file: ${rows_per_file}
+    start: ${start}
+    end: ${end}
