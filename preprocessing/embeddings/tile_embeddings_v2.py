@@ -84,7 +84,7 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
             max_tasks_in_flight_per_actor=per_actor_concurrency * 2,
         ),
         max_concurrency=per_actor_concurrency,
-        memory=int(8 * 1024**3),
+        memory=8 * 1024**3,
     )
 
     output_path = Path(config.output_path)

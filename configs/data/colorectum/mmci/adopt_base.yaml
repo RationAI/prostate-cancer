@@ -18,4 +18,4 @@ thresholds:
   residual_t: 0.25
   folding_t: 0.25
 
-  carcinoma_roi_t: 0.5
+  carcinoma_roi_t: 0.8
