@@ -115,14 +115,18 @@ class BaseTileDataset(MetaTiledSlides[T_co]):
         self, slides: HFDataset, tiles: HFDataset, deterministic: bool
     ) -> tuple[HFDataset, HFDataset]:
         """Restricts slides/tiles to a uniform random or determinisitc sample of `self.num_slides`."""
-        assert self.num_slides is not None or self.slide_range is not None
-
         if deterministic:
+            assert self.slide_range is not None
             start, end = self.slide_range
+
+            if start < 0 or end < 0 or end < start:
+                raise ValueError("Invalid bounds")
+
             start_idx = 0 if start is None else start
             stop_idx = len(slides) if end is None else end + 1  # end is inclusive
             selected_ids = set(slides["id"][start_idx:stop_idx])
         else:
+            assert self.num_slides is not None
             selected_ids = set(random.sample(slides["id"], self.num_slides))
 
         slides = slides.filter(lambda row: row["id"] in selected_ids)

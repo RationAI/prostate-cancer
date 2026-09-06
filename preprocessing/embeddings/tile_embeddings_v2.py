@@ -52,6 +52,9 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
     stop_idx = num_slides if config.end is None else config.end + 1  # end is inclusive
     sharded = config.start is not None or config.end is not None
     if sharded:
+        if start_idx < 0 or stop_idx < 0 or stop_idx < start_idx:
+            raise ValueError("Invalid bounds")
+
         slides = slides.iloc[start_idx:stop_idx].reset_index(drop=True)
 
     slide_info = slides.set_index("id")[
