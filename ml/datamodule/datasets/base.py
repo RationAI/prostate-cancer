@@ -132,9 +132,6 @@ class BaseTileDataset(MetaTiledSlides[T_co]):
         slides = slides.filter(lambda row: row["id"] in selected_ids)
         tiles = tiles.filter(lambda row: row["slide_id"] in selected_ids)
 
-        slides = slides.flatten_indices()
-        tiles = tiles.flatten_indices()
-
         return slides, tiles
 
     def resample_slides(self) -> None:
@@ -160,6 +157,9 @@ class BaseTileDataset(MetaTiledSlides[T_co]):
 
         if self.num_slides is not None:
             slides, tiles = self._subset_slides(slides, tiles, False)
+
+        slides = slides.flatten_indices()
+        tiles = tiles.flatten_indices()
 
         self.slides = slides
 
