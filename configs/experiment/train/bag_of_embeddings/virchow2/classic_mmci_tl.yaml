@@ -1,0 +1,7 @@
+# @package _global_
+
+defaults:
+  - /experiment/train/bag_of_embeddings/virchow2/classic_base
+  - /data/prostate/mmci/tl_train@train_data
+  - /data/prostate/mmci/tl_val@val_data
+  - _self_

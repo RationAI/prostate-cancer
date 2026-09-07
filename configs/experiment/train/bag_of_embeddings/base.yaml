@@ -2,8 +2,6 @@
 
 defaults:
   - /experiment/train/base
-  - /data/prostate/mmci/tl_train@train_data
-  - /data/prostate/mmci/tl_val@val_data
   - _self_
 
 model:

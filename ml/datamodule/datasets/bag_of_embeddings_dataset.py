@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 from collections import Counter
 from collections.abc import Iterable
 from pathlib import Path
-from typing import Generic, TypeVar
+from typing import Any, Generic, TypeVar
 
 import torch
 import torch.nn.functional as F
@@ -148,13 +148,39 @@ class LabeledBagOfEmbeddingsDataset(BagOfEmbeddingsDataset[LabeledBagOfTilesSamp
         super().__init__(uris=uris, padding=padding)
         self.carcinoma_roi_t = carcinoma_roi_t
 
-        self.tiles = self.tiles.map(
-            lambda r: {
-                "carcinoma": (r["carcinoma_roi_percentage"] > self.carcinoma_roi_t)
-            }
+        self.slide_carcinoma = dict(
+            zip(
+                self.slides["id"],
+                self.slides["carcinoma"],
+                strict=True,
+            )
         )
+
+        def label_row(row: dict[str, Any]) -> dict[str, bool]:
+            # if negative slide, all its tiles are negative
+            if not self.slide_carcinoma[row["slide_id"]]:
+                return {"carcinoma": False}
+
+            # if positive slide, get the overlap (either epithelium or carcinoma)
+            roi_percentage = (
+                row["carcinoma_roi_percentage"]
+                if "carcinoma_roi_percentage" in row
+                else row["epithelium_roi_percentage"]
+            )
+
+            # and threshold it
+            return {"carcinoma": roi_percentage > self.carcinoma_roi_t}
+
+        self.tiles = self.tiles.map(label_row)
         self._meta.tiles = self.tiles
         # no need to re-build index after .map
+
+        # note that there is no "stratified filtering" unlike in tile-level setup
+        # this is due to the fact that here we need to preserve slide structure for the inference
+        # not to fool the attention module -> if we represent positive slides only by the positive tiles
+        # the attention aggregation mechanism might collapse in the inference where we represent positive
+        # slides with all the tiles (including negative). In the tile-lvel setup this was not a problem because
+        # a sample on which the model operates is tile not slide (there is no notion of slide in that setup)
 
     def __getitem__(self, idx: int) -> LabeledBagOfTilesSample:
         slide_metadata, slide_tiles, slide_embeddings, metadata = self._load_bag(idx)
