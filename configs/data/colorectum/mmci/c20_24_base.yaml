@@ -8,10 +8,11 @@ tissue_masks_uri: "mlflow-artifacts:/74/85d9663e0d60414ca95b0a3d6084ed66/artifac
 epithelium_masks_uri: "mlflow-artifacts:/74/c7d2891dda974077b486636981da0961/artifacts/epithelium"
 
 
-# were used for filtering
+# were used for filtering or labeling
 thresholds:
   tissue_roi_t: 0.5
   residual_t: 0.25
   folding_t: 0.25
 
   epithelium_roi_t: 0.2 # weak replacement of carcinoma
+  carcinoma_roi_t: 0.2 # technical duplication of the same threshold (its used to decide carcinoma)
