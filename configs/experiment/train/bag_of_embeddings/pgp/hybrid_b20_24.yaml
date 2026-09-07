@@ -1,0 +1,8 @@
+# @package _global_
+
+defaults:
+  - /experiment/train/bag_of_embeddings/pgp/hybrid_base
+  - /experiment/train/breast_adapter_mil
+  - /data/breast/mmci/b20_24_train@train_data
+  - /data/breast/mmci/b20_24_val@val_data
+  - _self_

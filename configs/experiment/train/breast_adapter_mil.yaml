@@ -1,0 +1,6 @@
+# @package _global_
+
+carcinoma_roi_t: ${train_data.thresholds.epithelium_roi_t} # for breast, we use weak epithelium annotations
+
+trainer:
+  val_check_interval: 0.1 # more slides
