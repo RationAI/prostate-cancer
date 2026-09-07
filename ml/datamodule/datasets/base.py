@@ -52,7 +52,7 @@ class BaseTileDataset(MetaTiledSlides[T_co]):
         carcinoma_roi_t: float | None = None,  # only for labeled
         stratified_filter: bool | None = None,  # only for labeled
         train_pos_tissue_roi_t: float
-        | None = None,  # epithelium based training in labeled mode,
+        | None = None,  # epithelium based training (for breast malformed epithelial masks) in labeled mode,
         transforms: TransformType | None = None,
         num_slides: int | None = None,  # cap slide count for very large datasets
         slide_range: tuple[int | None, int | None]
@@ -164,7 +164,7 @@ class BaseTileDataset(MetaTiledSlides[T_co]):
         self.slides = slides
 
         if self.labeled:
-            # negative slides are never carcinoma, regardless of tile-level overlap
+            # tiles from negative slides are never carcinoma, regardless of tile-level overlap
             # (e.g. epithelium tiles in negative slides are not carcinoma).
             # positive slides decide per-tile via carcinoma annotation (if present)
             # or epithelium annotation (weak substitute), thresholded.

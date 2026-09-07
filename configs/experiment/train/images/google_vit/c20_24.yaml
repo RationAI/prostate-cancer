@@ -1,0 +1,8 @@
+# @package _global_
+
+defaults:
+  - /experiment/train/images/google_vit/base
+  - /experiment/train/colorectum_adapter
+  - /data/colorectum/mmci/c20_24_train@train_data
+  - /data/colorectum/mmci/c20_24_val@val_data
+  - _self_

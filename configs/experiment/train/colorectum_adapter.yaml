@@ -1,0 +1,11 @@
+# @package _global_
+
+carcinoma_roi_t: ${train_data.thresholds.epithelium_roi_t} # for colorectum, we use weak epithelium annotations
+
+datamodule:
+  train:
+    num_slides: 500 # cannot sample from bigger data (torch limitation)
+
+trainer:
+  val_check_interval: 0.1 # much more tiles per slide - validate more often
+  reload_dataloaders_every_n_epochs: 1 # re-sample train slides (num_slides) every epoch
