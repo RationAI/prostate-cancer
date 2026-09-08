@@ -1,0 +1,6 @@
+# @package _global_
+
+defaults:
+  - /experiment/preprocessing/tile_embeddings/pgp/base
+  - /data/colorectum/mmci/c20_24_val@data
+  - _self_
