@@ -17,7 +17,11 @@ from torchmetrics import (
     Specificity,
 )
 
-from ml.typing import TilingSlideMetadata, UnlabeledTileSampleBatch
+from ml.typing import (
+    LabeledTileSampleBatch,
+    TilingSlideMetadata,
+    UnlabeledTileSampleBatch,
+)
 
 
 if TYPE_CHECKING:
@@ -25,7 +29,10 @@ if TYPE_CHECKING:
 
 
 class MultiAggregatorEvalCallback(MultiloaderLifecycle):
-    """Aggregates TL predictions into SL predictions with the max, mean_pool_max and top_k aggregators."""
+    """Aggregates TL predictions into SL predictions with the max, mean_pool_max and top_k aggregators.
+
+    Used in the test or predict stage.
+    """
 
     def __init__(
         self,
@@ -69,8 +76,8 @@ class MultiAggregatorEvalCallback(MultiloaderLifecycle):
             "target": [],
         }
 
-    def on_predict_dataloader_start(
-        self, trainer: pl.Trainer, pl_module: pl.LightningModule, dataloader_idx: int
+    def _on_dataloader_start(
+        self, mode: str, trainer: pl.Trainer, dataloader_idx: int
     ) -> None:
         if not hasattr(trainer, "datamodule"):
             raise ValueError("Trainer should have datamodule attribute")
@@ -81,19 +88,30 @@ class MultiAggregatorEvalCallback(MultiloaderLifecycle):
         }
         datamodule = cast("TileDataModule", trainer.datamodule)
         self.slide = cast(
-            "TilingSlideMetadata", datamodule.predict.slides[dataloader_idx]
+            "TilingSlideMetadata", getattr(datamodule, mode).slides[dataloader_idx]
         )
 
-    def on_predict_batch_end(
-        self,
-        trainer: pl.Trainer,
-        pl_module: pl.LightningModule,
-        outputs: torch.Tensor,
-        batch: UnlabeledTileSampleBatch,
-        batch_idx: int,
-        dataloader_idx: int = 0,
+    def on_test_dataloader_start(
+        self, trainer: pl.Trainer, pl_module: pl.LightningModule, dataloader_idx: int
     ) -> None:
-        _, metadata = batch
+        self._on_dataloader_start("test", trainer, dataloader_idx)
+
+    def on_predict_dataloader_start(
+        self, trainer: pl.Trainer, pl_module: pl.LightningModule, dataloader_idx: int
+    ) -> None:
+        self._on_dataloader_start("predict", trainer, dataloader_idx)
+
+    def _on_batch_end(
+        self,
+        outputs: torch.Tensor,
+        batch: UnlabeledTileSampleBatch | LabeledTileSampleBatch,
+    ) -> None:
+        if len(batch) == 3:
+            # Test step
+            _, _, metadata = batch
+        else:
+            # Predict step
+            _, metadata = batch
 
         targets = torch.zeros_like(outputs)
         for aggregator in self.aggregators.values():
@@ -104,9 +122,29 @@ class MultiAggregatorEvalCallback(MultiloaderLifecycle):
                 y=metadata["y"],
             )
 
-    def on_predict_dataloader_end(
-        self, trainer: pl.Trainer, pl_module: pl.LightningModule, dataloader_idx: int
+    def on_test_batch_end(
+        self,
+        trainer: pl.Trainer,
+        pl_module: pl.LightningModule,
+        outputs: Any,
+        batch: LabeledTileSampleBatch,
+        batch_idx: int,
+        dataloader_idx: int = 0,
     ) -> None:
+        self._on_batch_end(outputs, batch)
+
+    def on_predict_batch_end(
+        self,
+        trainer: pl.Trainer,
+        pl_module: pl.LightningModule,
+        outputs: Any,
+        batch: UnlabeledTileSampleBatch,
+        batch_idx: int,
+        dataloader_idx: int = 0,
+    ) -> None:
+        self._on_batch_end(outputs, batch)
+
+    def _on_dataloader_end(self) -> None:
         slide_name = Path(self.slide["path"]).stem
         target = self.slide.get("carcinoma", None)
 
@@ -126,11 +164,17 @@ class MultiAggregatorEvalCallback(MultiloaderLifecycle):
         self.majority_table["prediction"].append(sum(votes) >= 2)
         self.majority_table["target"].append(target)
 
-    def on_predict_epoch_end(
-        self, trainer: pl.Trainer, pl_module: pl.LightningModule
+    def on_test_dataloader_end(
+        self, trainer: pl.Trainer, pl_module: pl.LightningModule, dataloader_idx: int
     ) -> None:
-        super().on_predict_epoch_end(trainer, pl_module)
+        self._on_dataloader_end()
 
+    def on_predict_dataloader_end(
+        self, trainer: pl.Trainer, pl_module: pl.LightningModule, dataloader_idx: int
+    ) -> None:
+        self._on_dataloader_end()
+
+    def _log_tables_and_metrics(self) -> None:
         metrics: dict[str, float] = {}
 
         for name, table in self.tables.items():
@@ -160,6 +204,18 @@ class MultiAggregatorEvalCallback(MultiloaderLifecycle):
         )
 
         mlflow.log_metrics(metrics)
+
+    def on_test_epoch_end(
+        self, trainer: pl.Trainer, pl_module: pl.LightningModule
+    ) -> None:
+        super().on_test_epoch_end(trainer, pl_module)
+        self._log_tables_and_metrics()
+
+    def on_predict_epoch_end(
+        self, trainer: pl.Trainer, pl_module: pl.LightningModule
+    ) -> None:
+        super().on_predict_epoch_end(trainer, pl_module)
+        self._log_tables_and_metrics()
 
     @staticmethod
     def _compute_metrics(
