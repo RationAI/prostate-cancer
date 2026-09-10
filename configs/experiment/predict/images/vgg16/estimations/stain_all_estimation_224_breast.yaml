@@ -1,0 +1,7 @@
+# @package _global_
+
+defaults:
+  - /experiment/predict/images/vgg16/stain_base_224_breast
+  - /experiment/predict/images/vgg16/estimations/all_estimation_224_base
+  - /data/breast/mmci/b20_24_val@predict_data
+  - _self_
