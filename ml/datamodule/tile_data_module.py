@@ -47,7 +47,7 @@ class TileDataModule(LightningDataModule):
                     "MetaTiledSlides[LabeledTileSample]",
                     instantiate(self.datasets["val"]),
                 )
-            case "val":
+            case "validate":
                 self.val = cast(
                     "MetaTiledSlides[LabeledTileSample]",
                     instantiate(self.datasets["val"]),
