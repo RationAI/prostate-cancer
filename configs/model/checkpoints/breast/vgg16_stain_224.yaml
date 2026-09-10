@@ -2,10 +2,11 @@ defaults:
   - base
   - _self_
 
-tile_threshold: 0.5
+tile_threshold: 0.48
 slide_max_threshold: 0.5
 slide_mpm_threshold: 0.5
 slide_top_k_threshold: 0.5
+slide_span_threshold: 0.5 # arbitrary - span predictions are binary
 
 checkpoint: "mlflow-artifacts:/61/b3bf0b502b2a46e88716f95ae0933cd4/artifacts/checkpoints/epoch=0-step=78641/checkpoint.ckpt"
 public_checkpoint: "..."
