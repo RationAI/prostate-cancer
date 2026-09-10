@@ -3,7 +3,6 @@
 defaults:
   - /experiment/predict/images/base
   - /model/vgg16_model@model
-  - /model/checkpoints/prostate/vgg16_224@model_data
   - _self_
 
 datamodule:

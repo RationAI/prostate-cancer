@@ -1,0 +1,6 @@
+# @package _global_
+
+defaults:
+  - /experiment/predict/images/vgg16/base_224_prostate
+  - /experiment/predict/images/vgg16/heatmaps/base
+  - _self_

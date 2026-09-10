@@ -1,0 +1,12 @@
+# @package _global_
+
+defaults:
+  - /experiment/predict/images/google_vit/stain_base_prostate
+  - /experiment/predict/images/google_vit/multi_aggregator_eval/base
+  - _self_
+
+mean_pool_max_aggregator:
+  kernel_size: 6
+top_k_aggregator:
+  kernel_size: 2
+  k: 4

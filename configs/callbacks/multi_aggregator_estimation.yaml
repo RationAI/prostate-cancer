@@ -1,0 +1,3 @@
+multi_estimation_callback:
+  _target_: ml.callbacks.MultiEstimationCallback
+  aggregators: ???

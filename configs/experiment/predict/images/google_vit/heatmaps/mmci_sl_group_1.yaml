@@ -1,6 +1,6 @@
 # @package _global_
 
 defaults:
-  - /experiment/predict/images/google_vit/heatmaps/base
+  - /experiment/predict/images/google_vit/heatmaps/base_prostate
   - /data/prostate/mmci/sl_group_1@predict_data
   - _self_

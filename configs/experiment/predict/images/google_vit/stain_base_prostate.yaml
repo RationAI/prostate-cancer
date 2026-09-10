@@ -1,0 +1,6 @@
+# @package _global_
+
+defaults:
+  - /experiment/predict/images/google_vit/base
+  - /model/checkpoints/prostate/google_vit_stain@model_data
+  - _self_

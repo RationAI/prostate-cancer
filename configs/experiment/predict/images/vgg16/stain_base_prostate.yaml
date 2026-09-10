@@ -1,0 +1,6 @@
+# @package _global_
+
+defaults:
+  - /experiment/predict/images/vgg16/base
+  - /model/checkpoints/prostate/vgg16_stain@model_data
+  - _self_

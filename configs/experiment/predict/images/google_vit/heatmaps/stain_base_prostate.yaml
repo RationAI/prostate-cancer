@@ -1,0 +1,6 @@
+# @package _global_
+
+defaults:
+  - /experiment/predict/images/google_vit/stain_base_prostate
+  - /experiment/predict/images/google_vit/heatmaps/base
+  - _self_

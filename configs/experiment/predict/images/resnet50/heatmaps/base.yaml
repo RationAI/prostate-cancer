@@ -1,7 +1,6 @@
 # @package _global_
 
 defaults:
-  - /experiment/predict/images/resnet50/base
   - /callbacks/heatmap@callbacks
   - _self_
 

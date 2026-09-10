@@ -14,6 +14,9 @@ from ml.callbacks.mil_prediction_callback import MILPredictionCallback
 from ml.callbacks.multi_aggregator_eval_callback import (
     MultiAggregatorEvalCallback,
 )
+from ml.callbacks.multi_estimation_callback import (
+    MultiEstimationCallback,
+)
 from ml.callbacks.nested_metrics_callback import NestedMetricsCallback
 from ml.callbacks.nested_metrics_callback_mil import (
     NestedMetricsCallbackMIL,
@@ -41,6 +44,7 @@ __all__ = [
     "HeatmapCallback",
     "MILPredictionCallback",
     "MultiAggregatorEvalCallback",
+    "MultiEstimationCallback",
     "NestedMetricsCallback",
     "NestedMetricsCallbackMIL",
     "NumPositiveCallback",

@@ -1,0 +1,12 @@
+# @package _global_
+
+defaults:
+  - /experiment/predict/images/vgg16/stain_base_224_prostate
+  - /experiment/predict/images/vgg16/multi_aggregator_eval/base_224
+  - _self_
+
+mean_pool_max_aggregator:
+  kernel_size: 1
+top_k_aggregator:
+  kernel_size: 1
+  k: 4

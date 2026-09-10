@@ -3,7 +3,6 @@
 defaults:
   - /callbacks/aggregator@callbacks
   - /aggregator/max@aggregator
-  - /experiment/predict/images/vgg16/base
   - _self_
 
 use_case: "Max. Aggregation"

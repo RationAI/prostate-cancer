@@ -3,7 +3,6 @@
 defaults:
   - /experiment/predict/images/base
   - /model/resnet50_model@model
-  - /model/checkpoints/prostate/resnet50_224@model_data
   - _self_
 
 datamodule:

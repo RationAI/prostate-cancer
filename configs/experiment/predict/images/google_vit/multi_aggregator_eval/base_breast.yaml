@@ -1,0 +1,6 @@
+# @package _global_
+
+defaults:
+  - /experiment/predict/images/google_vit/base_breast
+  - /experiment/predict/images/google_vit/multi_aggregator_eval/base
+  - _self_

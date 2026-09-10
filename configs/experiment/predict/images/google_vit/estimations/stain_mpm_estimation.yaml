@@ -2,7 +2,7 @@
 
 defaults:
   - /callbacks/aggregator_estimation@callbacks
-  - /experiment/predict/images/google_vit/stain_base
+  - /experiment/predict/images/google_vit/stain_base_prostate
   - /data/prostate/mmci/sl_group_1@predict_data
   - _self_
 
