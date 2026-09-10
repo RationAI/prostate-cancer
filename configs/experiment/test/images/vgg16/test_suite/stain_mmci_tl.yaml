@@ -1,7 +1,6 @@
 # @package _global_
 
 defaults:
-  - /experiment/test/images/vgg16/test_suite/base
-  - /experiment/test/images/vgg16/stain_base_prostate
+  - /experiment/test/images/vgg16/test_suite/stain_base_prostate
   - /data/prostate/mmci/tl_test@test_data
   - _self_

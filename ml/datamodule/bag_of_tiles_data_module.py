@@ -103,7 +103,7 @@ class BaseBagOfTilesDataModule(LightningDataModule, ABC):
                 self.val = cast(
                     "BagOfEmbeddingsDataset[Any]", instantiate(self.datasets["val"])
                 )
-            case "val":
+            case "validate":
                 self.val = cast(
                     "BagOfEmbeddingsDataset[Any]", instantiate(self.datasets["val"])
                 )

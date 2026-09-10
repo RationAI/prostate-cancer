@@ -29,14 +29,24 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
     normalized_slides = list(Path(config.normalized_data_dir).glob("*.tiff"))
     normalized_map = {p.stem: str(p) for p in normalized_slides}
 
-    if hasattr(config.data, "tiles_uri_512") and config.data.tiles_uri_512 is not None:
+    if (
+        hasattr(config.data, "tiles_filtered_uri_512")
+        and config.data.tiles_filtered_uri_512 is not None
+    ):
         repath_and_log(
-            config.data.tiles_uri_512, normalized_map, config.data.data_name + "512"
+            config.data.tiles_filtered_uri_512,
+            normalized_map,
+            config.data.data_name + "512",
         )
 
-    if hasattr(config.data, "tiles_uri_224") and config.data.tiles_uri_224 is not None:
+    if (
+        hasattr(config.data, "tiles_filtered_uri_224")
+        and config.data.tiles_filtered_uri_224 is not None
+    ):
         repath_and_log(
-            config.data.tiles_uri_224, normalized_map, config.data.data_name + "224"
+            config.data.tiles_filtered_uri_224,
+            normalized_map,
+            config.data.data_name + "224",
         )
 
 

@@ -1,0 +1,8 @@
+# @package _global_
+
+defaults:
+  - /experiment/test/bag_of_embeddings/pgp/test_suite/hybrid_base
+  - /data/radboud/test_heuristic_normalized@test_data
+  - _self_
+
+checkpoint: ${model_data.public_checkpoint}

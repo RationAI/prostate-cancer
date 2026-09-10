@@ -1,0 +1,7 @@
+# @package _global_
+
+defaults:
+  - /data/radboud/test@data
+  - _self_
+
+normalized_data_dir: /mnt/projects/quality_control/stain_normalization/panda/radboud_test_constant_vectors_keep_negative_values/percentile_25/NormalizeStaining/normalized_image

@@ -1,8 +1,7 @@
 # @package _global_
 
 defaults:
-  - /experiment/test/images/resnet50/test_suite/base
-  - /experiment/test/images/resnet50/base_prostate
+  - /experiment/test/images/resnet50/test_suite/base_prostate
   - /data/prostate/radboud/val@test_data
   - _self_
 

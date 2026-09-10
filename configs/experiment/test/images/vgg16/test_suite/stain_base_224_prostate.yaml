@@ -1,0 +1,19 @@
+# @package _global_
+
+defaults:
+  - /aggregator/max@max_aggregator
+  - /aggregator/mean_pool_max@mean_pool_max_aggregator
+  - /aggregator/top_k@top_k_aggregator
+  - /experiment/test/images/vgg16/stain_base_224_prostate
+  - /experiment/test/images/vgg16/test_suite/base
+  - _self_
+
+mean_pool_max_aggregator:
+  kernel_size: 1
+  extent_tile: 224
+  stride_tile: 112
+top_k_aggregator:
+  kernel_size: 1
+  extent_tile: 224
+  stride_tile: 112
+  k: 4

@@ -1,0 +1,10 @@
+defaults:
+  - base_test
+  - _self_
+
+tiles_filtered_uri_512: "mlflow-artifacts:/38/ab75b7eb858844b6a541bde54a493a61/artifacts/PANDA - Radboud test512_normalized"
+tiles_filtered_uri_224: "mlflow-artifacts:/38/ab75b7eb858844b6a541bde54a493a61/artifacts/PANDA - Radboud test224_normalized"
+tiles_filtered_w_virchow2_uri_224: "mlflow-artifacts:/38/9bd34a59bc764b80983bcbc25ce142a8/artifacts/PANDA - Radboud test (Heuristic Normalized)"
+tiles_filtered_w_pgp_uri_224: "mlflow-artifacts:/38/50cf4e9a1b0f4c58b4bdd2dbdae16e20/artifacts/PANDA - Radboud test (Heuristic Normalized)"
+
+data_name: "PANDA - Radboud test (Heuristic 1 Normalized)"

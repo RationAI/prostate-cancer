@@ -2,7 +2,20 @@
 
 defaults:
   - /callbacks/combined_test_suite@callbacks
+  - /aggregator/max@max_aggregator
+  - /aggregator/mean_pool_max@mean_pool_max_aggregator
+  - /aggregator/top_k@top_k_aggregator
   - /experiment/test/embeddings/virchow2/base
   - _self_
+
+mean_pool_max_aggregator:
+  kernel_size: 2
+  extent_tile: 224
+  stride_tile: 112
+top_k_aggregator:
+  kernel_size: 2
+  extent_tile: 224
+  stride_tile: 112
+  k: 3
 
 use_case: "TL Test"
