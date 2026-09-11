@@ -50,6 +50,18 @@ def main(config: DictConfig, logger: MLFlowLogger) -> None:
 
         for slide_dataset in tqdm(dataset.datasets):
             slide_name = Path(slide_dataset.slide_tiles.slide_path).stem
+            out_path = (dest / slide_name).with_suffix(".pt")
+
+            if out_path.exists():
+                try:
+                    existing = torch.load(out_path, map_location="cpu")
+                    if existing.size(0) == len(slide_dataset):
+                        continue
+                except Exception as e:  # noqa: BLE001
+                    print(
+                        f"{e} occured while checking existing {slide_name}, reprocessing"
+                    )
+
             try:
                 slide_dataloader = DataLoader(
                     slide_dataset,
