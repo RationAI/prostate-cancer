@@ -13,3 +13,4 @@ datamodule:
 trainer:
   val_check_interval: 0.03 # much more tiles per slide - validate more often
   reload_dataloaders_every_n_epochs: 1 # re-sample train slides (num_slides) every epoch
+  min_epochs: 5 # hard floor so early stopping can't cut coverage of the 1800 slides short

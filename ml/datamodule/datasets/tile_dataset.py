@@ -1,10 +1,13 @@
 from collections.abc import Iterable
 from typing import TypeVar
 
+import numpy as np
 import torch
 from albumentations.core.composition import TransformType
 from albumentations.pytorch import ToTensorV2
 from datasets import Dataset as HFDataset
+from numpy.typing import NDArray
+from ratiopath.openslide import OpenSlide
 from rationai.mlkit.data.datasets import OpenSlideTilesDataset
 
 from ml.datamodule.datasets.base import (
@@ -20,6 +23,40 @@ from ml.typing import (
 
 
 T_co = TypeVar("T_co", covariant=True)
+
+
+class CachedOpenSlideTilesDataset(OpenSlideTilesDataset):
+    """OpenSlideTilesDataset that keeps one lazily-opened handle for its
+    slide instead of reopening the file on every `__getitem__` call.
+
+    Reopening re-parses the pyramid/directory structure each time, which
+    dominates runtime when tiles are sampled at random. Each instance only
+    ever addresses a single slide_path, so a single cached handle per
+    instance is sufficient -- no cross-slide eviction policy is needed.
+    The handle is opened lazily (on first access, inside a DataLoader
+    worker) rather than in `__init__`, since eagerly opening it in the main
+    process before forking workers would share one native handle across
+    processes.
+    """
+
+    def __init__(self, *args: object, **kwargs: object) -> None:
+        super().__init__(*args, **kwargs)
+        self._handle: OpenSlide | None = None
+
+    def __getitem__(self, idx: int) -> NDArray[np.uint8]:
+        tile = self.tiles[idx]
+        level = self._get_from_tile(tile, self.level)
+        extent_x = self._get_from_tile(tile, self.tile_extent_x)
+        extent_y = self._get_from_tile(tile, self.tile_extent_y)
+
+        if self._handle is None:
+            self._handle = OpenSlide(self.slide_path)
+
+        return self._handle.read_tile(tile["x"], tile["y"], extent_x, extent_y, level)
+
+    def __del__(self) -> None:
+        if getattr(self, "_handle", None) is not None:
+            self._handle.close()
 
 
 class TilesDataset(BaseTileDataset[T_co]):
@@ -65,7 +102,7 @@ class SlideTiles(BaseSingleSlideDataset):
             tiles=tiles,
             include_label=include_label,
         )
-        self.slide_tiles = OpenSlideTilesDataset(
+        self.slide_tiles = CachedOpenSlideTilesDataset(
             slide_path=slide_metadata["path"],
             level=slide_metadata["level"],
             tile_extent_x=slide_metadata["tile_extent_x"],
