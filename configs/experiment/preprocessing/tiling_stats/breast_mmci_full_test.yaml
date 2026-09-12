@@ -1,0 +1,5 @@
+# @package _global_
+
+defaults:
+  - /data/breast/mmci/breast_mmci_full_test@data
+  - _self_

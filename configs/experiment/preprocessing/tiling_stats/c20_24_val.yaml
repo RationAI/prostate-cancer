@@ -1,0 +1,5 @@
+# @package _global_
+
+defaults:
+  - /data/colorectum/mmci/c20_24_val@data
+  - _self_
