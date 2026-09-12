@@ -15,27 +15,51 @@ def negative_split(
     n_negative: int,
     random_state: int = 42,
 ) -> tuple[pd.DataFrame, pd.DataFrame]:
-    """Split slides into a set of N negative slides and the rest.
+    """Split slides into a set of ~N negative slides and the rest, grouped by case.
+
+    Cases are the unit of selection: a case is never left partially in the
+    rest split. Cases are greedily picked in order of fewest positive slides
+    first (ties broken randomly), accumulating negative slides until at
+    least `n_negative` is reached. From each selected case only the negative
+    slides are kept for the negative split -- any positive slides belonging
+    to a selected case are discarded entirely (they end up in neither
+    output). Cases that are not selected stay untouched in rest.
 
     Arguments:
-        slides_df (pd.DataFrame): DataFrame with the slides metadata.
-        n_negative (int): Number of negative slides to draw into the negative split.
+        slides_df (pd.DataFrame): DataFrame with the slides metadata. Must
+            contain "carcinoma" (bool) and "case_id" columns.
+        n_negative (int): Target number of negative slides to draw into the
+            negative split.
         random_state (int): Random state for reproducibility. Default is 42.
 
     Returns:
         tuple[pd.DataFrame, pd.DataFrame]: A tuple of (negative, rest) splits.
     """
-    negative_candidates = slides_df[~slides_df["carcinoma"]]
+    case_counts = slides_df.groupby("case_id")["carcinoma"].agg(
+        neg_count=lambda labels: int((~labels).sum()),
+        pos_count=lambda labels: int(labels.sum()),
+    )
 
-    assert len(negative_candidates) >= n_negative, (
+    assert case_counts["neg_count"].sum() >= n_negative, (
         f"Requested {n_negative} negative slides, but only "
-        f"{len(negative_candidates)} are available."
+        f"{case_counts['neg_count'].sum()} negative slides are available in total."
     )
 
-    negative_slides = negative_candidates.sample(
-        n=n_negative, random_state=random_state
-    )
-    rest_slides = slides_df.drop(index=negative_slides.index)
+    # shuffle first so ties on pos_count aren't broken by case_id order
+    case_counts = case_counts.sample(frac=1, random_state=random_state)
+    case_counts = case_counts.sort_values("pos_count", kind="stable")
+
+    selected_case_ids = []
+    total_negative = 0
+    for case_id, row in case_counts.iterrows():
+        if total_negative >= n_negative:
+            break
+        selected_case_ids.append(case_id)
+        total_negative += row["neg_count"]
+
+    is_selected_case = slides_df["case_id"].isin(selected_case_ids)
+    negative_slides = slides_df[is_selected_case & ~slides_df["carcinoma"]]
+    rest_slides = slides_df[~is_selected_case]
 
     return negative_slides, rest_slides
 

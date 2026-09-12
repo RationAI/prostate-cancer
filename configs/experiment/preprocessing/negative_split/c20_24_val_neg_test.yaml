@@ -4,7 +4,7 @@ defaults:
   - /data/colorectum/mmci/c20_24_val_neg_test@data
   - _self_
 
-n_negative: 50
+n_negative: 30
 
 split_names:
   rest: val
