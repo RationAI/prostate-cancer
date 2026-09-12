@@ -1,0 +1,10 @@
+# @package _global_
+
+data: ???
+n_negative: ???
+split_names: ???
+use_case: Negative Slides Split
+
+metadata:
+  hyperparams:
+    n_negative: ${n_negative}

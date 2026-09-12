@@ -1,0 +1,14 @@
+defaults:
+  - b20_24_base
+  - _self_
+
+tiles_uri_512: "mlflow-artifacts:/61/739411e6af9d4f8f9f0d732247d298c7/artifacts/MMCI B20-24 (Val + Negative Test)_neg_test_512"
+tiles_uri_224: "mlflow-artifacts:/61/739411e6af9d4f8f9f0d732247d298c7/artifacts/MMCI B20-24 (Val + Negative Test)_neg_test_224"
+tiles_filtered_uri_512: "mlflow-artifacts:/61/739411e6af9d4f8f9f0d732247d298c7/artifacts/MMCI B20-24 (Val + Negative Test)_neg_test_filtered_512"
+tiles_filtered_uri_224: "mlflow-artifacts:/61/739411e6af9d4f8f9f0d732247d298c7/artifacts/MMCI B20-24 (Val + Negative Test)_neg_test_filtered_224"
+tiles_filtered_w_virchow2_uri_224: "..."
+tiles_filtered_w_pgp_uri_224: "..."
+
+metadata_table: "mlflow-artifacts:/61/739411e6af9d4f8f9f0d732247d298c7/artifacts/MMCI B20-24 (Val + Negative Test)_neg_test.csv"
+
+data_name: "MMCI B20-24 Negative Test"

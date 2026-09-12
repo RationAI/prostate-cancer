@@ -1,0 +1,8 @@
+# @package _global_
+
+defaults:
+  - /data/colorectum/mmci/c20_24_neg_test@data
+  - /data/colorectum/mmci/adopt_test@other_data
+  - _self_
+
+output_name: MMCI Colorectum Full Test

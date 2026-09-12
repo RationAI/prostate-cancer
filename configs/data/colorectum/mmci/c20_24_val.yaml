@@ -2,11 +2,11 @@ defaults:
   - c20_24_base
   - _self_
 
-tiles_uri_512: "mlflow-artifacts:/74/3df1d1ba697b4ea182867a6736234ea0/artifacts/MMCI C20-24 Val"
-tiles_uri_224: "mlflow-artifacts:/74/bd47e047a7204c4bbae5b30a91098644/artifacts/MMCI C20-24 Val"
-tiles_filtered_uri_512: "mlflow-artifacts:/74/857fc88cd14c4067b8ed8bcfd26db83d/artifacts/MMCI C20-24 Val_512"
-tiles_filtered_uri_224: "mlflow-artifacts:/74/857fc88cd14c4067b8ed8bcfd26db83d/artifacts/MMCI C20-24 Val_224"
+tiles_uri_512: "mlflow-artifacts:/74/96b1d4fb44134aa493b7889a47e3d767/artifacts/MMCI C20-24 (Val + Negative Test)_val_512"
+tiles_uri_224: "mlflow-artifacts:/74/96b1d4fb44134aa493b7889a47e3d767/artifacts/MMCI C20-24 (Val + Negative Test)_val_224"
+tiles_filtered_uri_512: "mlflow-artifacts:/74/96b1d4fb44134aa493b7889a47e3d767/artifacts/MMCI C20-24 (Val + Negative Test)_val_filtered_512"
+tiles_filtered_uri_224: "mlflow-artifacts:/74/96b1d4fb44134aa493b7889a47e3d767/artifacts/MMCI C20-24 (Val + Negative Test)_val_filtered_224"
 
-metadata_table: "mlflow-artifacts:/74/ffadac989d3e41e5be6263afcb141332/artifacts/val_slides.csv"
+metadata_table: "mlflow-artifacts:/74/96b1d4fb44134aa493b7889a47e3d767/artifacts/MMCI C20-24 (Val + Negative Test)_val.csv"
 
 data_name: "MMCI C20-24 Val"

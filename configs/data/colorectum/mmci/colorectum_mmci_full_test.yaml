@@ -1,0 +1,25 @@
+defaults:
+  - base
+  - _self_
+
+# were used for filtering
+thresholds:
+  tissue_roi_t: 0.5
+
+  residual_t: 0.25
+  folding_t: 0.25
+
+  carcinoma_roi_t: 0.8
+  epithelium_roi_t: 0.2
+  exclude_t: 0.0
+
+tiles_uri_512: "mlflow-artifacts:/74/44dd8c0796af4e25b14546e9e685508e/artifacts/MMCI Colorectum Full Test_512"
+tiles_uri_224: "mlflow-artifacts:/74/44dd8c0796af4e25b14546e9e685508e/artifacts/MMCI Colorectum Full Test_224"
+tiles_filtered_uri_512: "mlflow-artifacts:/74/44dd8c0796af4e25b14546e9e685508e/artifacts/MMCI Colorectum Full Test_filtered_512"
+tiles_filtered_uri_224: "mlflow-artifacts:/74/44dd8c0796af4e25b14546e9e685508e/artifacts/MMCI Colorectum Full Test_filtered_224"
+tiles_filtered_w_virchow2_uri_224: "..."
+tiles_filtered_w_pgp_uri_224: "..."
+
+metadata_table: "mlflow-artifacts:/74/44dd8c0796af4e25b14546e9e685508e/artifacts/MMCI Colorectum Full Test.csv"
+
+data_name: "Colorectum MMCI Full Test"

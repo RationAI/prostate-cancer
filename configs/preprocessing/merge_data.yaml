@@ -1,0 +1,7 @@
+# @package _global_
+
+data: ??? # instance from data/ directory (first source)
+other_data: ??? # instance from data/ directory, e.g. `+data@other_data=...` (second source)
+output_name: ???
+
+use_case: Merge Data
