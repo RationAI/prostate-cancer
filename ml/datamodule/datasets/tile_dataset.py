@@ -7,6 +7,7 @@ from albumentations.core.composition import TransformType
 from albumentations.pytorch import ToTensorV2
 from datasets import Dataset as HFDataset
 from numpy.typing import NDArray
+from openslide import OpenSlideCache
 from ratiopath.openslide import OpenSlide
 from rationai.mlkit.data.datasets import OpenSlideTilesDataset
 
@@ -24,6 +25,23 @@ from ml.typing import (
 
 T_co = TypeVar("T_co", covariant=True)
 
+# Bytes of decoded-tile cache shared by every OpenSlide handle opened in this
+# process. Without an explicit shared cache, each handle gets its own
+# private cache of a (libopenslide-)default size; keeping many handles open
+# at once (see CachedOpenSlideTilesDataset) then multiplies that private
+# cache by the number of open slides, which is what caused the OOM. A single
+# shared, size-capped cache keeps total decode memory bounded regardless of
+# how many slides are open.
+_SHARED_CACHE_BYTES = 256 * 1024 * 1024
+_shared_cache: OpenSlideCache | None = None
+
+
+def _get_shared_cache() -> OpenSlideCache:
+    global _shared_cache
+    if _shared_cache is None:
+        _shared_cache = OpenSlideCache(_SHARED_CACHE_BYTES)
+    return _shared_cache
+
 
 class CachedOpenSlideTilesDataset(OpenSlideTilesDataset):
     """OpenSlideTilesDataset that keeps one lazily-opened handle for its
@@ -32,11 +50,15 @@ class CachedOpenSlideTilesDataset(OpenSlideTilesDataset):
     Reopening re-parses the pyramid/directory structure each time, which
     dominates runtime when tiles are sampled at random. Each instance only
     ever addresses a single slide_path, so a single cached handle per
-    instance is sufficient -- no cross-slide eviction policy is needed.
-    The handle is opened lazily (on first access, inside a DataLoader
-    worker) rather than in `__init__`, since eagerly opening it in the main
-    process before forking workers would share one native handle across
-    processes.
+    instance is sufficient -- no cross-slide eviction policy is needed for
+    the handle itself. The handle is opened lazily (on first access, inside
+    a DataLoader worker) rather than in `__init__`, since eagerly opening it
+    in the main process before forking workers would share one native
+    handle across processes.
+
+    All handles opened by a worker process share one size-capped decode
+    cache (see `_get_shared_cache`) instead of each getting its own private,
+    unbounded-in-aggregate cache.
     """
 
     def __init__(self, *args: object, **kwargs: object) -> None:
@@ -51,6 +73,7 @@ class CachedOpenSlideTilesDataset(OpenSlideTilesDataset):
 
         if self._handle is None:
             self._handle = OpenSlide(self.slide_path)
+            self._handle.set_cache(_get_shared_cache())
 
         return self._handle.read_tile(tile["x"], tile["y"], extent_x, extent_y, level)
 
